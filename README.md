@@ -34,4 +34,4 @@
 ## 欢迎报告BUG和提交功能需求
 
 ### windows 客户端直接下载
-* [ ChessClient.rar ] ( http://pan.baidu.com/s/1nv3v8bJ )
+* [ ChessClient.rar ] ( http://pan.baidu.com/s/1dEGSPAL ) 提取码 : pjpr
