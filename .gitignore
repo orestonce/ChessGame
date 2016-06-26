@@ -27,3 +27,7 @@
 *.exe
 *.out
 *.app
+
+# QT
+ChessClient.pro.*
+ChessServer.pro.*
