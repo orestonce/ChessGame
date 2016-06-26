@@ -2,9 +2,9 @@
 网络版中国象棋 是一个网络象棋桌, 目前功能有注册、登陆、下棋、聊天四大功能.
 
 ## 部分截图
-![用户注册](https://github.com/orestonce/ChessGame/raw/master/screenshots/register.png)
-![用户登陆](https://github.com/orestonce/ChessGame/raw/master/screenshots/login.png)
-![游戏主界面](https://github.com/orestonce/ChessGame/raw/master/screenshots/playgame.png)
+![用户注册](https://github.com/orestonce/ChessGame/raw/master/screenshot/register.png)
+![用户登陆](https://github.com/orestonce/ChessGame/raw/master/screenshot/login.png)
+![游戏主界面](https://github.com/orestonce/ChessGame/raw/master/screenshot/playgame.png)
 
 ## ChessClient 依赖
 * gcc >= 4.8
@@ -32,3 +32,6 @@
 * 这个没什么好部署的, 只需要将对应的ChessServer地址设置好然后注册登陆即可
 
 ## 欢迎报告BUG和提交功能需求
+
+### windows 客户端直接下载
+* [ ChessClient.rar ] ( http://pan.baidu.com/s/1nv3v8bJ )
