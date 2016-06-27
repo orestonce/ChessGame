@@ -26,7 +26,8 @@
 ## 部署ChessServer
 1. 将 chess.sql 导入到数据库
 2. 编辑chess_config.ini 文件, 设置对应mysql数据库字段和监听端口等
-3. 将chess_config.ini文件放到编译出来的 ChessServer 同级目录下, 启动ChessServer: ./ChessServer
+3. 将chess_config.ini文件放到编译出来的 ChessServer 同级目录下
+4. 启动ChessServer: ./ChessServer
 
 ## 部署 ChessClient
 * 这个没什么好部署的, 只需要将对应的ChessServer地址设置好然后注册登陆即可
