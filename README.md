@@ -24,7 +24,7 @@
 * [ inifile2 ini文件读写库 ] ( https://github.com/Winnerhust/inifile2 )
 
 ## 部署ChessServer
-1. 将 chess.sql 倒入到数据库
+1. 将 chess.sql 导入到数据库
 2. 编辑chess_config.ini 文件, 设置对应mysql数据库字段和监听端口等
 3. 将chess_config.ini文件放到编译出来的 ChessServer 同级目录下, 启动ChessServer: ./ChessServer
 
