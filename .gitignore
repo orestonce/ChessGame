@@ -31,3 +31,7 @@
 # QT
 ChessClient.pro.*
 ChessServer.pro.*
+
+# image indexes
+Thumbs.db
+Thumbs.db_encryptable_*
