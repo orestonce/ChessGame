@@ -33,6 +33,3 @@
 * 这个没什么好部署的, 只需要将对应的ChessServer地址设置好然后注册登陆即可
 
 ## 欢迎报告BUG和提交功能需求
-
-### windows 客户端直接下载
-* [ ChessClient.rar ] ( http://pan.baidu.com/s/1dEGSPAL ) 提取码 : pjpr
