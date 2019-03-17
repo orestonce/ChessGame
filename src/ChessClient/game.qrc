@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/XQSTUDIO.png</file>
+        <file>images/up.png</file>
+        <file>images/forcuse.png</file>
+        <file>images/down.png</file>
+        <file>images/back3.jpg</file>
+        <file>images/back4.jpg</file>
+        <file>images/back5.jpg</file>
+        <file>images/back6.jpg</file>
+        <file>images/server_1.png</file>
+        <file>images/back1.jpg</file>
+        <file>images/back2.jpg</file>
+        <file>images/d-b.png</file>
+        <file>images/d-c.png</file>
+        <file>images/d-j.png</file>
+        <file>images/d-m.png</file>
+        <file>images/d-p.png</file>
+        <file>images/d-s.png</file>
+        <file>images/d-x.png</file>
+        <file>images/icon.ico</file>
+        <file>images/server.png</file>
+        <file>images/server1.png</file>
+        <file>images/u-b.png</file>
+        <file>images/u-c.png</file>
+        <file>images/u-j.png</file>
+        <file>images/u-m.png</file>
+        <file>images/u-p.png</file>
+        <file>images/u-s.png</file>
+        <file>images/u-x.png</file>
+    </qresource>
+</RCC>
