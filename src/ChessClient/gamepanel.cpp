@@ -268,7 +268,7 @@ void GamePanel::showPopup(QString title, QString msg)
     }
 
     rpchub->blockSignals(true);
-    QMessageBox::about(NULL, title, msg);
+    QMessageBox::about(this, title, msg);
     rpchub->blockSignals(false);
 }
 
