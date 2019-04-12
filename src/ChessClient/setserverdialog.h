@@ -18,11 +18,8 @@ public:
     void saveServerAddress();
 private slots:
     void on_pushButton_ok_clicked();
-
     void on_pushButton_cancel_clicked();
-
     void on_pushButton_reset_clicked();
-
 private:
     void loadServerAddress();
     Ui::SetServerDialog *ui;

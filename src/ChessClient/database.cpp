@@ -8,6 +8,7 @@
 static const char *k2ServerAddress = "k2ServerAddress";
 static const char *k2Username = "k2Username";
 static const char *k2Password = "k2Password";
+static const char *k2RoomId = "k2RoomId";
 static const char *k2RememberPassword = "k2RememberPassword";
 static const char *default_address = "ws://blog.linux9.org/ChessGame";
 
@@ -46,9 +47,9 @@ void Database::SetServerAddr(QString addr)
     this->setValue(k2ServerAddress, addr);
 }
 
-void Database::ResetDefaultServerAddr()
+QString Database::GetDefaultServerAddr()
 {
-    this->SetServerAddr(default_address);
+    return default_address;
 }
 
 QString Database::GetUsername()
@@ -61,15 +62,21 @@ QString Database::GetPassword()
     return this->getValue(k2Password);
 }
 
-void Database::SetUsernameAndPassword(QString username, QString password)
+QString Database::GetRoomId()
+{
+    return this->getValue(k2RoomId);
+}
+
+void Database::SaveData(QString username, QString password, QString roomId)
 {
     this->setValue(k2Username, username);
     this->setValue(k2Password, password);
+    this->setValue(k2RoomId, roomId);
 }
 
-void Database::CleanUsernameAndPassword()
+void Database::CleanData()
 {
-    this->SetUsernameAndPassword("", "");
+    this->SaveData("", "", "");
 }
 
 void Database::SetRememberPassword(bool remeber)

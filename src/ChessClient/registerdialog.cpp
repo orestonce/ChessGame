@@ -14,7 +14,13 @@ RegisterDialog::RegisterDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::RegisterDialog)
 {
+    this->setWindowFlags(Qt::WindowCloseButtonHint);
     ui->setupUi(this);
+
+    QString style = "border:2px groove gray;border-radius:4px;";
+    ui->lineEdit_userName->setStyleSheet(style);
+    ui->lineEdit_password1->setStyleSheet(style);
+    ui->lineEdit_password2->setStyleSheet(style);
 }
 
 RegisterDialog::~RegisterDialog()

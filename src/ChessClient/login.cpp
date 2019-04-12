@@ -20,7 +20,7 @@ void show_top_level(T *obj)
     obj->raise();
 }
 
-void swap_dialog(Login* login,QDialog *dlg )
+void swap_dialog(Login* login,QDialog *dlg)
 {
     login->hide();
     show_top_level(dlg);
@@ -35,27 +35,16 @@ Login::Login(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Login)
 {
+    this->setWindowFlags(Qt::WindowCloseButtonHint);
     ui->setupUi(this);
-    //绘制背景图片
-    this->setStyleSheet("QMainWindow {border-image:url(:/images/back3.jpg)}");
 
-    ui->passwordEdit->setStyleSheet("lineedit-password-character: 42;border:2px groove gray;border-radius:4px;");
-    ui->userEdit->setStyleSheet("border:2px groove gray;border-radius:4px;");
-    ui->rememberpasswordBox->setChecked( Database::GetInstance()->IsRememberPassword() );
-    if(ui->rememberpasswordBox->isChecked())
-    {
-        ui->userEdit->setText(Database::GetInstance()->GetUsername());
-        ui->passwordEdit->setText(Database::GetInstance()->GetPassword());
-    }
-    connect(ui->rememberpasswordBox, &QCheckBox::stateChanged, [&](int){
-        bool isRemember = ui->rememberpasswordBox->isChecked();
-        Database::GetInstance()->SetRememberPassword(isRemember);
-        if (isRemember) {
-            Database::GetInstance()->SetUsernameAndPassword(ui->userEdit->text(),ui->passwordEdit->text());
-        } else {
-            Database::GetInstance()->CleanUsernameAndPassword();
-        }
-    });
+    QString style = "border:2px groove gray;border-radius:4px;";
+    ui->passwordEdit->setStyleSheet(style);
+    ui->userEdit->setStyleSheet(style);
+    ui->roomEdit->setStyleSheet(style);
+
+    this->loadStatusFromDB();
+    connect(ui->rememberpasswordBox, &QCheckBox::stateChanged, this, &Login::saveStatusToDB);
 }
 
 Login::~Login()
@@ -68,24 +57,27 @@ void Login::on_loginButton_clicked()
 {
     QString username = ui->userEdit->text();
     QString password = ui->passwordEdit->text();
+    QString roomId = ui->roomEdit->text();
 
     if(username.isEmpty())
     {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("用户名不能为空，请重新输入！！"),QMessageBox::Ok);
+        QMessageBox::information(this,trUtf8("警告"),trUtf8("用户名不能为空，请重新输入！"),QMessageBox::Ok);
         return ;
-    }
-    else if(password.isEmpty()) {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("密码不能为空，请重新输入！！"),QMessageBox::Ok);
+    } else if(password.isEmpty()) {
+        QMessageBox::information(this,trUtf8("警告"),trUtf8("密码不能为空，请重新输入！"),QMessageBox::Ok);
+        return ;
+    } else if(roomId.isEmpty()) {
+        QMessageBox::information(this,trUtf8("警告"),trUtf8("房间不能为空，请重新输入！"),QMessageBox::Ok);
         return ;
     }
     // 保存一下状态.
-    ui->rememberpasswordBox->stateChanged(1);
+    this->saveStatusToDB();
 
     GamePanel * play = new GamePanel;
     connect(play,SIGNAL(finished(int)), this, SLOT(show()));
     this->hide();
     show_top_level(play);
-    if (play->Init(username, password)) {
+    if (play->Init(username, password, roomId)) {
         play->exec();
     }
     play->close();
@@ -100,11 +92,34 @@ void Login::on_registerButton_clicked()
 
 void Login::on_setServerButton_clicked()
 {
-    SetServerDialog *dlg = new SetServerDialog(this);
+    SetServerDialog *dlg = new SetServerDialog;
     swap_dialog(this, dlg);
 }
 
 void Login::on_cancelButton_clicked()
 {
     close();
+}
+
+void Login::loadStatusFromDB()
+{
+    bool isRemember = Database::GetInstance()->IsRememberPassword();
+    ui->rememberpasswordBox->setChecked( isRemember );
+    if( isRemember )
+    {
+        ui->userEdit->setText(Database::GetInstance()->GetUsername());
+        ui->passwordEdit->setText(Database::GetInstance()->GetPassword());
+        ui->roomEdit->setText(Database::GetInstance()->GetRoomId());
+    }
+}
+
+void Login::saveStatusToDB()
+{
+    bool isRemember = ui->rememberpasswordBox->isChecked();
+    Database::GetInstance()->SetRememberPassword(isRemember);
+    if (isRemember) {
+        Database::GetInstance()->SaveData(ui->userEdit->text(),ui->passwordEdit->text(),ui->roomEdit->text());
+    } else {
+        Database::GetInstance()->CleanData();
+    }
 }

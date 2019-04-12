@@ -10,9 +10,8 @@ SetServerDialog::SetServerDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     this->loadServerAddress();
-    connect(this, &QDialog::accepted, [&](){
-        this->saveServerAddress();
-    });
+    setWindowFlags(Qt::WindowCloseButtonHint);
+    connect(this, &QDialog::accepted, this, &SetServerDialog::saveServerAddress);
 }
 
 SetServerDialog::~SetServerDialog()
@@ -44,6 +43,6 @@ void SetServerDialog::saveServerAddress()
 
 void SetServerDialog::on_pushButton_reset_clicked()
 {
-    Database::GetInstance()->ResetDefaultServerAddr();
-    this->loadServerAddress();
+    QString addr = Database::GetInstance()->GetDefaultServerAddr();
+    ui->lineEdit_serverAddr->setText(addr);
 }

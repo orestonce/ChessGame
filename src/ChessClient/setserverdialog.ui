@@ -36,6 +36,10 @@
   <property name="windowTitle">
    <string>网络设置</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="game.qrc">
+    <normaloff>:/images/icon-set-server.png</normaloff>:/images/icon-set-server.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <spacer name="verticalSpacer">
@@ -56,6 +60,9 @@
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>服务器地址:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -147,6 +154,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="game.qrc"/>
+ </resources>
  <connections/>
 </ui>

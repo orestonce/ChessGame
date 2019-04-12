@@ -11,11 +11,12 @@ public:
     Database();
     QString GetServerAddr();
     void SetServerAddr(QString addr);
-    void ResetDefaultServerAddr();
+    QString GetDefaultServerAddr();
     QString GetUsername();
     QString GetPassword();
-    void SetUsernameAndPassword(QString username, QString password);
-    void CleanUsernameAndPassword();
+    QString GetRoomId();
+    void SaveData(QString username, QString password, QString roomId);
+    void CleanData();
     void SetRememberPassword(bool remeber);
     bool IsRememberPassword();
 private:

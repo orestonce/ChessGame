@@ -23,6 +23,7 @@ GamePanel::GamePanel(QWidget *parent) :
     ui(new Ui::gamepanel)
 {
     ui->setupUi(this);
+    this->setWindowFlags(Qt::WindowCloseButtonHint);
     core = new GameCore();
     rpchub = new RpcHub;
 
@@ -30,8 +31,6 @@ GamePanel::GamePanel(QWidget *parent) :
         rpchub->close_websocket();
         rpchub->deleteLater();
     });
-
-    this->setStyleSheet("QMainWindow {border-image:url(:/images/back6.jpg)}");
 
     ui->pushButton_TakeSite->hide ();
     ui->pushButton_ReGame->hide ();
@@ -43,7 +42,7 @@ GamePanel::GamePanel(QWidget *parent) :
     ui->showText->setVerticalScrollBar(ui->showTextBar);
 }
 
-bool GamePanel::Init(const QString &username, const QString &password)
+bool GamePanel::Init(const QString &username, const QString &password, const QString &roomId)
 {
     QTimer *timer = new QTimer;
     lastPongTime = time(NULL);
@@ -92,7 +91,7 @@ bool GamePanel::Init(const QString &username, const QString &password)
     LoginRequest req;
     req.Username = username;
     req.Password = password;
-    req.RoomId = "room-id";
+    req.RoomId = roomId;
     LoginResponse resp;
 
     if (!rpchub->SendAndRecv(req, resp) || !resp.ErrMsg.isEmpty()) {
@@ -171,11 +170,6 @@ void GamePanel::LoadGameCore()
 
 void GamePanel::paintEvent(QPaintEvent *)
 {
-    //绘制游戏界面背景
-    QPixmap pixmap = QPixmap(":/images/back5.jpg").scaled(this->size());
-    QPainter painterBackground(this);
-    painterBackground.drawPixmap(this->rect(),pixmap);
-
     QPainter painter(this);
 
     painter.drawImage(30, 40, QImage(":/images/XQSTUDIO.png"));
