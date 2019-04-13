@@ -41,4 +41,14 @@ server {
     }
 }
 ````
-## 欢迎报告BUG和提交功能需求
+## 编译服务端
+1. 克隆本仓库代码到本地
+` git clone https://github.com/orestonce/ChessGame `
+2. 设置 `GOPATH` 为克隆下来的的目录， 开始编译
+`GOPATH=$(pwd) go build ChessServer`
+
+## 编译客户端
+1. 克隆本仓库代码到本地
+` git clone https://github.com/orestonce/ChessGame `
+2. 打开 `src/ChessClient/ChessClient.pro` ，开始编译
+` ctrl + b`
