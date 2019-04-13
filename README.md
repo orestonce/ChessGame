@@ -2,9 +2,9 @@
 网络版中国象棋 是一个网络象棋桌, 目前功能有注册、登陆、下棋、聊天四大功能.
 
 ## 部分截图
-![用户注册](https://github.com/orestonce/ChessGame/raw/master/screenshot/register.png)
-![用户登陆](https://github.com/orestonce/ChessGame/raw/master/screenshot/login.png)
-![游戏主界面](https://github.com/orestonce/ChessGame/raw/master/screenshot/playgame.png)
+![用户注册](screenshot/register.png)
+![用户登陆](screenshot/login.png)
+![游戏主界面](screenshot/playgame.png)
 
 ## v2版本特点
 * 使用纯go语言重写了服务端逻辑，账号密码使用leveldb储存，不依赖外部数据库，可直接运行在windows、linux的电脑上
