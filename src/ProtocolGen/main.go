@@ -233,9 +233,14 @@ bool %s::DecodeFromQByteArray(const QByteArray& bin)
 	return this->FromJsonObject(obj["Data"].toObject());
 }
 
-bool %s::FromJsonObject(QJsonObject data)
+bool %s::FromJsonObject(QJsonObject %s)
 {
-`, a.Name(), packetType, showMethodName, a.Name())
+`, a.Name(), packetType, showMethodName, a.Name(), func() string {
+		if a.NumField() == 0 {
+			return ""
+		}
+		return "data"
+	}())
 
 	fmt.Fprintf(wCons, `%s::%s()
 {

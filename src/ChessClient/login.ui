@@ -324,12 +324,20 @@
      </layout>
     </item>
    </layout>
-   <zorder></zorder>
-   <zorder></zorder>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>userEdit</tabstop>
+  <tabstop>passwordEdit</tabstop>
+  <tabstop>roomEdit</tabstop>
+  <tabstop>rememberpasswordBox</tabstop>
+  <tabstop>loginButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>registerButton</tabstop>
+  <tabstop>setServerButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

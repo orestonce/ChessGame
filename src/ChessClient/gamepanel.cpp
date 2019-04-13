@@ -31,15 +31,6 @@ GamePanel::GamePanel(QWidget *parent) :
         rpchub->close_websocket();
         rpchub->deleteLater();
     });
-
-    ui->pushButton_TakeSite->hide ();
-    ui->pushButton_ReGame->hide ();
-
-    ui->chooselabel->setAlignment(Qt::AlignCenter);
-    ui->upUserLabel->setAlignment(Qt::AlignCenter);
-    ui->downUserLabel->setAlignment(Qt::AlignCenter);
-
-    ui->showText->setVerticalScrollBar(ui->showTextBar);
 }
 
 bool GamePanel::Init(const QString &username, const QString &password, const QString &roomId)

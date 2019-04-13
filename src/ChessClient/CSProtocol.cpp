@@ -401,7 +401,7 @@ bool PingRequest::DecodeFromQByteArray(const QByteArray& bin)
 	return this->FromJsonObject(obj["Data"].toObject());
 }
 
-bool PingRequest::FromJsonObject(QJsonObject data)
+bool PingRequest::FromJsonObject(QJsonObject )
 {
 
 	return true;
@@ -439,7 +439,7 @@ bool PingResponse::DecodeFromQByteArray(const QByteArray& bin)
 	return this->FromJsonObject(obj["Data"].toObject());
 }
 
-bool PingResponse::FromJsonObject(QJsonObject data)
+bool PingResponse::FromJsonObject(QJsonObject )
 {
 
 	return true;
@@ -818,7 +818,7 @@ bool ReGameRequest::DecodeFromQByteArray(const QByteArray& bin)
 	return this->FromJsonObject(obj["Data"].toObject());
 }
 
-bool ReGameRequest::FromJsonObject(QJsonObject data)
+bool ReGameRequest::FromJsonObject(QJsonObject )
 {
 
 	return true;
@@ -896,7 +896,7 @@ bool TakeSiteRequest::DecodeFromQByteArray(const QByteArray& bin)
 	return this->FromJsonObject(obj["Data"].toObject());
 }
 
-bool TakeSiteRequest::FromJsonObject(QJsonObject data)
+bool TakeSiteRequest::FromJsonObject(QJsonObject )
 {
 
 	return true;
