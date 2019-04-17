@@ -7,19 +7,19 @@ import (
 	"bytes"
 	"strings"
 	"log"
-	"ChessServer/ChessGame"
 	"io/ioutil"
+	"ChessServer/ChessGame/ChessCore"
 )
 
 func main() {
 	gen := NewCodeGenerator(`CSProtocol.h`)
-	gen.ExportType(ChessGame.PiecePoint{})
-	gen.ExportType(ChessGame.SyncPanelMessage{})
-	gen.ExportType(ChessGame.ChatMessage{})
-	gen.ExportType(ChessGame.GameOverNotice{})
-	gen.ExportType(ChessGame.ServerKickYou{})
-	gen.ExportTypeFromRpcMethod(&ChessGame.GameUser{})
-	gen.ExportTypeFromRpcMethod(&ChessGame.GameRoom{})
+	gen.ExportType(ChessCore.PiecePoint{})
+	gen.ExportType(ChessCore.SyncPanelMessage{})
+	gen.ExportType(ChessCore.ChatMessage{})
+	gen.ExportType(ChessCore.GameOverNotice{})
+	gen.ExportType(ChessCore.ServerKickYou{})
+	gen.ExportTypeFromRpcMethod(&ChessCore.GameUser{})
+	gen.ExportTypeFromRpcMethod(&ChessCore.GameRoom{})
 	gen.ExportEnd()
 
 	hFileContent, cppFileContent := gen.GetHeaderAndBody()
@@ -156,7 +156,7 @@ func (this *CppCodeGenerator) GetHeaderAndBody() (hFileContent, cppFileContent [
 }
 
 func outputType(a reflect.Type, wHeader io.Writer, wBody io.Writer, wNoticeHeader io.Writer) {
-	packetType := ChessGame.PtRpcCall
+	packetType := ChessCore.PtRpcCall
 	showMethodName := ``
 
 	wEncoder := &bytes.Buffer{}
@@ -167,13 +167,13 @@ func outputType(a reflect.Type, wHeader io.Writer, wBody io.Writer, wNoticeHeade
 	wnBody := &bytes.Buffer{}
 
 	if strings.HasSuffix(a.Name(), `Request`) {
-		packetType = ChessGame.PtRpcCall
+		packetType = ChessCore.PtRpcCall
 		showMethodName = "Rpc" + strings.TrimSuffix(a.Name(), `Request`)
 	} else if strings.HasSuffix(a.Name(), `Response`) {
-		packetType = ChessGame.PtRpcReply
+		packetType = ChessCore.PtRpcReply
 		showMethodName = "Rpc" + strings.TrimSuffix(a.Name(), `Response`)
 	} else {
-		packetType = ChessGame.PtRpcNotice
+		packetType = ChessCore.PtRpcNotice
 		showMethodName = a.Name()
 
 		fmt.Fprintf(wnHeader, "\tvoid Register%s(std::function<void (const %s& message)> fn);\n",

@@ -35,7 +35,7 @@ Login::Login(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Login)
 {
-    this->setWindowFlags(Qt::WindowCloseButtonHint);
+    this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     ui->setupUi(this);
 
     QString style = "border:2px groove gray;border-radius:4px;";

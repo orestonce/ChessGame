@@ -43,7 +43,6 @@ private:
     void UpdateGameStatus(bool bGameIsRuning);
 private:
     RpcHub* rpchub;
-    int lastPongTime;
     Ui::gamepanel *ui;
     GameCore *core;
 };

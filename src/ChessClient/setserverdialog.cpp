@@ -10,7 +10,7 @@ SetServerDialog::SetServerDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     this->loadServerAddress();
-    setWindowFlags(Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     connect(this, &QDialog::accepted, this, &SetServerDialog::saveServerAddress);
 }
 

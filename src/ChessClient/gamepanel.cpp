@@ -16,6 +16,7 @@
 #include <QTimer>
 #include <QWebSocket>
 #include <time.h>
+#include <memory>
 #include <QAbstractSocket>
 
 GamePanel::GamePanel(QWidget *parent) :
@@ -23,7 +24,7 @@ GamePanel::GamePanel(QWidget *parent) :
     ui(new Ui::gamepanel)
 {
     ui->setupUi(this);
-    this->setWindowFlags(Qt::WindowCloseButtonHint);
+    this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     core = new GameCore();
     rpchub = new RpcHub;
 
@@ -35,8 +36,7 @@ GamePanel::GamePanel(QWidget *parent) :
 
 bool GamePanel::Init(const QString &username, const QString &password, const QString &roomId)
 {
-    QTimer *timer = new QTimer;
-    lastPongTime = time(NULL);
+    QTimer *timer = new QTimer(this);
 
     core->MyUsername = username;
     this->setWindowTitle(this->windowTitle() + "-" + username);
@@ -51,9 +51,11 @@ bool GamePanel::Init(const QString &username, const QString &password, const QSt
     });
 
     timer->start(1000 * GameCore::HEARTBEAT_OVERTIME_SECONDS/2);
+
+    auto lastPong = std::make_shared<time_t>(time(NULL));
     connect(timer, &QTimer::timeout, [=](){
         int now = time(NULL);
-        int sub = now - lastPongTime;
+        int sub = now - *lastPong;
         if (sub > GameCore::HEARTBEAT_OVERTIME_SECONDS) {
             this->showErrorAndClose("服务器长时间无响应.");
             return;
@@ -62,7 +64,7 @@ bool GamePanel::Init(const QString &username, const QString &password, const QSt
         PingResponse resp;
         bool ok = rpchub->SendAndRecv(req, resp);
         if (ok) {
-            lastPongTime = now;
+            *lastPong = now;
         }
     });
     connect(this, &GamePanel::finished, [=](){
@@ -255,6 +257,8 @@ void GamePanel::showPopup(QString title, QString msg)
     rpchub->blockSignals(true);
     QMessageBox::about(this, title, msg);
     rpchub->blockSignals(false);
+    this->core->SuggestionPointToList.clear();
+    this->repaint();
 }
 
 void GamePanel::showError(QString msg)
