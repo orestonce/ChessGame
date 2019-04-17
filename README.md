@@ -59,7 +59,7 @@ server {
   # 启动game
   ./ChessGame -raddr 127.0.0.1:6379 -rprefix chess001 -spath /tmp/ChessGame
   ````
-![v2.5服务端1](v2.5-server1.png)
+![v2.5服务端1](screenshot/v2.5-server1.png)
 ## 编译、配置客户端
 1. 克隆本仓库代码到本地
   `git clone https://github.com/orestonce/ChessGame`
