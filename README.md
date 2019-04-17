@@ -15,11 +15,16 @@
     * 客户端可直接注册服务端通知回调函数, 配合c++11 的lamda表达式，处理代码几行搞定
 * 支持多个房间
 
+## v2.5版本改进
+![v2.5版本结构图](screenshot/v2.5-layout.png)
+* 服务端分离为 gateway、game两大模块, 使用redis的list结构传递, 解耦 (类似于d-bus)
+      * gateway 的作用是对客户端连接进行代理、数据分包、数据封包、死链接检测、把底层链接抽象为redis里的一条sessionId
+	  * game 承载游戏全部逻辑, 只与redis直接通信, 支持客户端无感知的情况下快速重启进程
 ## ChessClient 需要
 * qt  >= 5.6
 ## 引用项目
 * 服务端:
-    * [websocket](https://github.com/gorilla/websocket )
+    * [websocket](https://github.com/gorilla/websocket)
     * [goleveldb](https://github.com/syndtr/goleveldb)
 
 ## nginx代理websocket注意事项
@@ -41,14 +46,29 @@ server {
     }
 }
 ````
-## 编译服务端
+## 编译、部署服务端
 1. 克隆本仓库代码到本地
-` git clone https://github.com/orestonce/ChessGame `
-2. 设置 `GOPATH` 为克隆下来的的目录， 开始编译
-`GOPATH=$(pwd) go build ChessServer`
-
-## 编译客户端
+  `git clone https://github.com/orestonce/ChessGame`
+2. 设置 `GOPATH` 为克隆下来的的目录， 开始编译linux_amd64版服务端程序
+  `GOPATH=$(pwd) go run src/BuildServer/main.go`
+3. 编译完成，会生产 bin/ChessGame bin/ChessGate 两个二进制文件
+4. 部署到服务器: 假设redis地址为127.0.0.1:6379, 服务器地址为ws://192.168.56.111:8912/ChessGame, 部署前缀为chess001
+  ````
+  # 启动gateway
+  ./ChessGate -laddr 192.168.56.111:8912 -raddr 127.0.0.1:6379 -rprefix chess001 -wspath /ChessGame
+  # 启动game
+  ./ChessGame -raddr 127.0.0.1:6379 -rprefix chess001 -spath /tmp/ChessGame
+  ````
+![v2.5服务端1](v2.5-server1.png)
+## 编译、配置客户端
 1. 克隆本仓库代码到本地
-` git clone https://github.com/orestonce/ChessGame `
+  `git clone https://github.com/orestonce/ChessGame`
 2. 打开 `src/ChessClient/ChessClient.pro` ，开始编译
-` ctrl + b`
+  `ctrl + r`
+3. 在登陆页面点击 "设置服务器" 按钮, 输入服务器连接地址: `ws://192.168.56.111:8912/ChessGame`, 点击确认
+4. 回到登陆页面后，点击注册，输入用户名、密码点击确认即可注册成功
+5. 回到登陆页面后，输入用户名、密码点击登陆即可登入刚才在第4步创建的账号
+6. 再开启一个客户端进程，重复4, 5步，登陆另一个账号即可和自己玩耍了
+
+## 预编译的客户端、服务端
+   * [Go](https://github.com/orestonce/ChessGame/releases)
