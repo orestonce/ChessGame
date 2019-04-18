@@ -26,7 +26,8 @@
   * gateway进程的目前连接的session信息镜像，可直接用redis客户端看连接上来的客户端个数, sessionId信息
 * game进程重启逻辑
   * 老的game进程收到kill信息后，停止消费redis消息队列里的消息，保存进程内的全部状态到redis，os.Exit(0)
-  * 新是game进程启动时，先从redis加载上一个进程的状态到内存, 然后开始处理redis消息
+  * 新的game进程启动时，先从redis加载上一个进程的状态到内存, 然后开始处理redis消息
+  * 重启停机时间一般在100ms以内
 ## ChessClient 需要
 * qt  >= 5.6
 ## 引用项目
