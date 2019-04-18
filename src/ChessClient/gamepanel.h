@@ -35,12 +35,12 @@ private slots:
     void on_sendButton_clicked();
     void on_pushButton_TakeSite_clicked();
     void on_pushButton_ReGame_clicked();
-
 private:
     QPoint logicChangeToXY(const QPoint& point);
     QPoint xyChangeToLogic(const QPoint& point);
 private:
     RpcHub* rpchub;
+    QTimer* timer;
     Ui::gamepanel *ui;
     GameCore *core;
 };

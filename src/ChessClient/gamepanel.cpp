@@ -27,17 +27,18 @@ GamePanel::GamePanel(QWidget *parent) :
     this->setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
     core = new GameCore();
     rpchub = new RpcHub;
+    timer = new QTimer(this);
 
     connect(this, &GamePanel::finished, [&](){
         rpchub->close_websocket();
         rpchub->deleteLater();
+        timer->stop();
+        timer->deleteLater();
     });
 }
 
 bool GamePanel::Init(const QString &username, const QString &password, const QString &roomId)
 {
-    QTimer *timer = new QTimer(this);
-
     core->MyUsername = username;
     this->setWindowTitle(this->windowTitle() + "-" + username);
     rpchub->RegisterSyncPanelMessage([=](const SyncPanelMessage& message){
@@ -271,6 +272,8 @@ void GamePanel::showError(QString msg)
 
 void GamePanel::showErrorAndClose(QString msg)
 {
+    this->rpchub->close_websocket();
+    this->timer->stop();
     this->showError(msg);
     this->close();
 }
