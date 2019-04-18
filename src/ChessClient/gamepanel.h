@@ -40,8 +40,6 @@ private:
     QPoint logicChangeToXY(const QPoint& point);
     QPoint xyChangeToLogic(const QPoint& point);
 private:
-    void UpdateGameStatus(bool bGameIsRuning);
-private:
     RpcHub* rpchub;
     Ui::gamepanel *ui;
     GameCore *core;

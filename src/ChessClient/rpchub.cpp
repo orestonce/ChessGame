@@ -8,7 +8,30 @@
 RpcHub::RpcHub()
 {
     socket = 0;
-    socketIsError = false;
+}
+
+bool RpcHub::connectToWs(const QString& wsUrl, int timeoutSecond)
+{
+    bool connectSuccess = false;
+
+    QEventLoop *connectLoop = new QEventLoop;
+    QTimer *connectTimer = new QTimer;
+
+    connect(this->socket, &QWebSocket::connected, [=, &connectSuccess](){
+        connectSuccess = true;
+        connectLoop->quit();
+    });
+    connect(connectTimer, &QTimer::timeout, [=](){
+        connectLoop->quit();
+        connectTimer->stop();
+    });
+    connectTimer->start(1000 * timeoutSecond);
+    this->socket->open(QUrl(wsUrl));
+    connectLoop->exec();
+    connectTimer->stop();
+    delete connectLoop;
+    delete connectTimer;
+    return connectSuccess;
 }
 
 bool RpcHub::InitWebsocket(const QString &wsUrl,int timeoutSecond)
@@ -16,32 +39,14 @@ bool RpcHub::InitWebsocket(const QString &wsUrl,int timeoutSecond)
     this->socket = new QWebSocket;
     this->socket->setParent(this);
 
-    bool connectSuccess = false;
-    {
-        QEventLoop *connectLoop = new QEventLoop;
-        QTimer *connectTimer = new QTimer;
-
-        connect(this->socket, &QWebSocket::connected, [=, &connectSuccess](){
-            connectSuccess = true;
-            connectLoop->quit();
-        });
-        connect(connectTimer, &QTimer::timeout, [=](){
-            connectLoop->quit();
-            connectTimer->stop();
-        });
-        connectTimer->start(1000 * timeoutSecond);
-        this->socket->open(QUrl(wsUrl));
-        connectLoop->exec();
-        connectTimer->stop();
-        delete connectLoop;
-        delete connectTimer;
-    }
-
-    if (!connectSuccess) {
+    if (!this->connectToWs(wsUrl, timeoutSecond)) {
         return false;
     }
-
-    connect(this->socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(on_websocket_error(QAbstractSocket::SocketError)));
+    // https://wiki.qt.io/New_Signal_Slot_Syntax
+    connect(this->socket,static_cast<void (QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error),[this](){
+        this->RemoveAll();
+        emit this->signal_websocket_error(socket->errorString());
+    });
     connect(this->socket, &QWebSocket::binaryMessageReceived, [=](const QByteArray &message){
         QJsonObject obj = QJsonDocument::fromJson(message).object();
         QString method=obj["Method"].toString();
@@ -66,7 +71,7 @@ bool RpcHub::InitWebsocket(const QString &wsUrl,int timeoutSecond)
 
 bool RpcHub::SendAndRecv(RpcAbstract &sendObj, RpcAbstract &recvObj)
 {
-    if (!this->socket->isValid() || socketIsError ) {
+    if (!this->socket->isValid() ) {
         return false;
     }
 
@@ -95,12 +100,6 @@ bool RpcHub::SendAndRecv(RpcAbstract &sendObj, RpcAbstract &recvObj)
 RpcHub::~RpcHub()
 {
     close_websocket();
-}
-
-void RpcHub::on_websocket_error(QAbstractSocket::SocketError)
-{
-    RemoveAll();
-    emit this->signal_websocket_error(socket->errorString());
 }
 
 void RpcHub::RemoveAll()

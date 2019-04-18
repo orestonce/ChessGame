@@ -34,14 +34,12 @@ public:
     void RemoveAll();
 public slots:
     void close_websocket();
-private slots:
-    void on_websocket_error(QAbstractSocket::SocketError);
 private:
+    bool connectToWs(const QString& wsUrl, int timeoutSecond);
     RpcHub(const RpcHub&) = delete;
     RpcHub& operator =(const RpcHub&) = delete;
 private:
     QWebSocket *socket;
-    bool socketIsError;
     std::map<QString, RpcWaitObj*> rpcWaitMap;
 };
 
