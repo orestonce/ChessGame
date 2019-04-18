@@ -17,9 +17,16 @@
 
 ## v2.5版本改进
 ![v2.5版本结构图](screenshot/v2.5-layout.png)
-* 服务端分离为 gateway、game两大模块, 使用redis的list结构传递, 解耦 (类似于d-bus)
+* 服务端分离为 gateway、game两大模块
   * gateway 的作用是对客户端连接进行代理、数据分包、数据封包、死链接检测、把底层链接抽象为redis里的一条sessionId
   * game 承载游戏全部逻辑, 只与redis直接通信, 支持客户端无感知的情况下快速重启进程
+* redis的作用
+  * 消息队列: 使用redis的list结构传递客户端连接信息、客户端读写数据信息
+  * game进程重启时的内存状态暂存区
+  * gateway进程的目前连接的session信息镜像，可直接用redis客户端看连接上来的客户端个数, sessionId信息
+* game进程重启逻辑
+  * 老的game进程收到kill信息后，停止消费redis消息队列里的消息，保存进程内的全部状态到redis，os.Exit(0)
+  * 新是game进程启动时，先从redis加载上一个进程的状态到内存, 然后开始处理redis消息
 ## ChessClient 需要
 * qt  >= 5.6
 ## 引用项目
