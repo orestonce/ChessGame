@@ -5,6 +5,12 @@ type RedisInfo struct {
 	Prefix    string
 }
 
+type GatewayConnInfo struct {
+	SessionId   string `json:",omitempty"`
+	ConnectTime string `json:",omitempty"`
+	ClientIp    string `json:",omitempty"`
+}
+
 type RedisExchange struct {
 	SessionId string `json:",omitempty"`
 	MsgType   string `json:",omitempty"`

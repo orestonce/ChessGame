@@ -14,10 +14,13 @@ func main() {
 	var laddr string
 	var redis ymdQuickRestart.RedisInfo
 	var wspath string
+	var pnginx bool
+
 	flag.StringVar(&laddr, `laddr`, `127.0.0.1:8912`, `监听地址`)
 	flag.StringVar(&redis.RedisAddr, `raddr`, `127.0.0.1:6379`, `redis地址`)
 	flag.StringVar(&redis.Prefix, `rprefix`, `chess`, `redis前缀`)
 	flag.StringVar(&wspath, `wspath`, `/ChessGame`, `websocket路径`)
+	flag.BoolVar(&pnginx, `pnginx`, false, `是否使用了nginx作为前端代理`)
 	flag.Parse()
 	ln, err := net.Listen("tcp", laddr)
 	if err != nil {
@@ -37,10 +40,13 @@ func main() {
 			log.Println(err)
 			return
 		}
-		log.Println("new session")
+		clientIp, _, _ := net.SplitHostPort(request.RemoteAddr)
+		if pnginx {
+			clientIp = request.Header.Get(`X-Real-IP`)
+		}
 		gateway.NewSession(ChessGateClient{
 			ws: conn,
-		})
+		}, clientIp)
 		conn.Close()
 	})
 	http.Serve(ln, mux)

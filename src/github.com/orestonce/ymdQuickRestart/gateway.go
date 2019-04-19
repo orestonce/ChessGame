@@ -81,9 +81,9 @@ func (this *GatewayService) getNextSessionId() string {
 	return sessionId
 }
 
-func (this *GatewayService) NewSession(runner GatewaySessionRunner) {
+func (this *GatewayService) NewSession(runner GatewaySessionRunner, clientIp string) {
 	sessionId := this.getNextSessionId()
-	log.Println(sessionId, "session open")
+	log.Println(sessionId, "session open ", clientIp)
 
 	toClientMsgCh := make(chan RedisExchange, 10)
 	this.locker.Lock()
@@ -101,7 +101,11 @@ func (this *GatewayService) NewSession(runner GatewaySessionRunner) {
 			runner.CloseClient()
 		})
 	}
-	this.redisClient.MustHSetNx(this.req.GatewaySession(), sessionId, ymdTime.DefaultFormat(time.Now()))
+	this.redisClient.MustHSetNx(this.req.GatewaySession(), sessionId, ymdJson.MustMarshalToString(GatewayConnInfo{
+		SessionId:   sessionId,
+		ConnectTime: ymdTime.DefaultFormat(time.Now()),
+		ClientIp:    clientIp,
+	}))
 	this.redisClient.MustRPush(this.req.LogicIn(), ymdJson.MustMarshalToString(RedisExchange{
 		MsgType:   MTGatewayNew,
 		SessionId: sessionId,

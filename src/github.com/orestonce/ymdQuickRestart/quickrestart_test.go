@@ -35,7 +35,7 @@ func TestGatewayService_NewSession(t *testing.T) {
 		logic.Close()
 	}()
 	go func() {
-		gate.NewSession(session)
+		gate.NewSession(session, ``)
 	}()
 	for msg := range logic.GetMessageChan() {
 		log.Println(msg.MsgType, msg.SessionId)
