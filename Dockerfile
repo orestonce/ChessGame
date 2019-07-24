@@ -3,7 +3,7 @@ FROM ubuntu:18.04 as builder
 RUN apt-get update && apt-get install golang -y
 ADD src /data/src
 WORKDIR /data
-ENV GOPATH=/data/
+ARG GOPATH=/data/
 RUN go run src/ProtocolGen/main.go 
 RUN go build ChessServer/ChessGate
 RUN go build ChessServer/ChessGame
