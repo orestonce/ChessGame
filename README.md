@@ -54,6 +54,11 @@ server {
     }
 }
 ````
+## 使用docker-compose一键部署服务端
+1. 克隆代码到本地
+  `git clone https://github.com/orestonce/ChessGame`
+2. 启动docker-compose
+  `docker-compose up -d`
 ## 编译、部署服务端
 1. 克隆本仓库代码到本地
   `git clone https://github.com/orestonce/ChessGame`
