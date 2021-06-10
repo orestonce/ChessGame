@@ -1,5 +1,4 @@
 FROM ubuntu:18.04 as builder
-
 RUN apt-get update && apt-get install golang -y
 ADD src /data/src
 WORKDIR /data
