@@ -6,10 +6,7 @@ import (
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"log"
-	"time"
 )
-
-type GameRoomManager struct{}
 
 type GameRoom struct {
 	RoomId    string
@@ -42,33 +39,4 @@ func (this *GameRoom) BroadcastToAll(a interface{}) {
 
 type ServerKickYou struct {
 	ErrMsg string
-}
-
-func (this *Game) OnUserLogin(user *GameUser) {
-	// 踢掉上一个用户
-	{
-		for _, oldSession := range getSessionListBy(dsession.UserID(user.Session.UserID), dsession.IDNEQ(user.Session.ID)) {
-			log.Println("kickSession", oldSession, user.Session)
-			sendNoticeToSession(oldSession.ID, ServerKickYou{
-				ErrMsg: ErrNextLogin,
-			})
-			this.kickSession(oldSession.ID)
-		}
-	}
-	room := getRoomById(user.Session.RoomID)
-	if room == nil {
-		room = &GameRoom{
-			RoomId: user.Session.RoomID,
-			Data: &ent.DRoom{
-				ID:         user.Session.RoomID,
-				CreateTime: time.Now(),
-			},
-		}
-		room.LoadPanelFromData()
-		err := gDbClient.DRoom.Create().SetID(user.Session.RoomID).SetCreateTime(room.Data.CreateTime).Exec(context.Background())
-		if err != nil {
-			log.Println("GameRoomManager.OnUserLogin", err)
-		}
-	}
-	room.sync2Client(nil)
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/orestonce/ChessGame/ent/migrate"
 
+	"github.com/orestonce/ChessGame/ent/dchat"
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -22,6 +23,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// DChat is the client for interacting with the DChat builders.
+	DChat *DChatClient
 	// DRoom is the client for interacting with the DRoom builders.
 	DRoom *DRoomClient
 	// DSession is the client for interacting with the DSession builders.
@@ -41,6 +44,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.DChat = NewDChatClient(c.config)
 	c.DRoom = NewDRoomClient(c.config)
 	c.DSession = NewDSessionClient(c.config)
 	c.DUser = NewDUserClient(c.config)
@@ -77,6 +81,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		DChat:    NewDChatClient(cfg),
 		DRoom:    NewDRoomClient(cfg),
 		DSession: NewDSessionClient(cfg),
 		DUser:    NewDUserClient(cfg),
@@ -98,6 +103,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config:   cfg,
+		DChat:    NewDChatClient(cfg),
 		DRoom:    NewDRoomClient(cfg),
 		DSession: NewDSessionClient(cfg),
 		DUser:    NewDUserClient(cfg),
@@ -107,7 +113,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		DRoom.
+//		DChat.
 //		Query().
 //		Count(ctx)
 //
@@ -130,9 +136,100 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.DChat.Use(hooks...)
 	c.DRoom.Use(hooks...)
 	c.DSession.Use(hooks...)
 	c.DUser.Use(hooks...)
+}
+
+// DChatClient is a client for the DChat schema.
+type DChatClient struct {
+	config
+}
+
+// NewDChatClient returns a client for the DChat from the given config.
+func NewDChatClient(c config) *DChatClient {
+	return &DChatClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dchat.Hooks(f(g(h())))`.
+func (c *DChatClient) Use(hooks ...Hook) {
+	c.hooks.DChat = append(c.hooks.DChat, hooks...)
+}
+
+// Create returns a create builder for DChat.
+func (c *DChatClient) Create() *DChatCreate {
+	mutation := newDChatMutation(c.config, OpCreate)
+	return &DChatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DChat entities.
+func (c *DChatClient) CreateBulk(builders ...*DChatCreate) *DChatCreateBulk {
+	return &DChatCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DChat.
+func (c *DChatClient) Update() *DChatUpdate {
+	mutation := newDChatMutation(c.config, OpUpdate)
+	return &DChatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DChatClient) UpdateOne(d *DChat) *DChatUpdateOne {
+	mutation := newDChatMutation(c.config, OpUpdateOne, withDChat(d))
+	return &DChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DChatClient) UpdateOneID(id string) *DChatUpdateOne {
+	mutation := newDChatMutation(c.config, OpUpdateOne, withDChatID(id))
+	return &DChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DChat.
+func (c *DChatClient) Delete() *DChatDelete {
+	mutation := newDChatMutation(c.config, OpDelete)
+	return &DChatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DChatClient) DeleteOne(d *DChat) *DChatDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DChatClient) DeleteOneID(id string) *DChatDeleteOne {
+	builder := c.Delete().Where(dchat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DChatDeleteOne{builder}
+}
+
+// Query returns a query builder for DChat.
+func (c *DChatClient) Query() *DChatQuery {
+	return &DChatQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DChat entity by its id.
+func (c *DChatClient) Get(ctx context.Context, id string) (*DChat, error) {
+	return c.Query().Where(dchat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DChatClient) GetX(ctx context.Context, id string) *DChat {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DChatClient) Hooks() []Hook {
+	return c.hooks.DChat
 }
 
 // DRoomClient is a client for the DRoom schema.

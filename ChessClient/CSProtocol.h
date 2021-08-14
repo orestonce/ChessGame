@@ -41,10 +41,12 @@ public :
 	bool FromJsonObject(QJsonObject obj);
 public :
 	QString PanelFull ;
-	QString UpperUsername ;
-	QString DownUsername ;
+	QString WUserName ;
+	QString WUserId ;
+	QString BUserName ;
+	QString BUserId ;
 	bool IsGameRunning ;
-	QString NextTurnUsername ;
+	QString NextTurnUserId ;
 	bool ShowReGame ;
 	bool ShowSiteDown ;
 } SyncPanelMessage;
@@ -61,6 +63,7 @@ public :
 public :
 	QString TimeStr ;
 	QString Username ;
+	QString UserId ;
 	QString Text ;
 } ChatMessage;
 
@@ -116,6 +119,7 @@ public :
 	QJsonObject ToJsonObject() const;
 	bool FromJsonObject(QJsonObject obj);
 public :
+	QString UserId ;
 	QString ErrMsg ;
 } LoginResponse;
 

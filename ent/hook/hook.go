@@ -9,6 +9,19 @@ import (
 	"github.com/orestonce/ChessGame/ent"
 )
 
+// The DChatFunc type is an adapter to allow the use of ordinary
+// function as DChat mutator.
+type DChatFunc func(context.Context, *ent.DChatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DChatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DChatMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DChatMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DRoomFunc type is an adapter to allow the use of ordinary
 // function as DRoom mutator.
 type DRoomFunc func(context.Context, *ent.DRoomMutation) (ent.Value, error)

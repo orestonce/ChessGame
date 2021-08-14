@@ -1,9 +1,33 @@
 #include "gamecore.h"
+#include <QDebug>
 
 void GameCore::Load(const SyncPanelMessage &resp)
 {
-    std::string full = resp.PanelFull.toStdString();
-
+    QStringList lineData = resp.PanelFull.split(QChar('/'));
+    for (int line=0; line < LINE_END; ++line) {
+        if (line >= lineData.length()) {
+            break;
+        }
+        int rIdx =0;
+        for(int col =0; col < COLUMN_END; ) {
+            if (rIdx >= lineData[line].length()) {
+                break;
+            }
+            char ch = lineData[line][rIdx].toLatin1();
+            rIdx++;
+            if ('0' < ch && ch <= '9') {
+                int emptyCnt = int(int(ch) - '0');
+                while (emptyCnt > 0 && col < COLUMN_END) {
+                    m_arrChessPanel[line][col] = '0';
+                    col++;
+                    emptyCnt--;
+                }
+            } else {
+                m_arrChessPanel[line][col] = ch;
+                col++;
+            }
+        }
+    }
     for(int iLine=0; iLine<LINE_END; ++iLine)
     {
         for(int iColumn=0; iColumn<COLUMN_END; ++iColumn)
@@ -12,13 +36,15 @@ void GameCore::Load(const SyncPanelMessage &resp)
             if (idx > LINE_END * COLUMN_END ) {
                 continue;
             }
-            m_arrChessPanel[iLine][iColumn]= full[idx];
+            qDebug() << "data" << m_arrChessPanel[iLine][iColumn];
         }
     }
-    this->WUsername = resp.UpperUsername;
-    this->BUsername = resp.DownUsername;
+    this->WUsername = resp.WUserName;
+    this->WUserId = resp.WUserId;
+    this->BUsername = resp.BUserName;
+    this->BUserId = resp.BUserId;
     this->IsGameRunning = resp.IsGameRunning;
-    this->NextTurnUsername = resp.NextTurnUsername;
+    this->NextTurnUserId = resp.NextTurnUserId;
     this->ShowReGame = resp.ShowReGame;
     this->ShowSiteDown = resp.ShowSiteDown;
 }
@@ -37,7 +63,7 @@ GamePoint GameCore::GetPoint(QPoint p)
 
 bool GameCore::AmUpper()
 {
-    return this->WUsername == this->MyUsername;
+    return this->WUserId == this->MyUserId;
 }
 
 bool GameCore::IsPointValied(QPoint p)
@@ -54,21 +80,21 @@ void GameCore::ClearPoint(QPoint &p)
 
 bool GameCore::IsTurnMe()
 {
-    return this->NextTurnUsername == this->MyUsername;
+    return this->NextTurnUserId == this->MyUserId;
 }
 
 bool GameCore::IsTurnUpper()
 {
-    return this->NextTurnUsername == this->WUsername;
+    return this->NextTurnUserId == this->WUserId;
 }
 
 bool GameCore::SameTeamWithMe(QPoint p)
 {
     auto data = this->GetPoint(p).Data;
-    if (this->MyUsername == this->WUsername) {
+    if (this->MyUserId == this->WUserId) {
         return islower(data);
     }
-    if (this->MyUsername == this->BUsername ) {
+    if (this->MyUserId == this->BUserId ) {
         return isupper(data);
     }
     return false;

@@ -81,6 +81,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
+	UserId string
 	ErrMsg string
 }
 
@@ -116,7 +117,32 @@ func (this *GameUser) RpcLogin(req LoginRequest) (resp LoginResponse) {
 	}
 	this.Session.UserID = user.ID
 	this.Session.RoomID = req.RoomId
-	gGame.OnUserLogin(this)
+	// 踢掉上一个用户
+	{
+		for _, oldSession := range getSessionListBy(dsession.UserID(this.Session.UserID), dsession.IDNEQ(this.Session.ID)) {
+			sendNoticeToSession(oldSession.ID, ServerKickYou{
+				ErrMsg: ErrNextLogin,
+			})
+			kickSession(oldSession.ID)
+		}
+	}
+	room := getRoomById(this.Session.RoomID)
+	if room == nil {
+		room = &GameRoom{
+			RoomId: this.Session.RoomID,
+			Data: &ent.DRoom{
+				ID:         this.Session.RoomID,
+				CreateTime: time.Now(),
+			},
+		}
+		room.LoadPanelFromData()
+		err = gDbClient.DRoom.Create().SetID(this.Session.RoomID).SetCreateTime(room.Data.CreateTime).Exec(context.Background())
+		if err != nil {
+			log.Println("GameRoomManager.OnUserLogin", err)
+		}
+	}
+	room.sync2Client(nil)
+	resp.UserId = user.ID
 	return
 }
 
@@ -131,19 +157,25 @@ type ChatResponse struct {
 type ChatMessage struct {
 	TimeStr  string
 	Username string
+	UserId   string
 	Text     string
 }
 
 func (this *GameRoom) RpcChat(session *ent.DSession, req ChatRequest) (resp ChatResponse) {
-	message := ChatMessage{
-		TimeStr:  ymdTime.DefaultFormat(time.Now()),
+	now := time.Now()
+	err := gDbClient.DChat.Create().SetID(uuid.NewString()).SetSessionID(session.ID).SetUserID(session.UserID).SetRoomID(session.RoomID).SetText(req.Text).SetCreateTime(now).Exec(context.Background())
+	if err != nil {
+		log.Println("GameRoom.RpcChat", err)
+		resp.ErrMsg = ErrUnknown
+		return resp
+	}
+	this.BroadcastToAll(ChatMessage{
+		TimeStr:  ymdTime.DefaultFormat(now),
+		UserId:   session.UserID,
 		Username: getUserNameByIdIgnoreEmpty(session.UserID),
 		Text:     req.Text,
-	}
-	for _, session := range this.getSessionList() {
-		sendNoticeToSession(session.ID, message)
-	}
-	return
+	})
+	return resp
 }
 
 func (this *GameRoom) getSessionList() []*ent.DSession {
@@ -151,14 +183,15 @@ func (this *GameRoom) getSessionList() []*ent.DSession {
 }
 
 type SyncPanelMessage struct {
-	PanelFull        string
-	UpperUsername    string
-	DownUsername     string
-	IsGameRunning    bool
-	NextTurnUsername string
-	ShowReGame       bool
-	ShowSiteDown     bool
-	ShowStandUp      bool
+	PanelFull      string
+	WUserName      string
+	WUserId        string
+	BUserName      string
+	BUserId        string
+	IsGameRunning  bool
+	NextTurnUserId string
+	ShowReGame     bool
+	ShowSiteDown   bool
 }
 
 type TakeSiteRequest struct{}

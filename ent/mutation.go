@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/orestonce/ChessGame/ent/dchat"
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -25,10 +26,525 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeDChat    = "DChat"
 	TypeDRoom    = "DRoom"
 	TypeDSession = "DSession"
 	TypeDUser    = "DUser"
 )
+
+// DChatMutation represents an operation that mutates the DChat nodes in the graph.
+type DChatMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	session_id    *string
+	user_id       *string
+	room_id       *string
+	text          *string
+	create_time   *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*DChat, error)
+	predicates    []predicate.DChat
+}
+
+var _ ent.Mutation = (*DChatMutation)(nil)
+
+// dchatOption allows management of the mutation configuration using functional options.
+type dchatOption func(*DChatMutation)
+
+// newDChatMutation creates new mutation for the DChat entity.
+func newDChatMutation(c config, op Op, opts ...dchatOption) *DChatMutation {
+	m := &DChatMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDChat,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDChatID sets the ID field of the mutation.
+func withDChatID(id string) dchatOption {
+	return func(m *DChatMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DChat
+		)
+		m.oldValue = func(ctx context.Context) (*DChat, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DChat.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDChat sets the old DChat of the mutation.
+func withDChat(node *DChat) dchatOption {
+	return func(m *DChatMutation) {
+		m.oldValue = func(context.Context) (*DChat, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DChatMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DChatMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DChat entities.
+func (m *DChatMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DChatMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *DChatMutation) SetSessionID(s string) {
+	m.session_id = &s
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *DChatMutation) SessionID() (r string, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the DChat entity.
+// If the DChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChatMutation) OldSessionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *DChatMutation) ResetSessionID() {
+	m.session_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DChatMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DChatMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the DChat entity.
+// If the DChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChatMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DChatMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetRoomID sets the "room_id" field.
+func (m *DChatMutation) SetRoomID(s string) {
+	m.room_id = &s
+}
+
+// RoomID returns the value of the "room_id" field in the mutation.
+func (m *DChatMutation) RoomID() (r string, exists bool) {
+	v := m.room_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoomID returns the old "room_id" field's value of the DChat entity.
+// If the DChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChatMutation) OldRoomID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRoomID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRoomID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoomID: %w", err)
+	}
+	return oldValue.RoomID, nil
+}
+
+// ResetRoomID resets all changes to the "room_id" field.
+func (m *DChatMutation) ResetRoomID() {
+	m.room_id = nil
+}
+
+// SetText sets the "text" field.
+func (m *DChatMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *DChatMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the DChat entity.
+// If the DChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChatMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *DChatMutation) ResetText() {
+	m.text = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *DChatMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *DChatMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the DChat entity.
+// If the DChat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChatMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *DChatMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// Where appends a list predicates to the DChatMutation builder.
+func (m *DChatMutation) Where(ps ...predicate.DChat) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *DChatMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (DChat).
+func (m *DChatMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DChatMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.session_id != nil {
+		fields = append(fields, dchat.FieldSessionID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, dchat.FieldUserID)
+	}
+	if m.room_id != nil {
+		fields = append(fields, dchat.FieldRoomID)
+	}
+	if m.text != nil {
+		fields = append(fields, dchat.FieldText)
+	}
+	if m.create_time != nil {
+		fields = append(fields, dchat.FieldCreateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DChatMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case dchat.FieldSessionID:
+		return m.SessionID()
+	case dchat.FieldUserID:
+		return m.UserID()
+	case dchat.FieldRoomID:
+		return m.RoomID()
+	case dchat.FieldText:
+		return m.Text()
+	case dchat.FieldCreateTime:
+		return m.CreateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DChatMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case dchat.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case dchat.FieldUserID:
+		return m.OldUserID(ctx)
+	case dchat.FieldRoomID:
+		return m.OldRoomID(ctx)
+	case dchat.FieldText:
+		return m.OldText(ctx)
+	case dchat.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown DChat field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DChatMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case dchat.FieldSessionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case dchat.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case dchat.FieldRoomID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoomID(v)
+		return nil
+	case dchat.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	case dchat.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DChat field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DChatMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DChatMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DChatMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DChat numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DChatMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DChatMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DChatMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DChat nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DChatMutation) ResetField(name string) error {
+	switch name {
+	case dchat.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case dchat.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case dchat.FieldRoomID:
+		m.ResetRoomID()
+		return nil
+	case dchat.FieldText:
+		m.ResetText()
+		return nil
+	case dchat.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown DChat field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DChatMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DChatMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DChatMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DChatMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DChatMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DChatMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DChatMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DChat unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DChatMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DChat edge %s", name)
+}
 
 // DRoomMutation represents an operation that mutates the DRoom nodes in the graph.
 type DRoomMutation struct {

@@ -36,9 +36,11 @@ public:
     bool IsInSuggestionList(PiecePoint p);
 public:
     QString WUsername ;
-    QString BUsername ;
+    QString WUserId;
+    QString BUsername;
+    QString BUserId;
     bool IsGameRunning ;
-    QString NextTurnUsername;
+    QString NextTurnUserId;
     bool ShowSiteDown;
     bool ShowReGame;
     char m_arrChessPanel[LINE_END][ COLUMN_END];
@@ -46,7 +48,7 @@ public:
     QPoint SelectedPointTo;
     QVector<PiecePoint> SuggestionPointToList;
 public:
-    QString MyUsername;
+    QString MyUserId;
 };
 
 #endif // GAMECORE_H

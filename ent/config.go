@@ -24,6 +24,7 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
+	DChat    []ent.Hook
 	DRoom    []ent.Hook
 	DSession []ent.Hook
 	DUser    []ent.Hook

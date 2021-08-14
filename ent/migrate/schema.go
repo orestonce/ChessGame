@@ -8,6 +8,21 @@ import (
 )
 
 var (
+	// DchatsColumns holds the columns for the "dchats" table.
+	DchatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "session_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "room_id", Type: field.TypeString},
+		{Name: "text", Type: field.TypeString},
+		{Name: "create_time", Type: field.TypeTime},
+	}
+	// DchatsTable holds the schema information for the "dchats" table.
+	DchatsTable = &schema.Table{
+		Name:       "dchats",
+		Columns:    DchatsColumns,
+		PrimaryKey: []*schema.Column{DchatsColumns[0]},
+	}
 	// DroomsColumns holds the columns for the "drooms" table.
 	DroomsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -51,6 +66,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DchatsTable,
 		DroomsTable,
 		DsessionsTable,
 		DusersTable,

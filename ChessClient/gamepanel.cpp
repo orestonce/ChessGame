@@ -39,7 +39,6 @@ GamePanel::GamePanel(QWidget *parent) :
 
 bool GamePanel::Init(const QString &username, const QString &password, const QString &roomId)
 {
-    core->MyUsername = username;
     this->setWindowTitle(this->windowTitle() + "-" + username);
     rpchub->RegisterSyncPanelMessage([=](const SyncPanelMessage& message){
         core->Load(message);
@@ -93,6 +92,7 @@ bool GamePanel::Init(const QString &username, const QString &password, const QSt
         return false;
     }
     ui->showText->append("登陆服务器成功...") ;
+    core->MyUserId = resp.UserId;
 
     connect(rpchub, &RpcHub::signal_websocket_error, [=](QString errMsg){
         this->showErrorAndClose(errMsg);

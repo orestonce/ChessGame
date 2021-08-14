@@ -92,10 +92,12 @@ QJsonObject SyncPanelMessage::ToJsonObject() const
 {
 	QJsonObject data;
 	data["PanelFull"] = this->PanelFull;
-	data["UpperUsername"] = this->UpperUsername;
-	data["DownUsername"] = this->DownUsername;
+	data["WUserName"] = this->WUserName;
+	data["WUserId"] = this->WUserId;
+	data["BUserName"] = this->BUserName;
+	data["BUserId"] = this->BUserId;
 	data["IsGameRunning"] = this->IsGameRunning;
-	data["NextTurnUsername"] = this->NextTurnUsername;
+	data["NextTurnUserId"] = this->NextTurnUserId;
 	data["ShowReGame"] = this->ShowReGame;
 	data["ShowSiteDown"] = this->ShowSiteDown;
 
@@ -115,10 +117,12 @@ bool SyncPanelMessage::DecodeFromQByteArray(const QByteArray& bin)
 bool SyncPanelMessage::FromJsonObject(QJsonObject data)
 {
 	this->PanelFull = data["PanelFull"].toString();
-	this->UpperUsername = data["UpperUsername"].toString();
-	this->DownUsername = data["DownUsername"].toString();
+	this->WUserName = data["WUserName"].toString();
+	this->WUserId = data["WUserId"].toString();
+	this->BUserName = data["BUserName"].toString();
+	this->BUserId = data["BUserId"].toString();
 	this->IsGameRunning = data["IsGameRunning"].toBool();
-	this->NextTurnUsername = data["NextTurnUsername"].toString();
+	this->NextTurnUserId = data["NextTurnUserId"].toString();
 	this->ShowReGame = data["ShowReGame"].toBool();
 	this->ShowSiteDown = data["ShowSiteDown"].toBool();
 
@@ -156,6 +160,7 @@ QJsonObject ChatMessage::ToJsonObject() const
 	QJsonObject data;
 	data["TimeStr"] = this->TimeStr;
 	data["Username"] = this->Username;
+	data["UserId"] = this->UserId;
 	data["Text"] = this->Text;
 
 	return data;
@@ -175,6 +180,7 @@ bool ChatMessage::FromJsonObject(QJsonObject data)
 {
 	this->TimeStr = data["TimeStr"].toString();
 	this->Username = data["Username"].toString();
+	this->UserId = data["UserId"].toString();
 	this->Text = data["Text"].toString();
 
 	return true;
@@ -347,6 +353,7 @@ QByteArray LoginResponse::EncodeToQByteArray() const
 QJsonObject LoginResponse::ToJsonObject() const
 {
 	QJsonObject data;
+	data["UserId"] = this->UserId;
 	data["ErrMsg"] = this->ErrMsg;
 
 	return data;
@@ -364,6 +371,7 @@ bool LoginResponse::DecodeFromQByteArray(const QByteArray& bin)
 
 bool LoginResponse::FromJsonObject(QJsonObject data)
 {
+	this->UserId = data["UserId"].toString();
 	this->ErrMsg = data["ErrMsg"].toString();
 
 	return true;

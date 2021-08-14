@@ -372,17 +372,13 @@ func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, userId string) {
 }
 
 func (this *GameRoom) formatPanelFull(resp *SyncPanelMessage) {
-	w := &bytes.Buffer{}
-	for line := 0; line < LINE_COUNT; line++ {
-		for column := 0; column < COLUMN_COUNT; column++ {
-			w.WriteByte(byte(this.PanelFull[line][column]))
-		}
-	}
-	resp.PanelFull = w.String()
-	resp.UpperUsername = getUserNameByIdIgnoreEmpty(this.Data.WUserID)
-	resp.DownUsername = getUserNameByIdIgnoreEmpty(this.Data.BUserID)
+	resp.PanelFull = this.formatPanelV2()
+	resp.WUserName = getUserNameByIdIgnoreEmpty(this.Data.WUserID)
+	resp.WUserId = this.Data.WUserID
+	resp.BUserName = getUserNameByIdIgnoreEmpty(this.Data.BUserID)
+	resp.BUserId = this.Data.BUserID
 	resp.IsGameRunning = this.Data.IsGameRunning
-	resp.NextTurnUsername = getUserNameByIdIgnoreEmpty(this.Data.NextTurnUserID)
+	resp.NextTurnUserId = this.Data.NextTurnUserID
 }
 
 func (this *GameRoom) formatPanelV2() string {
@@ -416,6 +412,6 @@ func (this *GameRoom) formatPanelV2() string {
 		w.WriteByte('b')
 	}
 	str := w.String()
-	log.Println("format", str)
+	//log.Println("format", str)
 	return str
 }
