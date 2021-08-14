@@ -1,7 +1,6 @@
 package ChessGate
 
 import (
-	"flag"
 	"github.com/gorilla/websocket"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"log"
@@ -11,21 +10,11 @@ import (
 )
 
 func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string, pnginx bool) {
-	//var laddr string
-	//var redis ymdQuickRestart.RedisInfo
-	//var wspath string
-	//var pnginx bool
-
-	flag.StringVar(&laddr, `laddr`, `127.0.0.1:8912`, `监听地址`)
-	flag.StringVar(&redis.RedisAddr, `raddr`, `127.0.0.1:6379`, `redis地址`)
-	flag.StringVar(&redis.Prefix, `rprefix`, `chess`, `redis前缀`)
-	flag.StringVar(&wspath, `wspath`, `/ChessGame`, `websocket路径`)
-	flag.BoolVar(&pnginx, `pnginx`, false, `是否使用了nginx作为前端代理`)
-	flag.Parse()
 	ln, err := net.Listen("tcp", laddr)
 	if err != nil {
 		log.Fatal("Cannot listen to", laddr, err)
 	}
+	log.Println("listen success", laddr)
 	mux := http.NewServeMux()
 	gateway := ymdQuickRestart.NewGatewayService(redis)
 	mux.HandleFunc(wspath, func(writer http.ResponseWriter, request *http.Request) {
@@ -49,7 +38,6 @@ func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string, 
 		}, clientIp)
 		conn.Close()
 	})
-	log.Println("listen success", laddr)
 	http.Serve(ln, mux)
 }
 
