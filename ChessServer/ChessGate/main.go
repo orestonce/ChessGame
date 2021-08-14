@@ -1,4 +1,4 @@
-package main
+package ChessGate
 
 import (
 	"flag"
@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-func main() {
-	var laddr string
-	var redis ymdQuickRestart.RedisInfo
-	var wspath string
-	var pnginx bool
+func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string, pnginx bool) {
+	//var laddr string
+	//var redis ymdQuickRestart.RedisInfo
+	//var wspath string
+	//var pnginx bool
 
 	flag.StringVar(&laddr, `laddr`, `127.0.0.1:8912`, `监听地址`)
 	flag.StringVar(&redis.RedisAddr, `raddr`, `127.0.0.1:6379`, `redis地址`)

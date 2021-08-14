@@ -1,4 +1,4 @@
-package ChessCore
+package ChessGame
 
 import (
 	"bytes"

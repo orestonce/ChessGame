@@ -1,8 +1,6 @@
-package main
+package ChessGame
 
 import (
-	"flag"
-	"github.com/orestonce/ChessGame/ChessServer/ChessGame/ChessCore"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"log"
 	"os"
@@ -10,13 +8,13 @@ import (
 	"syscall"
 )
 
-func main() {
-	var redis ymdQuickRestart.RedisInfo
-	var spath string
-	flag.StringVar(&redis.RedisAddr, `raddr`, `127.0.0.1:6379`, `redis地址`)
-	flag.StringVar(&redis.Prefix, `rprefix`, `chess`, `redis前缀`)
-	flag.StringVar(&spath, `spath`, `ChessGame`, `数据储存位置`)
-	flag.Parse()
+func RunChessGame(redis ymdQuickRestart.RedisInfo, spath string) {
+	//var redis ymdQuickRestart.RedisInfo
+	//var spath string
+	//flag.StringVar(&redis.RedisAddr, `raddr`, `127.0.0.1:6379`, `redis地址`)
+	//flag.StringVar(&redis.Prefix, `rprefix`, `chess`, `redis前缀`)
+	//flag.StringVar(&spath, `spath`, `ChessGame`, `数据储存位置`)
+	//flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	logic := ymdQuickRestart.NewLogicService(redis)
@@ -28,6 +26,6 @@ func main() {
 		log.Println("Logic close with signal", sig.String())
 		logic.Close()
 	}()
-	game := ChessCore.NewChessGame(spath, logic)
+	game := NewChessGame(spath, logic)
 	game.RunMainLogic()
 }

@@ -1,4 +1,4 @@
-package ChessCore
+package ChessGame
 
 type GameRoomManager struct {
 	core                   *Game `json:"-"`

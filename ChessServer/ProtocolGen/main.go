@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/orestonce/ChessGame/ChessServer/ChessGame/ChessCore"
+	"github.com/orestonce/ChessGame/ChessServer/ChessGame"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,13 +13,13 @@ import (
 
 func main() {
 	gen := NewCodeGenerator(`CSProtocol.h`)
-	gen.ExportType(ChessCore.PiecePoint{})
-	gen.ExportType(ChessCore.SyncPanelMessage{})
-	gen.ExportType(ChessCore.ChatMessage{})
-	gen.ExportType(ChessCore.GameOverNotice{})
-	gen.ExportType(ChessCore.ServerKickYou{})
-	gen.ExportTypeFromRpcMethod(&ChessCore.GameUser{})
-	gen.ExportTypeFromRpcMethod(&ChessCore.GameRoom{})
+	gen.ExportType(ChessGame.PiecePoint{})
+	gen.ExportType(ChessGame.SyncPanelMessage{})
+	gen.ExportType(ChessGame.ChatMessage{})
+	gen.ExportType(ChessGame.GameOverNotice{})
+	gen.ExportType(ChessGame.ServerKickYou{})
+	gen.ExportTypeFromRpcMethod(&ChessGame.GameUser{})
+	gen.ExportTypeFromRpcMethod(&ChessGame.GameRoom{})
 	gen.ExportEnd()
 
 	hFileContent, cppFileContent := gen.GetHeaderAndBody()
@@ -156,7 +156,7 @@ func (this *CppCodeGenerator) GetHeaderAndBody() (hFileContent, cppFileContent [
 }
 
 func outputType(a reflect.Type, wHeader io.Writer, wBody io.Writer, wNoticeHeader io.Writer) {
-	packetType := ChessCore.PtRpcCall
+	packetType := ChessGame.PtRpcCall
 	showMethodName := ``
 
 	wEncoder := &bytes.Buffer{}
@@ -167,13 +167,13 @@ func outputType(a reflect.Type, wHeader io.Writer, wBody io.Writer, wNoticeHeade
 	wnBody := &bytes.Buffer{}
 
 	if strings.HasSuffix(a.Name(), `Request`) {
-		packetType = ChessCore.PtRpcCall
+		packetType = ChessGame.PtRpcCall
 		showMethodName = "Rpc" + strings.TrimSuffix(a.Name(), `Request`)
 	} else if strings.HasSuffix(a.Name(), `Response`) {
-		packetType = ChessCore.PtRpcReply
+		packetType = ChessGame.PtRpcReply
 		showMethodName = "Rpc" + strings.TrimSuffix(a.Name(), `Response`)
 	} else {
-		packetType = ChessCore.PtRpcNotice
+		packetType = ChessGame.PtRpcNotice
 		showMethodName = a.Name()
 
 		fmt.Fprintf(wnHeader, "\tvoid Register%s(std::function<void (const %s& message)> fn);\n",
