@@ -24,7 +24,9 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	DUser []ent.Hook
+	DRoom    []ent.Hook
+	DSession []ent.Hook
+	DUser    []ent.Hook
 }
 
 // Options applies the options on the config object.

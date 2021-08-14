@@ -6,5 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// DRoom is the predicate function for droom builders.
+type DRoom func(*sql.Selector)
+
+// DSession is the predicate function for dsession builders.
+type DSession func(*sql.Selector)
+
 // DUser is the predicate function for duser builders.
 type DUser func(*sql.Selector)

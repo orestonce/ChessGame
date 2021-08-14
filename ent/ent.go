@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 )
 
@@ -29,7 +31,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		duser.Table: duser.ValidColumn,
+		droom.Table:    droom.ValidColumn,
+		dsession.Table: dsession.ValidColumn,
+		duser.Table:    duser.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

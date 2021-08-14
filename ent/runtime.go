@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 	"github.com/orestonce/ChessGame/ent/schema"
 )
@@ -11,6 +13,38 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	droomFields := schema.DRoom{}.Fields()
+	_ = droomFields
+	// droomDescIsGameRunning is the schema descriptor for is_game_running field.
+	droomDescIsGameRunning := droomFields[1].Descriptor()
+	// droom.DefaultIsGameRunning holds the default value on creation for the is_game_running field.
+	droom.DefaultIsGameRunning = droomDescIsGameRunning.Default.(bool)
+	// droomDescPanel is the schema descriptor for panel field.
+	droomDescPanel := droomFields[2].Descriptor()
+	// droom.DefaultPanel holds the default value on creation for the panel field.
+	droom.DefaultPanel = droomDescPanel.Default.(string)
+	// droomDescUpUserID is the schema descriptor for up_user_id field.
+	droomDescUpUserID := droomFields[3].Descriptor()
+	// droom.DefaultUpUserID holds the default value on creation for the up_user_id field.
+	droom.DefaultUpUserID = droomDescUpUserID.Default.(string)
+	// droomDescDownUserID is the schema descriptor for down_user_id field.
+	droomDescDownUserID := droomFields[4].Descriptor()
+	// droom.DefaultDownUserID holds the default value on creation for the down_user_id field.
+	droom.DefaultDownUserID = droomDescDownUserID.Default.(string)
+	dsessionFields := schema.DSession{}.Fields()
+	_ = dsessionFields
+	// dsessionDescUserID is the schema descriptor for user_id field.
+	dsessionDescUserID := dsessionFields[1].Descriptor()
+	// dsession.DefaultUserID holds the default value on creation for the user_id field.
+	dsession.DefaultUserID = dsessionDescUserID.Default.(string)
+	// dsessionDescUserName is the schema descriptor for user_name field.
+	dsessionDescUserName := dsessionFields[2].Descriptor()
+	// dsession.DefaultUserName holds the default value on creation for the user_name field.
+	dsession.DefaultUserName = dsessionDescUserName.Default.(string)
+	// dsessionDescRoomID is the schema descriptor for room_id field.
+	dsessionDescRoomID := dsessionFields[3].Descriptor()
+	// dsession.DefaultRoomID holds the default value on creation for the room_id field.
+	dsession.DefaultRoomID = dsessionDescRoomID.Default.(string)
 	duserFields := schema.DUser{}.Fields()
 	_ = duserFields
 	// duserDescName is the schema descriptor for name field.

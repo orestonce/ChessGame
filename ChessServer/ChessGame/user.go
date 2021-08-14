@@ -1,6 +1,7 @@
 package ChessGame
 
 import (
+	"github.com/orestonce/ChessGame/ent"
 	"github.com/orestonce/ChessGame/ymd/ymdJson"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"log"
@@ -9,24 +10,27 @@ import (
 )
 
 type GameUser struct {
-	gameCore  *Game `json:"-"`
-	SessionId string
-	Username  string
-	RoomId    string
+	Session *ent.DSession
 }
 
-func (this *GameUser) HandleClientMessage(msg ymdQuickRestart.RedisExchange) {
+func userHandleClientMessage(msg ymdQuickRestart.RedisExchange) {
+	session := getSessionById(msg.SessionId)
+	if session == nil {
+		return
+	}
 	var callPacket CSExchangePacket
 	ymdJson.MustUnmarshal(msg.MsgData, &callPacket)
 	if !strings.HasPrefix(callPacket.Method, `Rpc`) || callPacket.PacketType != PtRpcCall {
-		log.Println("Unkown call ", msg.SessionId)
+		log.Println("Unknown call ", msg.SessionId)
 		return
 	}
 	var reply interface{}
-	if this.RoomId != `` && callPacket.Method != `RpcPing` {
-		reply = this.gameCore.gRoomManager.handleGameRoomPacket(this.RoomId, this.Username, callPacket.Method, callPacket.Data)
+	if session.RoomID != `` && callPacket.Method != `RpcPing` {
+		reply = GameRoomManagerHandleGameRoomPacket(session, callPacket.Method, callPacket.Data)
 	} else {
-		method := reflect.ValueOf(this).MethodByName(callPacket.Method)
+		method := reflect.ValueOf(&GameUser{
+			Session: session,
+		}).MethodByName(callPacket.Method)
 		if !method.IsValid() {
 			log.Println("Unkown method", callPacket.Method)
 			return
@@ -42,13 +46,13 @@ func (this *GameUser) HandleClientMessage(msg ymdQuickRestart.RedisExchange) {
 	replyPacket.Method = callPacket.Method
 	replyPacket.PacketType = PtRpcReply
 	replyPacket.Data = ymdJson.MustMarshal(reply)
-	this.writeMessage(ymdJson.MustMarshal(replyPacket))
+	gLogic.WriteSession(session.ID, ymdJson.MustMarshal(replyPacket))
 }
 
-func (this *GameRoomManager) handleGameRoomPacket(roomId, username, methodName string, data []byte) (replyData interface{}) {
-	room := this.RoomMap[roomId]
+func GameRoomManagerHandleGameRoomPacket(session *ent.DSession, methodName string, data []byte) (replyData interface{}) {
+	room := getRoomById(session.RoomID)
 	if room == nil {
-		return
+		return nil
 	}
 	roomValue := reflect.ValueOf(room)
 	method := roomValue.MethodByName(methodName)
@@ -59,22 +63,18 @@ func (this *GameRoomManager) handleGameRoomPacket(roomId, username, methodName s
 	request := reflect.New(method.Type().In(1))
 	ymdJson.MustUnmarshal(data, request.Interface())
 	result := method.Call([]reflect.Value{
-		reflect.ValueOf(username),
+		reflect.ValueOf(session),
 		request.Elem(),
 	})
 	return result[0].Interface()
 }
 
-func (this *GameUser) SendNotice(a interface{}) {
+func sendNoticeToSession(sessionId string, a interface{}) {
 	var packet = CSExchangePacket{
 		PacketType: PtRpcNotice,
 		Method:     reflect.TypeOf(a).Name(),
 		Data:       ymdJson.MustMarshal(a),
 	}
 	noticePacket := ymdJson.MustMarshal(packet)
-	this.writeMessage(noticePacket)
-}
-
-func (this *GameUser) writeMessage(message []byte) {
-	this.gameCore.logic.WriteSession(this.SessionId, message)
+	gLogic.WriteSession(sessionId, noticePacket)
 }

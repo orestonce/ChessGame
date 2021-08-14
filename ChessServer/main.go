@@ -11,18 +11,24 @@ var root = cobra.Command{
 	Use: "ChessServer",
 }
 
+func main() {
+	if err := root.Execute(); err != nil {
+		root.Help()
+	}
+}
+
 func init() {
 	var redis ymdQuickRestart.RedisInfo
-	var mysql_schema string
+	var mysqlSchema string
 	game := &cobra.Command{
 		Use: "Game",
 		Run: func(cmd *cobra.Command, args []string) {
-			ChessGame.RunChessGame(redis, mysql_schema)
+			ChessGame.RunChessGame(redis, mysqlSchema)
 		},
 	}
 	game.Flags().StringVarP(&redis.RedisAddr, `raddr`, ``, `127.0.0.1:6379`, `redis地址`)
 	game.Flags().StringVarP(&redis.Prefix, `rprefix`, ``, `chess`, `redis前缀`)
-	game.Flags().StringVarP(&mysql_schema, `mysql_schema`, ``, `root:@tcp(127.0.0.1:3306)/chess?charset=utf8`, `mysql连接`)
+	game.Flags().StringVarP(&mysqlSchema, `mysql_schema`, ``, `root:@tcp(127.0.0.1:3306)/chess?parseTime=true&charset=utf8`, `mysql连接`)
 	root.AddCommand(game)
 
 	var laddr string
@@ -41,10 +47,4 @@ func init() {
 	gate.Flags().StringVarP(&wspath, `wspath`, ``, `/ChessGame`, `websocket路径`)
 	gate.Flags().BoolVarP(&pnginx, `pnginx`, ``, false, `是否使用了nginx作为前端代理`)
 	root.AddCommand(gate)
-}
-
-func main() {
-	if err := root.Execute(); err != nil {
-		root.Help()
-	}
 }

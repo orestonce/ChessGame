@@ -9,6 +9,8 @@ import (
 
 	"github.com/orestonce/ChessGame/ent/migrate"
 
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 
 	"entgo.io/ent/dialect"
@@ -20,6 +22,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// DRoom is the client for interacting with the DRoom builders.
+	DRoom *DRoomClient
+	// DSession is the client for interacting with the DSession builders.
+	DSession *DSessionClient
 	// DUser is the client for interacting with the DUser builders.
 	DUser *DUserClient
 }
@@ -35,6 +41,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.DRoom = NewDRoomClient(c.config)
+	c.DSession = NewDSessionClient(c.config)
 	c.DUser = NewDUserClient(c.config)
 }
 
@@ -67,9 +75,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		DUser:  NewDUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		DRoom:    NewDRoomClient(cfg),
+		DSession: NewDSessionClient(cfg),
+		DUser:    NewDUserClient(cfg),
 	}, nil
 }
 
@@ -87,15 +97,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config: cfg,
-		DUser:  NewDUserClient(cfg),
+		config:   cfg,
+		DRoom:    NewDRoomClient(cfg),
+		DSession: NewDSessionClient(cfg),
+		DUser:    NewDUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		DUser.
+//		DRoom.
 //		Query().
 //		Count(ctx)
 //
@@ -118,7 +130,189 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.DRoom.Use(hooks...)
+	c.DSession.Use(hooks...)
 	c.DUser.Use(hooks...)
+}
+
+// DRoomClient is a client for the DRoom schema.
+type DRoomClient struct {
+	config
+}
+
+// NewDRoomClient returns a client for the DRoom from the given config.
+func NewDRoomClient(c config) *DRoomClient {
+	return &DRoomClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `droom.Hooks(f(g(h())))`.
+func (c *DRoomClient) Use(hooks ...Hook) {
+	c.hooks.DRoom = append(c.hooks.DRoom, hooks...)
+}
+
+// Create returns a create builder for DRoom.
+func (c *DRoomClient) Create() *DRoomCreate {
+	mutation := newDRoomMutation(c.config, OpCreate)
+	return &DRoomCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DRoom entities.
+func (c *DRoomClient) CreateBulk(builders ...*DRoomCreate) *DRoomCreateBulk {
+	return &DRoomCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DRoom.
+func (c *DRoomClient) Update() *DRoomUpdate {
+	mutation := newDRoomMutation(c.config, OpUpdate)
+	return &DRoomUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DRoomClient) UpdateOne(d *DRoom) *DRoomUpdateOne {
+	mutation := newDRoomMutation(c.config, OpUpdateOne, withDRoom(d))
+	return &DRoomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DRoomClient) UpdateOneID(id string) *DRoomUpdateOne {
+	mutation := newDRoomMutation(c.config, OpUpdateOne, withDRoomID(id))
+	return &DRoomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DRoom.
+func (c *DRoomClient) Delete() *DRoomDelete {
+	mutation := newDRoomMutation(c.config, OpDelete)
+	return &DRoomDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DRoomClient) DeleteOne(d *DRoom) *DRoomDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DRoomClient) DeleteOneID(id string) *DRoomDeleteOne {
+	builder := c.Delete().Where(droom.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DRoomDeleteOne{builder}
+}
+
+// Query returns a query builder for DRoom.
+func (c *DRoomClient) Query() *DRoomQuery {
+	return &DRoomQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DRoom entity by its id.
+func (c *DRoomClient) Get(ctx context.Context, id string) (*DRoom, error) {
+	return c.Query().Where(droom.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DRoomClient) GetX(ctx context.Context, id string) *DRoom {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DRoomClient) Hooks() []Hook {
+	return c.hooks.DRoom
+}
+
+// DSessionClient is a client for the DSession schema.
+type DSessionClient struct {
+	config
+}
+
+// NewDSessionClient returns a client for the DSession from the given config.
+func NewDSessionClient(c config) *DSessionClient {
+	return &DSessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dsession.Hooks(f(g(h())))`.
+func (c *DSessionClient) Use(hooks ...Hook) {
+	c.hooks.DSession = append(c.hooks.DSession, hooks...)
+}
+
+// Create returns a create builder for DSession.
+func (c *DSessionClient) Create() *DSessionCreate {
+	mutation := newDSessionMutation(c.config, OpCreate)
+	return &DSessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DSession entities.
+func (c *DSessionClient) CreateBulk(builders ...*DSessionCreate) *DSessionCreateBulk {
+	return &DSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DSession.
+func (c *DSessionClient) Update() *DSessionUpdate {
+	mutation := newDSessionMutation(c.config, OpUpdate)
+	return &DSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DSessionClient) UpdateOne(d *DSession) *DSessionUpdateOne {
+	mutation := newDSessionMutation(c.config, OpUpdateOne, withDSession(d))
+	return &DSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DSessionClient) UpdateOneID(id string) *DSessionUpdateOne {
+	mutation := newDSessionMutation(c.config, OpUpdateOne, withDSessionID(id))
+	return &DSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DSession.
+func (c *DSessionClient) Delete() *DSessionDelete {
+	mutation := newDSessionMutation(c.config, OpDelete)
+	return &DSessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DSessionClient) DeleteOne(d *DSession) *DSessionDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DSessionClient) DeleteOneID(id string) *DSessionDeleteOne {
+	builder := c.Delete().Where(dsession.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DSessionDeleteOne{builder}
+}
+
+// Query returns a query builder for DSession.
+func (c *DSessionClient) Query() *DSessionQuery {
+	return &DSessionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DSession entity by its id.
+func (c *DSessionClient) Get(ctx context.Context, id string) (*DSession, error) {
+	return c.Query().Where(dsession.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DSessionClient) GetX(ctx context.Context, id string) *DSession {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DSessionClient) Hooks() []Hook {
+	return c.hooks.DSession
 }
 
 // DUserClient is a client for the DUser schema.

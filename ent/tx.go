@@ -12,6 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// DRoom is the client for interacting with the DRoom builders.
+	DRoom *DRoomClient
+	// DSession is the client for interacting with the DSession builders.
+	DSession *DSessionClient
 	// DUser is the client for interacting with the DUser builders.
 	DUser *DUserClient
 
@@ -149,6 +153,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.DRoom = NewDRoomClient(tx.config)
+	tx.DSession = NewDSessionClient(tx.config)
 	tx.DUser = NewDUserClient(tx.config)
 }
 
@@ -159,7 +165,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: DUser.QueryXXX(), the query will be executed
+// applies a query, for example: DRoom.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

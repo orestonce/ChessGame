@@ -3,22 +3,25 @@ package ChessGame
 import (
 	"context"
 	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
+	"github.com/orestonce/ChessGame/ent/duser"
+	"github.com/orestonce/ChessGame/ent/predicate"
 	"github.com/orestonce/ChessGame/ymd/ymdError"
-	"github.com/orestonce/ChessGame/ymd/ymdJson"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"log"
 	"time"
 )
 
-type Game struct {
-	gRoomManager *GameRoomManager
-	logic        *ymdQuickRestart.LogicService
-}
+type Game struct{}
 
-func InitChessGame(mysql_schema string, logic *ymdQuickRestart.LogicService) *Game {
-	this := &Game{}
+var gLogic *ymdQuickRestart.LogicService
+var gGame *Game
+
+func InitChessGame(mysqlSchema string, logic *ymdQuickRestart.LogicService) *Game {
+	gGame = &Game{}
 	var err error
-	gDbClient, err = ent.Open("mysql", mysql_schema)
+	gDbClient, err = ent.Open("mysql", mysqlSchema)
 	if err != nil {
 		log.Fatal("InitChessGame ent.Open", err)
 		return nil
@@ -28,14 +31,8 @@ func InitChessGame(mysql_schema string, logic *ymdQuickRestart.LogicService) *Ga
 		log.Println("InitChessGame Schema.Create", err)
 		return nil
 	}
-	this.gRoomManager = &GameRoomManager{
-		core:                   this,
-		SessionIdToGameUserMap: map[string]*GameUser{},
-		UsernameToSessionIdMap: map[string]string{},
-		RoomMap:                map[string]*GameRoom{},
-	}
-	this.logic = logic
-	return this
+	gLogic = logic
+	return gGame
 }
 
 func (this *Game) RunMainLogic() {
@@ -46,39 +43,17 @@ func (this *Game) RunMainLogic() {
 
 func (this *Game) loadMemoryState() {
 	start := time.Now()
-	value := this.logic.GetMemoryState()
-	if value != `` {
-		ymdJson.MustUnmarshalFromString(value, this.gRoomManager)
-		this.gRoomManager.core = this
-		for _, user := range this.gRoomManager.SessionIdToGameUserMap {
-			user.gameCore = this
-		}
-		for _, room := range this.gRoomManager.RoomMap {
-			room.mgr = this.gRoomManager
-			for _, user := range room.UserMap {
-				user.gameCore = this
-			}
-			room.Panel.room = room
-		}
-	}
 	log.Println(`loadMemoryState`, time.Since(start))
 }
 
 func (this *Game) processLogicMessage() {
-	for msg := range this.logic.GetMessageChan() {
+	for msg := range gLogic.GetMessageChan() {
 		errMsg, stack := ymdError.PanicToErrMsgAndStack(func() {
 			switch msg.MsgType {
 			case ymdQuickRestart.MTGatewayNew:
-				this.gRoomManager.SessionIdToGameUserMap[msg.SessionId] = &GameUser{
-					gameCore:  this,
-					SessionId: msg.SessionId,
-				}
+				insertSession(msg.SessionId)
 			case ymdQuickRestart.MTGatewayRead:
-				user := this.gRoomManager.SessionIdToGameUserMap[msg.SessionId]
-				if user == nil {
-					break
-				}
-				user.HandleClientMessage(msg)
+				userHandleClientMessage(msg)
 			case ymdQuickRestart.MTGatewayClose:
 				this.kickSession(msg.SessionId)
 			}
@@ -90,26 +65,108 @@ func (this *Game) processLogicMessage() {
 	}
 }
 
+func insertSession(sessionId string) {
+	err := gDbClient.DSession.Create().SetID(sessionId).SetCreateTime(time.Now()).Exec(context.Background())
+	if err != nil {
+		log.Println("insertSession error", err)
+	}
+}
+
 func (this *Game) saveMemoryState() {
 	start := time.Now()
-	value := ymdJson.MustMarshalToString(this.gRoomManager)
-	this.logic.SetMemoryState(value)
 	log.Println(`saveMemoryState`, time.Since(start))
 }
 
 func (this *Game) kickSession(sessionId string) {
-	user := this.gRoomManager.SessionIdToGameUserMap[sessionId]
-	if user == nil {
+	session := getSessionById(sessionId)
+	if session == nil {
 		return
 	}
-	delete(this.gRoomManager.SessionIdToGameUserMap, sessionId)
-	delete(this.gRoomManager.UsernameToSessionIdMap, user.Username)
-	room := this.gRoomManager.RoomMap[user.RoomId]
+	_, err := gDbClient.DSession.Delete().Where(dsession.ID(sessionId)).Exec(context.Background())
+	if err != nil {
+		log.Println("Game.kickSession", err, sessionId)
+		return
+	}
+	room := getRoomById(session.RoomID)
 	if room != nil {
-		room.UserLeave(user.Username)
+		room.UserLeave(session)
 		if room.IsEmpty() {
-			delete(this.gRoomManager.RoomMap, user.RoomId)
+			_, err = gDbClient.DRoom.Delete().Where(droom.ID(room.RoomId)).Exec(context.Background())
+			if err != nil {
+				log.Println("Game.kickSession", err)
+			}
 		}
 	}
-	this.logic.KickSession(sessionId)
+	gLogic.KickSession(sessionId)
+}
+
+func getRoomById(id string) *GameRoom {
+	room, err := gDbClient.DRoom.Query().Where(droom.ID(id)).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("userHandleClientMessage ", err)
+		}
+		return nil
+	}
+	r := &GameRoom{
+		RoomId: id,
+		Data:   room,
+	}
+	r.LoadPanelFromData()
+	return r
+}
+
+func getSessionListBy(pAnd ...predicate.DSession) []*ent.DSession {
+	sessionList, err := gDbClient.DSession.Query().Where(dsession.And(pAnd...)).All(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("userHandleClientMessage ", err)
+		}
+		return nil
+	}
+	return sessionList
+}
+
+func getSessionById(sessionId string) *ent.DSession {
+	session, err := gDbClient.DSession.Query().Where(dsession.ID(sessionId)).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("getSessionById ", err)
+		}
+		return nil
+	}
+	return session
+}
+
+func getUserById(id string) *ent.DUser {
+	user, err := gDbClient.DUser.Query().Where(duser.ID(id)).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("getUserById ", err)
+		}
+		return nil
+	}
+	return user
+}
+
+func getUserNameByIdIgnoreEmpty(id string) string {
+	if id == "" {
+		return ""
+	}
+	u := getUserById(id)
+	if u == nil {
+		return ""
+	}
+	return u.Name
+}
+
+func getUserByName(name string) *ent.DUser {
+	user, err := gDbClient.DUser.Query().Where(duser.Name(name)).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("getUserByName ", err)
+		}
+		return nil
+	}
+	return user
 }

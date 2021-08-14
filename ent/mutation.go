@@ -6,7 +6,10 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 	"github.com/orestonce/ChessGame/ent/predicate"
 
@@ -22,8 +25,1063 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDUser = "DUser"
+	TypeDRoom    = "DRoom"
+	TypeDSession = "DSession"
+	TypeDUser    = "DUser"
 )
+
+// DRoomMutation represents an operation that mutates the DRoom nodes in the graph.
+type DRoomMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	is_game_running *bool
+	panel           *string
+	up_user_id      *string
+	down_user_id    *string
+	create_time     *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*DRoom, error)
+	predicates      []predicate.DRoom
+}
+
+var _ ent.Mutation = (*DRoomMutation)(nil)
+
+// droomOption allows management of the mutation configuration using functional options.
+type droomOption func(*DRoomMutation)
+
+// newDRoomMutation creates new mutation for the DRoom entity.
+func newDRoomMutation(c config, op Op, opts ...droomOption) *DRoomMutation {
+	m := &DRoomMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDRoom,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDRoomID sets the ID field of the mutation.
+func withDRoomID(id string) droomOption {
+	return func(m *DRoomMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DRoom
+		)
+		m.oldValue = func(ctx context.Context) (*DRoom, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DRoom.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDRoom sets the old DRoom of the mutation.
+func withDRoom(node *DRoom) droomOption {
+	return func(m *DRoomMutation) {
+		m.oldValue = func(context.Context) (*DRoom, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DRoomMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DRoomMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DRoom entities.
+func (m *DRoomMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DRoomMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetIsGameRunning sets the "is_game_running" field.
+func (m *DRoomMutation) SetIsGameRunning(b bool) {
+	m.is_game_running = &b
+}
+
+// IsGameRunning returns the value of the "is_game_running" field in the mutation.
+func (m *DRoomMutation) IsGameRunning() (r bool, exists bool) {
+	v := m.is_game_running
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsGameRunning returns the old "is_game_running" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldIsGameRunning(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldIsGameRunning is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldIsGameRunning requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsGameRunning: %w", err)
+	}
+	return oldValue.IsGameRunning, nil
+}
+
+// ClearIsGameRunning clears the value of the "is_game_running" field.
+func (m *DRoomMutation) ClearIsGameRunning() {
+	m.is_game_running = nil
+	m.clearedFields[droom.FieldIsGameRunning] = struct{}{}
+}
+
+// IsGameRunningCleared returns if the "is_game_running" field was cleared in this mutation.
+func (m *DRoomMutation) IsGameRunningCleared() bool {
+	_, ok := m.clearedFields[droom.FieldIsGameRunning]
+	return ok
+}
+
+// ResetIsGameRunning resets all changes to the "is_game_running" field.
+func (m *DRoomMutation) ResetIsGameRunning() {
+	m.is_game_running = nil
+	delete(m.clearedFields, droom.FieldIsGameRunning)
+}
+
+// SetPanel sets the "panel" field.
+func (m *DRoomMutation) SetPanel(s string) {
+	m.panel = &s
+}
+
+// Panel returns the value of the "panel" field in the mutation.
+func (m *DRoomMutation) Panel() (r string, exists bool) {
+	v := m.panel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPanel returns the old "panel" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldPanel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPanel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPanel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPanel: %w", err)
+	}
+	return oldValue.Panel, nil
+}
+
+// ClearPanel clears the value of the "panel" field.
+func (m *DRoomMutation) ClearPanel() {
+	m.panel = nil
+	m.clearedFields[droom.FieldPanel] = struct{}{}
+}
+
+// PanelCleared returns if the "panel" field was cleared in this mutation.
+func (m *DRoomMutation) PanelCleared() bool {
+	_, ok := m.clearedFields[droom.FieldPanel]
+	return ok
+}
+
+// ResetPanel resets all changes to the "panel" field.
+func (m *DRoomMutation) ResetPanel() {
+	m.panel = nil
+	delete(m.clearedFields, droom.FieldPanel)
+}
+
+// SetUpUserID sets the "up_user_id" field.
+func (m *DRoomMutation) SetUpUserID(s string) {
+	m.up_user_id = &s
+}
+
+// UpUserID returns the value of the "up_user_id" field in the mutation.
+func (m *DRoomMutation) UpUserID() (r string, exists bool) {
+	v := m.up_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpUserID returns the old "up_user_id" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldUpUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpUserID: %w", err)
+	}
+	return oldValue.UpUserID, nil
+}
+
+// ClearUpUserID clears the value of the "up_user_id" field.
+func (m *DRoomMutation) ClearUpUserID() {
+	m.up_user_id = nil
+	m.clearedFields[droom.FieldUpUserID] = struct{}{}
+}
+
+// UpUserIDCleared returns if the "up_user_id" field was cleared in this mutation.
+func (m *DRoomMutation) UpUserIDCleared() bool {
+	_, ok := m.clearedFields[droom.FieldUpUserID]
+	return ok
+}
+
+// ResetUpUserID resets all changes to the "up_user_id" field.
+func (m *DRoomMutation) ResetUpUserID() {
+	m.up_user_id = nil
+	delete(m.clearedFields, droom.FieldUpUserID)
+}
+
+// SetDownUserID sets the "down_user_id" field.
+func (m *DRoomMutation) SetDownUserID(s string) {
+	m.down_user_id = &s
+}
+
+// DownUserID returns the value of the "down_user_id" field in the mutation.
+func (m *DRoomMutation) DownUserID() (r string, exists bool) {
+	v := m.down_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDownUserID returns the old "down_user_id" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldDownUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDownUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDownUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDownUserID: %w", err)
+	}
+	return oldValue.DownUserID, nil
+}
+
+// ClearDownUserID clears the value of the "down_user_id" field.
+func (m *DRoomMutation) ClearDownUserID() {
+	m.down_user_id = nil
+	m.clearedFields[droom.FieldDownUserID] = struct{}{}
+}
+
+// DownUserIDCleared returns if the "down_user_id" field was cleared in this mutation.
+func (m *DRoomMutation) DownUserIDCleared() bool {
+	_, ok := m.clearedFields[droom.FieldDownUserID]
+	return ok
+}
+
+// ResetDownUserID resets all changes to the "down_user_id" field.
+func (m *DRoomMutation) ResetDownUserID() {
+	m.down_user_id = nil
+	delete(m.clearedFields, droom.FieldDownUserID)
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *DRoomMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *DRoomMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *DRoomMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// Where appends a list predicates to the DRoomMutation builder.
+func (m *DRoomMutation) Where(ps ...predicate.DRoom) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *DRoomMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (DRoom).
+func (m *DRoomMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DRoomMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.is_game_running != nil {
+		fields = append(fields, droom.FieldIsGameRunning)
+	}
+	if m.panel != nil {
+		fields = append(fields, droom.FieldPanel)
+	}
+	if m.up_user_id != nil {
+		fields = append(fields, droom.FieldUpUserID)
+	}
+	if m.down_user_id != nil {
+		fields = append(fields, droom.FieldDownUserID)
+	}
+	if m.create_time != nil {
+		fields = append(fields, droom.FieldCreateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DRoomMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case droom.FieldIsGameRunning:
+		return m.IsGameRunning()
+	case droom.FieldPanel:
+		return m.Panel()
+	case droom.FieldUpUserID:
+		return m.UpUserID()
+	case droom.FieldDownUserID:
+		return m.DownUserID()
+	case droom.FieldCreateTime:
+		return m.CreateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DRoomMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case droom.FieldIsGameRunning:
+		return m.OldIsGameRunning(ctx)
+	case droom.FieldPanel:
+		return m.OldPanel(ctx)
+	case droom.FieldUpUserID:
+		return m.OldUpUserID(ctx)
+	case droom.FieldDownUserID:
+		return m.OldDownUserID(ctx)
+	case droom.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown DRoom field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DRoomMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case droom.FieldIsGameRunning:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsGameRunning(v)
+		return nil
+	case droom.FieldPanel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPanel(v)
+		return nil
+	case droom.FieldUpUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpUserID(v)
+		return nil
+	case droom.FieldDownUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDownUserID(v)
+		return nil
+	case droom.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DRoom field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DRoomMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DRoomMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DRoomMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DRoom numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DRoomMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(droom.FieldIsGameRunning) {
+		fields = append(fields, droom.FieldIsGameRunning)
+	}
+	if m.FieldCleared(droom.FieldPanel) {
+		fields = append(fields, droom.FieldPanel)
+	}
+	if m.FieldCleared(droom.FieldUpUserID) {
+		fields = append(fields, droom.FieldUpUserID)
+	}
+	if m.FieldCleared(droom.FieldDownUserID) {
+		fields = append(fields, droom.FieldDownUserID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DRoomMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DRoomMutation) ClearField(name string) error {
+	switch name {
+	case droom.FieldIsGameRunning:
+		m.ClearIsGameRunning()
+		return nil
+	case droom.FieldPanel:
+		m.ClearPanel()
+		return nil
+	case droom.FieldUpUserID:
+		m.ClearUpUserID()
+		return nil
+	case droom.FieldDownUserID:
+		m.ClearDownUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown DRoom nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DRoomMutation) ResetField(name string) error {
+	switch name {
+	case droom.FieldIsGameRunning:
+		m.ResetIsGameRunning()
+		return nil
+	case droom.FieldPanel:
+		m.ResetPanel()
+		return nil
+	case droom.FieldUpUserID:
+		m.ResetUpUserID()
+		return nil
+	case droom.FieldDownUserID:
+		m.ResetDownUserID()
+		return nil
+	case droom.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown DRoom field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DRoomMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DRoomMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DRoomMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DRoomMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DRoomMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DRoomMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DRoomMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DRoom unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DRoomMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DRoom edge %s", name)
+}
+
+// DSessionMutation represents an operation that mutates the DSession nodes in the graph.
+type DSessionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	user_id       *string
+	user_name     *string
+	room_id       *string
+	create_time   *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*DSession, error)
+	predicates    []predicate.DSession
+}
+
+var _ ent.Mutation = (*DSessionMutation)(nil)
+
+// dsessionOption allows management of the mutation configuration using functional options.
+type dsessionOption func(*DSessionMutation)
+
+// newDSessionMutation creates new mutation for the DSession entity.
+func newDSessionMutation(c config, op Op, opts ...dsessionOption) *DSessionMutation {
+	m := &DSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDSessionID sets the ID field of the mutation.
+func withDSessionID(id string) dsessionOption {
+	return func(m *DSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DSession
+		)
+		m.oldValue = func(ctx context.Context) (*DSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDSession sets the old DSession of the mutation.
+func withDSession(node *DSession) dsessionOption {
+	return func(m *DSessionMutation) {
+		m.oldValue = func(context.Context) (*DSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DSession entities.
+func (m *DSessionMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DSessionMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DSessionMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DSessionMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the DSession entity.
+// If the DSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DSessionMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DSessionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetUserName sets the "user_name" field.
+func (m *DSessionMutation) SetUserName(s string) {
+	m.user_name = &s
+}
+
+// UserName returns the value of the "user_name" field in the mutation.
+func (m *DSessionMutation) UserName() (r string, exists bool) {
+	v := m.user_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserName returns the old "user_name" field's value of the DSession entity.
+// If the DSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DSessionMutation) OldUserName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUserName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUserName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserName: %w", err)
+	}
+	return oldValue.UserName, nil
+}
+
+// ResetUserName resets all changes to the "user_name" field.
+func (m *DSessionMutation) ResetUserName() {
+	m.user_name = nil
+}
+
+// SetRoomID sets the "room_id" field.
+func (m *DSessionMutation) SetRoomID(s string) {
+	m.room_id = &s
+}
+
+// RoomID returns the value of the "room_id" field in the mutation.
+func (m *DSessionMutation) RoomID() (r string, exists bool) {
+	v := m.room_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoomID returns the old "room_id" field's value of the DSession entity.
+// If the DSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DSessionMutation) OldRoomID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRoomID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRoomID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoomID: %w", err)
+	}
+	return oldValue.RoomID, nil
+}
+
+// ResetRoomID resets all changes to the "room_id" field.
+func (m *DSessionMutation) ResetRoomID() {
+	m.room_id = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *DSessionMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *DSessionMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the DSession entity.
+// If the DSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DSessionMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *DSessionMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// Where appends a list predicates to the DSessionMutation builder.
+func (m *DSessionMutation) Where(ps ...predicate.DSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *DSessionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (DSession).
+func (m *DSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DSessionMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.user_id != nil {
+		fields = append(fields, dsession.FieldUserID)
+	}
+	if m.user_name != nil {
+		fields = append(fields, dsession.FieldUserName)
+	}
+	if m.room_id != nil {
+		fields = append(fields, dsession.FieldRoomID)
+	}
+	if m.create_time != nil {
+		fields = append(fields, dsession.FieldCreateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case dsession.FieldUserID:
+		return m.UserID()
+	case dsession.FieldUserName:
+		return m.UserName()
+	case dsession.FieldRoomID:
+		return m.RoomID()
+	case dsession.FieldCreateTime:
+		return m.CreateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case dsession.FieldUserID:
+		return m.OldUserID(ctx)
+	case dsession.FieldUserName:
+		return m.OldUserName(ctx)
+	case dsession.FieldRoomID:
+		return m.OldRoomID(ctx)
+	case dsession.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown DSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case dsession.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case dsession.FieldUserName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserName(v)
+		return nil
+	case dsession.FieldRoomID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoomID(v)
+		return nil
+	case dsession.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DSessionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DSessionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DSessionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DSessionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DSessionMutation) ResetField(name string) error {
+	switch name {
+	case dsession.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case dsession.FieldUserName:
+		m.ResetUserName()
+		return nil
+	case dsession.FieldRoomID:
+		m.ResetRoomID()
+		return nil
+	case dsession.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown DSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DSessionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DSessionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DSessionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DSessionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DSessionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DSession edge %s", name)
+}
 
 // DUserMutation represents an operation that mutates the DUser nodes in the graph.
 type DUserMutation struct {

@@ -2,6 +2,11 @@ package ChessGame
 
 import (
 	"bytes"
+	"context"
+	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
+	"log"
 	"unicode"
 )
 
@@ -10,34 +15,9 @@ const (
 	COLUMN_COUNT = 9
 )
 
-type GamePanel struct {
-	room             *GameRoom `json:"-"`
-	PanelFull        [LINE_COUNT][COLUMN_COUNT]GamePiece
-	UpperUsername    string
-	DownUsername     string
-	IsGameRunning    bool
-	NextTurnUsername string
-}
-
 type GamePiece byte
 
-func (this *GamePanel) Reset(room *GameRoom) {
-	this.room = room
-	this.PanelFull = [LINE_COUNT][COLUMN_COUNT]GamePiece{
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-	}
-}
-
-func (this *GamePanel) LoadNormalPanelFull() {
+func (this *GameRoom) LoadPanelFromData() {
 	this.PanelFull = [LINE_COUNT][COLUMN_COUNT]GamePiece{
 		{'C', 'M', 'X', 'S', 'J', 'S', 'X', 'M', 'C'},
 		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
@@ -52,37 +32,52 @@ func (this *GamePanel) LoadNormalPanelFull() {
 	}
 }
 
-func (this *GamePanel) onUserLeave(username string) {
-	winUsername := ``
-	if this.DownUsername == username {
-		this.DownUsername = ``
-		winUsername = this.UpperUsername
-	} else if this.UpperUsername == username {
-		this.UpperUsername = ``
-		winUsername = this.DownUsername
-	} else {
+func (this *GameRoom) SaveRoomDataToDb() {
+	data := this.Data
+	if data == nil {
 		return
 	}
-	if this.IsGameRunning {
-		this.onGameOver(winUsername)
-	} else {
-		this.room.sync2Client(nil)
+	var resp SyncPanelMessage
+	this.formatPanelFull(&resp)
+	data.Panel = resp.PanelFull
+	_, err := gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).
+		SetUpUserID(data.UpUserID).SetDownUserID(data.DownUserID).SetPanel(resp.PanelFull).SetIsGameRunning(data.IsGameRunning).Save(context.Background())
+	if err != nil {
+		log.Println("GameRoom.SaveRoomDataToDb", err)
 	}
 }
 
-func (this *GamePanel) CanMove(who string, from PiecePoint, to PiecePoint) bool {
+func (this *GameRoom) onUserLeave(userId string) {
+	winUserId := ``
+	if this.Data.DownUserID == userId {
+		this.Data.DownUserID = ``
+		winUserId = this.Data.UpUserID
+	} else if this.Data.UpUserID == userId {
+		this.Data.UpUserID = ``
+		winUserId = this.Data.UpUserID
+	} else {
+		return
+	}
+	if this.Data.IsGameRunning {
+		this.onGameOver(winUserId)
+	} else {
+		this.sync2Client(nil)
+	}
+}
+
+func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePoint) bool {
 	fromPiece := this.getPiece(from)
 	toPiece := this.getPiece(to)
 
 	if !from.IsValid() || !to.IsValid() {
 		return false
 	}
-	if this.NextTurnUsername != who {
+	if this.NextTurnUserId != session.UserID {
 		return false
 	}
 
-	if fromPiece.IsUpper() && this.NextTurnUsername != this.UpperUsername ||
-		fromPiece.IsDown() && this.NextTurnUsername != this.DownUsername {
+	if fromPiece.IsUpper() && this.NextTurnUserId != this.Data.UpUserID ||
+		fromPiece.IsDown() && this.NextTurnUserId != this.Data.DownUserID {
 		return false
 	}
 
@@ -174,7 +169,7 @@ func (this *GamePanel) CanMove(who string, from PiecePoint, to PiecePoint) bool 
 				break
 			}
 			if !this.getPiece(from).IsNull() {
-				midHasPieceCount ++
+				midHasPieceCount++
 			}
 		}
 		if midHasPieceCount == 0 && toPiece.IsNull() {
@@ -191,7 +186,7 @@ func (this *GamePanel) CanMove(who string, from PiecePoint, to PiecePoint) bool 
 				return false
 			}
 			return true
-		} else if (abs(dLine) == 1 && dColumn == 0) { // 上下移动, 不准后退
+		} else if abs(dLine) == 1 && dColumn == 0 { // 上下移动, 不准后退
 			var goback bool
 			if fromPiece.IsUpper() {
 				goback = dLine < 0
@@ -223,7 +218,7 @@ func getD(fromP, toP int32) int32 {
 	return 1
 }
 
-func rangeHasPiece(this *GamePanel, from, to PiecePoint) bool {
+func rangeHasPiece(this *GameRoom, from, to PiecePoint) bool {
 	dL := getD(from.Line, to.Line)
 	dC := getD(from.Column, to.Column)
 
@@ -256,7 +251,7 @@ func (this *GamePiece) ToLower() rune {
 	return unicode.ToLower(rune(*this))
 }
 
-func (this *GamePanel) getPiece(p PiecePoint) GamePiece {
+func (this *GameRoom) getPiece(p PiecePoint) GamePiece {
 	return this.PanelFull[p.Line][p.Column]
 }
 
@@ -277,24 +272,29 @@ type GameOverNotice struct {
 	WinUsername string
 }
 
-func (this *GamePanel) DoMove(from PiecePoint, to PiecePoint) {
+func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 	toPiece := this.getPiece(to)
 	this.PanelFull[to.Line][to.Column] = this.PanelFull[from.Line][from.Column]
 	this.PanelFull[from.Line][from.Column] = '0'
 
-	winUsername := ``
+	winUserId := ``
 	if toPiece.ToLower() == 'j' {
-		winUsername = this.NextTurnUsername
+		winUserId = this.NextTurnUserId
 	}
-	oldNextTurn := this.NextTurnUsername
-	if this.NextTurnUsername == this.DownUsername {
-		this.NextTurnUsername = this.UpperUsername
+	oldNextTurnUserId := this.NextTurnUserId
+	if this.NextTurnUserId == this.Data.DownUserID {
+		this.NextTurnUserId = this.Data.UpUserID
 	} else {
-		this.NextTurnUsername = this.DownUsername
+		this.NextTurnUserId = this.Data.DownUserID
 	}
-	nextIsUpper := this.NextTurnUsername == this.UpperUsername
+	sessionList := getSessionListBy(dsession.UserID(this.NextTurnUserId))
+	if len(sessionList) == 0 {
+		log.Println("nextUser is nil")
+		return
+	}
+	nextIsUpper := this.NextTurnUserId == this.Data.UpUserID
 	cannotMovePiece := true
-	for line := int32(0); line < LINE_COUNT && cannotMovePiece && winUsername == ``; line ++ {
+	for line := int32(0); line < LINE_COUNT && cannotMovePiece && winUserId == ``; line++ {
 		for column := int32(0); column < COLUMN_COUNT && cannotMovePiece; column++ {
 			thisPoint := PiecePoint{
 				Line:   line,
@@ -302,7 +302,7 @@ func (this *GamePanel) DoMove(from PiecePoint, to PiecePoint) {
 			}
 			thisPiece := this.getPiece(thisPoint)
 			if (nextIsUpper && thisPiece.IsUpper()) || (!nextIsUpper && thisPiece.IsDown()) {
-				resp := this.room.RpcGetSuggestion(this.NextTurnUsername, GetSuggestionRequest{
+				resp := this.RpcGetSuggestion(sessionList[0], GetSuggestionRequest{
 					FromPoint: thisPoint,
 				})
 				if len(resp.CanMoveToList) > 0 {
@@ -311,43 +311,49 @@ func (this *GamePanel) DoMove(from PiecePoint, to PiecePoint) {
 			}
 		}
 	}
-	if winUsername == `` && cannotMovePiece {
-		winUsername = oldNextTurn
+	if winUserId == `` && cannotMovePiece {
+		winUserId = oldNextTurnUserId
 	}
-	this.room.sync2Client(nil)
-	if winUsername != `` {
-		this.onGameOver(winUsername)
+	this.sync2Client(nil)
+	if winUserId != `` {
+		this.onGameOver(winUserId)
 	}
 }
 
-func (this *GamePanel) onGameOver(winUsername string) {
-	this.IsGameRunning = false
-	this.room.sync2Client(nil)
+func (this *GameRoom) onGameOver(winUserId string) {
+	this.Data.IsGameRunning = false
+	this.sync2Client(nil)
 	pkt := GameOverNotice{
-		IsPeace:     winUsername == ``,
-		WinUsername: winUsername,
+		IsPeace:     winUserId == ``,
+		WinUsername: getUserNameByIdIgnoreEmpty(winUserId),
 	}
-	this.room.BroadcastToAll(pkt)
+	this.BroadcastToAll(pkt)
 }
 
-func (this *GamePanel) formatShowStatus(resp *SyncPanelMessage, username string) {
+func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, username string) {
 	resp.ShowReGame = false
 	resp.ShowSiteDown = false
-	if this.UpperUsername != `` && this.DownUsername != `` && !this.IsGameRunning {
-		if this.DownUsername == username || this.UpperUsername == username {
-			resp.ShowReGame = true;
+	user := getUserByName(username)
+	if user == nil {
+		return
+	}
+	userId := user.ID
+
+	if this.Data.UpUserID != `` && this.Data.DownUserID != `` && !this.Data.IsGameRunning {
+		if this.Data.DownUserID == userId || this.Data.UpUserID == userId {
+			resp.ShowReGame = true
 		}
 	}
-	if !this.IsGameRunning {
-		if this.DownUsername == `` && this.UpperUsername != username {
+	if !this.Data.IsGameRunning {
+		if this.Data.DownUserID == `` && this.Data.DownUserID != username {
 			resp.ShowSiteDown = true
-		} else if this.UpperUsername == `` && this.DownUsername != username {
+		} else if this.Data.UpUserID == `` && this.Data.DownUserID != username {
 			resp.ShowSiteDown = true
 		}
 	}
 }
 
-func (this *GamePanel) formatPanelFull(resp *SyncPanelMessage) {
+func (this *GameRoom) formatPanelFull(resp *SyncPanelMessage) {
 	w := &bytes.Buffer{}
 	for line := 0; line < LINE_COUNT; line++ {
 		for column := 0; column < COLUMN_COUNT; column++ {
@@ -355,8 +361,8 @@ func (this *GamePanel) formatPanelFull(resp *SyncPanelMessage) {
 		}
 	}
 	resp.PanelFull = w.String()
-	resp.UpperUsername = this.UpperUsername
-	resp.DownUsername = this.DownUsername
-	resp.IsGameRunning = this.IsGameRunning
-	resp.NextTurnUsername = this.NextTurnUsername
+	resp.UpperUsername = getUserNameByIdIgnoreEmpty(this.Data.UpUserID)
+	resp.DownUsername = getUserNameByIdIgnoreEmpty(this.Data.DownUserID)
+	resp.IsGameRunning = this.Data.IsGameRunning
+	resp.NextTurnUsername = getUserNameByIdIgnoreEmpty(this.NextTurnUserId)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 	"github.com/orestonce/ChessGame/ymd/ymdTime"
 	"golang.org/x/crypto/bcrypt"
@@ -103,13 +104,20 @@ func (this *GameUser) RpcLogin(req LoginRequest) (resp LoginResponse) {
 		resp.ErrMsg = ErrRoomIdInvalid
 		return
 	}
-	if this.Username != `` || this.RoomId != `` {
+	if this.Session.UserName != `` || this.Session.RoomID != `` {
 		resp.ErrMsg = ErrLoginRepeat
 		return
 	}
-	this.Username = req.Username
-	this.RoomId = req.RoomId
-	this.gameCore.gRoomManager.OnUserLogin(this)
+	_, err = gDbClient.DSession.Update().Where(dsession.ID(this.Session.ID)).SetUserID(user.ID).SetUserName(user.Name).SetRoomID(req.RoomId).Save(context.Background())
+	if err != nil {
+		log.Println("DSession.Update", err)
+		resp.ErrMsg = ErrUnknown
+		return
+	}
+	this.Session.UserID = user.ID
+	this.Session.UserName = user.Name
+	this.Session.RoomID = req.RoomId
+	gGame.OnUserLogin(this)
 	return
 }
 
@@ -127,16 +135,20 @@ type ChatMessage struct {
 	Text     string
 }
 
-func (this *GameRoom) RpcChat(username string, req ChatRequest) (resp ChatResponse) {
+func (this *GameRoom) RpcChat(session *ent.DSession, req ChatRequest) (resp ChatResponse) {
 	message := ChatMessage{
 		TimeStr:  ymdTime.DefaultFormat(time.Now()),
-		Username: username,
+		Username: session.UserName,
 		Text:     req.Text,
 	}
-	for _, user := range this.UserMap {
-		user.SendNotice(message)
+	for _, session := range this.getSessionList() {
+		sendNoticeToSession(session.ID, message)
 	}
 	return
+}
+
+func (this *GameRoom) getSessionList() []*ent.DSession {
+	return getSessionListBy(dsession.RoomID(this.RoomId))
 }
 
 type SyncPanelMessage struct {
@@ -155,25 +167,25 @@ type TakeSiteResponse struct {
 	ErrMsg string
 }
 
-func (this *GameRoom) RpcTakeSite(username string, req TakeSiteRequest) (resp TakeSiteResponse) {
-	panel := &this.Panel
-	if panel.IsGameRunning {
+func (this *GameRoom) RpcTakeSite(session *ent.DSession, req TakeSiteRequest) (resp TakeSiteResponse) {
+	if this.Data.IsGameRunning {
 		resp.ErrMsg = ErrGameIsRunning
 		return
 	}
+	userId := session.UserID
 
-	if panel.UpperUsername == `` && panel.DownUsername != username {
-		panel.UpperUsername = username
-	} else if panel.DownUsername == `` && panel.UpperUsername != username {
-		panel.DownUsername = username
+	if this.Data.UpUserID == `` && this.Data.DownUserID != userId {
+		this.Data.UpUserID = userId
+	} else if this.Data.DownUserID == `` && this.Data.UpUserID != userId {
+		this.Data.DownUserID = userId
 	} else {
 		resp.ErrMsg = ErrNoPosition
 		return
 	}
-	if panel.DownUsername != `` && panel.UpperUsername != `` {
-		panel.IsGameRunning = true
-		panel.NextTurnUsername = panel.DownUsername
-		panel.LoadNormalPanelFull()
+	if this.Data.DownUserID != `` && this.Data.UpUserID != `` {
+		this.Data.IsGameRunning = true
+		this.NextTurnUserId = this.Data.DownUserID
+		this.LoadPanelFromData()
 	}
 	this.sync2Client(nil)
 
@@ -194,16 +206,16 @@ type MovePieceResponse struct {
 	ErrMsg string
 }
 
-func (this *GameRoom) RpcMovePiece(username string, req MovePieceRequest) (resp MovePieceResponse) {
-	if !this.Panel.IsGameRunning {
+func (this *GameRoom) RpcMovePiece(session *ent.DSession, req MovePieceRequest) (resp MovePieceResponse) {
+	if !this.Data.IsGameRunning {
 		resp.ErrMsg = ErrGameIsNotRunning
 		return
 	}
-	if !this.Panel.CanMove(username, req.FromPoint, req.ToPoint) {
+	if !this.CanMove(session, req.FromPoint, req.ToPoint) {
 		resp.ErrMsg = ErrCannotMove
 		return
 	}
-	this.Panel.DoMove(req.FromPoint, req.ToPoint)
+	this.DoMove(req.FromPoint, req.ToPoint)
 	return
 }
 
@@ -216,11 +228,11 @@ type GetSuggestionResponse struct {
 	CanMoveToList []PiecePoint
 }
 
-func (this *GameRoom) RpcGetSuggestion(username string, req GetSuggestionRequest) (resp GetSuggestionResponse) {
+func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionRequest) (resp GetSuggestionResponse) {
 	for line := int32(0); line < LINE_COUNT; line++ {
 		for column := int32(0); column < COLUMN_COUNT; column++ {
 			to := PiecePoint{Line: line, Column: column}
-			if this.Panel.CanMove(username, req.FromPoint, to) {
+			if this.CanMove(session, req.FromPoint, to) {
 				resp.CanMoveToList = append(resp.CanMoveToList, to)
 			}
 		}
@@ -235,38 +247,36 @@ type ReGameResponse struct {
 	ErrMsg string
 }
 
-func (this *GameRoom) RpcReGame(username string, req ReGameRequest) (resp ReGameResponse) {
-	panel := &this.Panel
-	if panel.IsGameRunning {
+func (this *GameRoom) RpcReGame(session *ent.DSession, req ReGameRequest) (resp ReGameResponse) {
+	if this.Data.IsGameRunning {
 		resp.ErrMsg = ErrGameIsRunning
 		return
 	}
-	if panel.DownUsername == `` || panel.UpperUsername == `` {
+	if this.Data.DownUserID == `` || this.Data.UpUserID == `` {
 		resp.ErrMsg = ErrUserNotEnough
 		return
 	}
-	panel.IsGameRunning = true
-	panel.LoadNormalPanelFull()
-	panel.NextTurnUsername = panel.UpperUsername
+	this.Data.IsGameRunning = true
+	this.LoadPanelFromData()
+	this.NextTurnUserId = this.Data.UpUserID
 	this.sync2Client(nil)
 	return
 }
 
 func (this *GameRoom) sync2Client(user *GameUser) {
 	var s SyncPanelMessage
-	this.Panel.formatPanelFull(&s)
-	var userMap map[string]*GameUser
+	this.formatPanelFull(&s)
+	var sessionList []*ent.DSession
 	if user != nil {
-		userMap = map[string]*GameUser{
-			user.Username: user,
-		}
+		sessionList = append(sessionList, user.Session)
 	} else {
-		userMap = this.UserMap
+		sessionList = getSessionListBy(dsession.RoomID(this.RoomId))
 	}
-	for _, user := range userMap {
-		this.Panel.formatShowStatus(&s, user.Username)
-		user.SendNotice(s)
+	for _, session := range sessionList {
+		this.formatShowStatus(&s, session.UserName)
+		sendNoticeToSession(session.ID, s)
 	}
+	this.SaveRoomDataToDb()
 }
 
 func (this *PiecePoint) IsValid() bool {

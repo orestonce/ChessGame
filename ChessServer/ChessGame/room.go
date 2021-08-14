@@ -1,35 +1,43 @@
 package ChessGame
 
-type GameRoomManager struct {
-	core                   *Game `json:"-"`
-	SessionIdToGameUserMap map[string]*GameUser
-	UsernameToSessionIdMap map[string]string
-	RoomMap                map[string]*GameRoom
-}
+import (
+	"context"
+	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/droom"
+	"github.com/orestonce/ChessGame/ent/dsession"
+	"log"
+	"time"
+)
+
+type GameRoomManager struct{}
 
 type GameRoom struct {
-	mgr     *GameRoomManager `json:"-"`
-	RoomId  string
-	Panel   GamePanel
-	UserMap map[string]*GameUser
+	RoomId         string
+	PanelFull      [LINE_COUNT][COLUMN_COUNT]GamePiece
+	NextTurnUserId string
+	Data           *ent.DRoom
 }
 
 func (this *GameRoom) IsEmpty() bool {
-	return len(this.UserMap) == 0
+	return len(this.getSessionList()) == 0
 }
 
-func (this *GameRoom) UserLeave(username string) {
-	user := this.UserMap[username]
-	if user == nil {
-		return
+func (this *GameRoom) UserLeave(session *ent.DSession) {
+	this.onUserLeave(session.UserID)
+	_, err := gDbClient.DSession.Delete().Where(dsession.ID(session.ID)).Exec(context.Background())
+	if err != nil {
+		log.Println("GameRoom.UserLeave", err)
 	}
-	delete(this.UserMap, username)
-	this.Panel.onUserLeave(username)
+	data := this.Data
+	err = gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).SetPanel(data.Panel).SetUpUserID(data.UpUserID).SetDownUserID(data.DownUserID).Exec(context.Background())
+	if err != nil {
+		log.Println("GamePanel onUserLeave", err)
+	}
 }
 
 func (this *GameRoom) BroadcastToAll(a interface{}) {
-	for _, user := range this.UserMap {
-		user.SendNotice(a)
+	for _, session := range this.getSessionList() {
+		sendNoticeToSession(session.ID, a)
 	}
 }
 
@@ -37,32 +45,31 @@ type ServerKickYou struct {
 	ErrMsg string
 }
 
-func (this *GameRoomManager) OnUserLogin(user *GameUser) {
+func (this *Game) OnUserLogin(user *GameUser) {
 	// 踢掉上一个用户
 	{
-		oldSessionId := this.UsernameToSessionIdMap[user.Username]
-		oldUser := this.SessionIdToGameUserMap[oldSessionId]
-		if oldSessionId != `` {
-			oldUser.SendNotice(ServerKickYou{
+		for _, oldSession := range getSessionListBy(dsession.UserID(user.Session.UserID), dsession.IDNEQ(user.Session.ID)) {
+			log.Println("kickSession", oldSession, user.Session)
+			sendNoticeToSession(oldSession.ID, ServerKickYou{
 				ErrMsg: ErrNextLogin,
 			})
-			this.core.kickSession(oldSessionId)
+			this.kickSession(oldSession.ID)
 		}
 	}
-
-	newRoom := this.RoomMap[user.RoomId]
-	if newRoom == nil {
-		newRoom = &GameRoom{
-			mgr:     this,
-			RoomId:  user.RoomId,
-			UserMap: map[string]*GameUser{},
+	room := getRoomById(user.Session.RoomID)
+	if room == nil {
+		room = &GameRoom{
+			RoomId: user.Session.RoomID,
+			Data: &ent.DRoom{
+				ID:         user.Session.RoomID,
+				CreateTime: time.Now(),
+			},
 		}
-		newRoom.Panel.Reset(newRoom)
-		this.RoomMap[user.RoomId] = newRoom
+		room.LoadPanelFromData()
+		err := gDbClient.DRoom.Create().SetID(user.Session.RoomID).SetCreateTime(room.Data.CreateTime).Exec(context.Background())
+		if err != nil {
+			log.Println("GameRoomManager.OnUserLogin", err)
+		}
 	}
-	newRoom.UserMap[user.Username] = user
-	this.UsernameToSessionIdMap[user.Username] = user.SessionId
-	this.SessionIdToGameUserMap[user.SessionId] = user
-	this.RoomMap[user.RoomId] = newRoom
-	newRoom.sync2Client(nil)
+	room.sync2Client(nil)
 }
