@@ -13,16 +13,16 @@ var root = cobra.Command{
 
 func init() {
 	var redis ymdQuickRestart.RedisInfo
-	var spath string
+	var mysql_schema string
 	game := &cobra.Command{
 		Use: "Game",
 		Run: func(cmd *cobra.Command, args []string) {
-			ChessGame.RunChessGame(redis, spath)
+			ChessGame.RunChessGame(redis, mysql_schema)
 		},
 	}
 	game.Flags().StringVarP(&redis.RedisAddr, `raddr`, ``, `127.0.0.1:6379`, `redis地址`)
 	game.Flags().StringVarP(&redis.Prefix, `rprefix`, ``, `chess`, `redis前缀`)
-	game.Flags().StringVarP(&spath, `spath`, ``, `ChessGame`, `数据储存位置`)
+	game.Flags().StringVarP(&mysql_schema, `mysql_schema`, ``, `root:@tcp(127.0.0.1:3306)/chess?charset=utf8`, `mysql连接`)
 	root.AddCommand(game)
 
 	var laddr string

@@ -1,6 +1,8 @@
 package ChessGame
 
 import (
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/orestonce/ChessGame/ent"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"log"
 	"os"
@@ -8,7 +10,9 @@ import (
 	"syscall"
 )
 
-func RunChessGame(redis ymdQuickRestart.RedisInfo, spath string) {
+var gDbClient *ent.Client
+
+func RunChessGame(redis ymdQuickRestart.RedisInfo, mysql_schema string) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	logic := ymdQuickRestart.NewLogicService(redis)
 	go func() {
@@ -19,7 +23,7 @@ func RunChessGame(redis ymdQuickRestart.RedisInfo, spath string) {
 		log.Println("Logic close with signal", sig.String())
 		logic.Close()
 	}()
-	game := NewChessGame(spath, logic)
+	game := InitChessGame(mysql_schema, logic)
 	log.Println("start game ...")
 	game.RunMainLogic()
 }

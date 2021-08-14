@@ -1,12 +1,19 @@
 package ChessGame
 
 import (
+	"context"
+	"github.com/google/uuid"
+	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/duser"
 	"github.com/orestonce/ChessGame/ymd/ymdTime"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"time"
 )
 
 const (
 	ErrUsernameExists          = `用户名已注册`
+	ErrUsernameNotExists       = `用户不存在`
 	ErrPassword                = `密码错误`
 	ErrRoomIdInvalid           = `房间号码不合法`
 	ErrGameIsRunning           = `游戏正在运行`
@@ -17,6 +24,7 @@ const (
 	ErrLoginRepeat             = `重复登陆`
 	ErrNextLogin               = `你的账号在别处登录`
 	ErrEmptyPasswordOrUsername = `账号或密码为空`
+	ErrUnknown                 = `未知错误`
 )
 
 type PingRequest struct{}
@@ -40,11 +48,27 @@ func (this *GameUser) RpcRegister(req RegisterRequest) (resp RegisterResponse) {
 		resp.ErrMsg = ErrEmptyPasswordOrUsername
 		return
 	}
-	password := this.gameCore.getPassword(req.Username)
-	if password == `` {
-		this.gameCore.setPassword(req.Username, req.Password)
-	} else {
+	exists, err := gDbClient.DUser.Query().Where(duser.Name(req.Username)).Exist(context.Background())
+	if err != nil {
+		resp.ErrMsg = ErrUnknown
+		log.Println("GameUser.RpcRegister", err)
+		return resp
+	}
+	if exists {
 		resp.ErrMsg = ErrUsernameExists
+		return resp
+	}
+	hashByte, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println("GameUser.RpcRegister", err)
+		resp.ErrMsg = ErrUnknown
+		return resp
+	}
+	_, err = gDbClient.DUser.Create().SetID(uuid.NewString()).SetName(req.Username).SetPasswordHash(string(hashByte)).Save(context.Background())
+	if err != nil {
+		log.Println("GameUser.RpcRegister", err)
+		resp.ErrMsg = ErrUnknown
+		return resp
 	}
 	return
 }
@@ -60,10 +84,20 @@ type LoginResponse struct {
 }
 
 func (this *GameUser) RpcLogin(req LoginRequest) (resp LoginResponse) {
-	password := this.gameCore.getPassword(req.Username)
-	if password == `` || password != req.Password || req.Username == `` {
+	user, err := gDbClient.DUser.Query().Where(duser.Name(req.Username)).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); ok {
+			resp.ErrMsg = ErrUsernameNotExists
+			return resp
+		}
+		log.Println("GameUser.RpcLogin", err)
 		resp.ErrMsg = ErrPassword
-		return
+		return resp
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+	if err != nil {
+		resp.ErrMsg = ErrPassword
+		return resp
 	}
 	if req.RoomId == `` {
 		resp.ErrMsg = ErrRoomIdInvalid

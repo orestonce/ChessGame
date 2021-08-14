@@ -1,30 +1,32 @@
 package ChessGame
 
 import (
+	"context"
+	"github.com/orestonce/ChessGame/ent"
 	"github.com/orestonce/ChessGame/ymd/ymdError"
 	"github.com/orestonce/ChessGame/ymd/ymdJson"
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
-	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/syndtr/goleveldb/leveldb/storage"
 	"log"
 	"time"
 )
 
 type Game struct {
-	db           *leveldb.DB
 	gRoomManager *GameRoomManager
 	logic        *ymdQuickRestart.LogicService
 }
 
-func NewChessGame(storePath string, logic *ymdQuickRestart.LogicService) *Game {
+func InitChessGame(mysql_schema string, logic *ymdQuickRestart.LogicService) *Game {
 	this := &Game{}
-	store, err := storage.OpenFile(storePath, false)
+	var err error
+	gDbClient, err = ent.Open("mysql", mysql_schema)
 	if err != nil {
-		log.Fatal("InitGame OpenLevelDBStorage", err)
+		log.Fatal("InitChessGame ent.Open", err)
+		return nil
 	}
-	this.db, err = leveldb.Open(store, nil)
+	err = gDbClient.Schema.Create(context.Background())
 	if err != nil {
-		log.Fatal("InitGame OpenLevelDB", err)
+		log.Println("InitChessGame Schema.Create", err)
+		return nil
 	}
 	this.gRoomManager = &GameRoomManager{
 		core:                   this,
@@ -93,24 +95,6 @@ func (this *Game) saveMemoryState() {
 	value := ymdJson.MustMarshalToString(this.gRoomManager)
 	this.logic.SetMemoryState(value)
 	log.Println(`saveMemoryState`, time.Since(start))
-}
-
-func (this *Game) getPassword(username string) (password string) {
-	value, err := this.db.Get([]byte(username), nil)
-	if err == leveldb.ErrNotFound {
-		err = nil
-	}
-	if err != nil {
-		panic(`GetPassword ` + err.Error())
-	}
-	return string(value)
-}
-
-func (this *Game) setPassword(username string, password string) {
-	err := this.db.Put([]byte(username), []byte(password), nil)
-	if err != nil {
-		panic(`SetPassword ` + err.Error())
-	}
 }
 
 func (this *Game) kickSession(sessionId string) {
