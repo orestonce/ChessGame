@@ -35,8 +35,8 @@ public:
     bool SameTeamWithMe(QPoint p);
     bool IsInSuggestionList(PiecePoint p);
 public:
-    QString UpperUsername ;
-    QString DownUsername ;
+    QString WUsername ;
+    QString BUsername ;
     bool IsGameRunning ;
     QString NextTurnUsername;
     bool ShowSiteDown;

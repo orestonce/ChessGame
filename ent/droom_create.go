@@ -48,30 +48,44 @@ func (dc *DRoomCreate) SetNillablePanel(s *string) *DRoomCreate {
 	return dc
 }
 
-// SetUpUserID sets the "up_user_id" field.
-func (dc *DRoomCreate) SetUpUserID(s string) *DRoomCreate {
-	dc.mutation.SetUpUserID(s)
+// SetWUserID sets the "w_user_id" field.
+func (dc *DRoomCreate) SetWUserID(s string) *DRoomCreate {
+	dc.mutation.SetWUserID(s)
 	return dc
 }
 
-// SetNillableUpUserID sets the "up_user_id" field if the given value is not nil.
-func (dc *DRoomCreate) SetNillableUpUserID(s *string) *DRoomCreate {
+// SetNillableWUserID sets the "w_user_id" field if the given value is not nil.
+func (dc *DRoomCreate) SetNillableWUserID(s *string) *DRoomCreate {
 	if s != nil {
-		dc.SetUpUserID(*s)
+		dc.SetWUserID(*s)
 	}
 	return dc
 }
 
-// SetDownUserID sets the "down_user_id" field.
-func (dc *DRoomCreate) SetDownUserID(s string) *DRoomCreate {
-	dc.mutation.SetDownUserID(s)
+// SetBUserID sets the "b_user_id" field.
+func (dc *DRoomCreate) SetBUserID(s string) *DRoomCreate {
+	dc.mutation.SetBUserID(s)
 	return dc
 }
 
-// SetNillableDownUserID sets the "down_user_id" field if the given value is not nil.
-func (dc *DRoomCreate) SetNillableDownUserID(s *string) *DRoomCreate {
+// SetNillableBUserID sets the "b_user_id" field if the given value is not nil.
+func (dc *DRoomCreate) SetNillableBUserID(s *string) *DRoomCreate {
 	if s != nil {
-		dc.SetDownUserID(*s)
+		dc.SetBUserID(*s)
+	}
+	return dc
+}
+
+// SetNextTurnUserID sets the "next_turn_user_id" field.
+func (dc *DRoomCreate) SetNextTurnUserID(s string) *DRoomCreate {
+	dc.mutation.SetNextTurnUserID(s)
+	return dc
+}
+
+// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
+func (dc *DRoomCreate) SetNillableNextTurnUserID(s *string) *DRoomCreate {
+	if s != nil {
+		dc.SetNextTurnUserID(*s)
 	}
 	return dc
 }
@@ -167,13 +181,17 @@ func (dc *DRoomCreate) defaults() {
 		v := droom.DefaultPanel
 		dc.mutation.SetPanel(v)
 	}
-	if _, ok := dc.mutation.UpUserID(); !ok {
-		v := droom.DefaultUpUserID
-		dc.mutation.SetUpUserID(v)
+	if _, ok := dc.mutation.WUserID(); !ok {
+		v := droom.DefaultWUserID
+		dc.mutation.SetWUserID(v)
 	}
-	if _, ok := dc.mutation.DownUserID(); !ok {
-		v := droom.DefaultDownUserID
-		dc.mutation.SetDownUserID(v)
+	if _, ok := dc.mutation.BUserID(); !ok {
+		v := droom.DefaultBUserID
+		dc.mutation.SetBUserID(v)
+	}
+	if _, ok := dc.mutation.NextTurnUserID(); !ok {
+		v := droom.DefaultNextTurnUserID
+		dc.mutation.SetNextTurnUserID(v)
 	}
 }
 
@@ -227,21 +245,29 @@ func (dc *DRoomCreate) createSpec() (*DRoom, *sqlgraph.CreateSpec) {
 		})
 		_node.Panel = value
 	}
-	if value, ok := dc.mutation.UpUserID(); ok {
+	if value, ok := dc.mutation.WUserID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldUpUserID,
+			Column: droom.FieldWUserID,
 		})
-		_node.UpUserID = value
+		_node.WUserID = value
 	}
-	if value, ok := dc.mutation.DownUserID(); ok {
+	if value, ok := dc.mutation.BUserID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldDownUserID,
+			Column: droom.FieldBUserID,
 		})
-		_node.DownUserID = value
+		_node.BUserID = value
+	}
+	if value, ok := dc.mutation.NextTurnUserID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: droom.FieldNextTurnUserID,
+		})
+		_node.NextTurnUserID = value
 	}
 	if value, ok := dc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

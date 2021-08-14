@@ -15,8 +15,8 @@ void GameCore::Load(const SyncPanelMessage &resp)
             m_arrChessPanel[iLine][iColumn]= full[idx];
         }
     }
-    this->DownUsername = resp.DownUsername;
-    this->UpperUsername = resp.UpperUsername;
+    this->WUsername = resp.UpperUsername;
+    this->BUsername = resp.DownUsername;
     this->IsGameRunning = resp.IsGameRunning;
     this->NextTurnUsername = resp.NextTurnUsername;
     this->ShowReGame = resp.ShowReGame;
@@ -37,7 +37,7 @@ GamePoint GameCore::GetPoint(QPoint p)
 
 bool GameCore::AmUpper()
 {
-    return this->UpperUsername == this->MyUsername;
+    return this->WUsername == this->MyUsername;
 }
 
 bool GameCore::IsPointValied(QPoint p)
@@ -59,17 +59,17 @@ bool GameCore::IsTurnMe()
 
 bool GameCore::IsTurnUpper()
 {
-    return this->NextTurnUsername == this->UpperUsername;
+    return this->NextTurnUsername == this->WUsername;
 }
 
 bool GameCore::SameTeamWithMe(QPoint p)
 {
     auto data = this->GetPoint(p).Data;
-    if (this->MyUsername == this->UpperUsername) {
-        return isupper(data);
-    }
-    if (this->MyUsername == this->DownUsername ) {
+    if (this->MyUsername == this->WUsername) {
         return islower(data);
+    }
+    if (this->MyUsername == this->BUsername ) {
+        return isupper(data);
     }
     return false;
 }
@@ -114,11 +114,11 @@ QString GamePoint::GetImageString()
     QString qstrImagePath ;
     if (!islower(this->Data))
     {
-        qstrImagePath = "u-";
+        qstrImagePath = "w";
     }
     else
     {
-        qstrImagePath = "d-";
+        qstrImagePath = "b";
     }
     qstrImagePath.push_back(tolower(this->Data));
     return  ":/images/" + qstrImagePath + ".png";

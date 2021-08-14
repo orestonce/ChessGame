@@ -18,8 +18,6 @@ type DSession struct {
 	ID string `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// UserName holds the value of the "user_name" field.
-	UserName string `json:"user_name,omitempty"`
 	// RoomID holds the value of the "room_id" field.
 	RoomID string `json:"room_id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
@@ -31,7 +29,7 @@ func (*DSession) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dsession.FieldID, dsession.FieldUserID, dsession.FieldUserName, dsession.FieldRoomID:
+		case dsession.FieldID, dsession.FieldUserID, dsession.FieldRoomID:
 			values[i] = new(sql.NullString)
 		case dsession.FieldCreateTime:
 			values[i] = new(sql.NullTime)
@@ -61,12 +59,6 @@ func (d *DSession) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				d.UserID = value.String
-			}
-		case dsession.FieldUserName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_name", values[i])
-			} else if value.Valid {
-				d.UserName = value.String
 			}
 		case dsession.FieldRoomID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -110,8 +102,6 @@ func (d *DSession) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
 	builder.WriteString(", user_id=")
 	builder.WriteString(d.UserID)
-	builder.WriteString(", user_name=")
-	builder.WriteString(d.UserName)
 	builder.WriteString(", room_id=")
 	builder.WriteString(d.RoomID)
 	builder.WriteString(", create_time=")

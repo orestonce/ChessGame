@@ -9,8 +9,6 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldUserName holds the string denoting the user_name field in the database.
-	FieldUserName = "user_name"
 	// FieldRoomID holds the string denoting the room_id field in the database.
 	FieldRoomID = "room_id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
@@ -23,7 +21,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUserID,
-	FieldUserName,
 	FieldRoomID,
 	FieldCreateTime,
 }
@@ -41,8 +38,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultUserID holds the default value on creation for the "user_id" field.
 	DefaultUserID string
-	// DefaultUserName holds the default value on creation for the "user_name" field.
-	DefaultUserName string
 	// DefaultRoomID holds the default value on creation for the "room_id" field.
 	DefaultRoomID string
 )

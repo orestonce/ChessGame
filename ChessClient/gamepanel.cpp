@@ -135,8 +135,8 @@ void GamePanel::LoadGameCore()
 
     if (core->AmUpper())
     {
-        ui->upUserLabel->setText(core->DownUsername);
-        ui->downUserLabel->setText(core->UpperUsername);
+        ui->upUserLabel->setText(core->BUsername);
+        ui->downUserLabel->setText(core->WUsername);
         if (core->IsTurnMe())
         {
             turnUsername = down;
@@ -148,8 +148,8 @@ void GamePanel::LoadGameCore()
     }
     else
     {
-        ui->upUserLabel->setText(core->UpperUsername);
-        ui->downUserLabel->setText(core->DownUsername);
+        ui->upUserLabel->setText(core->WUsername);
+        ui->downUserLabel->setText(core->BUsername);
         if (core->IsTurnUpper())
         {
             turnUsername = upper;
@@ -218,10 +218,11 @@ void GamePanel::mousePressEvent(QMouseEvent *e)
         req.FromPoint = piece;
         if (!rpchub->SendAndRecv(req, resp) )
         {
-            this->showError("");
-        } else {
-            core->SuggestionPointToList = resp.CanMoveToList;
+            this->showError("获取失败");
+            return;
         }
+        core->SuggestionPointToList = resp.CanMoveToList;
+        qDebug() <<"建议长度" << core->SuggestionPointToList.length();
     }
     else if (core->IsPointValied(core->SelectedPointFrom) && core->IsInSuggestionList(piece))
     {

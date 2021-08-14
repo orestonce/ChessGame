@@ -15,7 +15,6 @@ func (DSession) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id"),
 		field.String("user_id").Default(""),
-		field.String("user_name").Default(""),
 		field.String("room_id").Default(""),
 		field.Time("create_time"),
 	}

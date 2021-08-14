@@ -11,10 +11,12 @@ const (
 	FieldIsGameRunning = "is_game_running"
 	// FieldPanel holds the string denoting the panel field in the database.
 	FieldPanel = "panel"
-	// FieldUpUserID holds the string denoting the up_user_id field in the database.
-	FieldUpUserID = "up_user_id"
-	// FieldDownUserID holds the string denoting the down_user_id field in the database.
-	FieldDownUserID = "down_user_id"
+	// FieldWUserID holds the string denoting the w_user_id field in the database.
+	FieldWUserID = "w_user_id"
+	// FieldBUserID holds the string denoting the b_user_id field in the database.
+	FieldBUserID = "b_user_id"
+	// FieldNextTurnUserID holds the string denoting the next_turn_user_id field in the database.
+	FieldNextTurnUserID = "next_turn_user_id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// Table holds the table name of the droom in the database.
@@ -26,8 +28,9 @@ var Columns = []string{
 	FieldID,
 	FieldIsGameRunning,
 	FieldPanel,
-	FieldUpUserID,
-	FieldDownUserID,
+	FieldWUserID,
+	FieldBUserID,
+	FieldNextTurnUserID,
 	FieldCreateTime,
 }
 
@@ -46,8 +49,10 @@ var (
 	DefaultIsGameRunning bool
 	// DefaultPanel holds the default value on creation for the "panel" field.
 	DefaultPanel string
-	// DefaultUpUserID holds the default value on creation for the "up_user_id" field.
-	DefaultUpUserID string
-	// DefaultDownUserID holds the default value on creation for the "down_user_id" field.
-	DefaultDownUserID string
+	// DefaultWUserID holds the default value on creation for the "w_user_id" field.
+	DefaultWUserID string
+	// DefaultBUserID holds the default value on creation for the "b_user_id" field.
+	DefaultBUserID string
+	// DefaultNextTurnUserID holds the default value on creation for the "next_turn_user_id" field.
+	DefaultNextTurnUserID string
 )

@@ -67,43 +67,63 @@ func (du *DRoomUpdate) ClearPanel() *DRoomUpdate {
 	return du
 }
 
-// SetUpUserID sets the "up_user_id" field.
-func (du *DRoomUpdate) SetUpUserID(s string) *DRoomUpdate {
-	du.mutation.SetUpUserID(s)
+// SetWUserID sets the "w_user_id" field.
+func (du *DRoomUpdate) SetWUserID(s string) *DRoomUpdate {
+	du.mutation.SetWUserID(s)
 	return du
 }
 
-// SetNillableUpUserID sets the "up_user_id" field if the given value is not nil.
-func (du *DRoomUpdate) SetNillableUpUserID(s *string) *DRoomUpdate {
+// SetNillableWUserID sets the "w_user_id" field if the given value is not nil.
+func (du *DRoomUpdate) SetNillableWUserID(s *string) *DRoomUpdate {
 	if s != nil {
-		du.SetUpUserID(*s)
+		du.SetWUserID(*s)
 	}
 	return du
 }
 
-// ClearUpUserID clears the value of the "up_user_id" field.
-func (du *DRoomUpdate) ClearUpUserID() *DRoomUpdate {
-	du.mutation.ClearUpUserID()
+// ClearWUserID clears the value of the "w_user_id" field.
+func (du *DRoomUpdate) ClearWUserID() *DRoomUpdate {
+	du.mutation.ClearWUserID()
 	return du
 }
 
-// SetDownUserID sets the "down_user_id" field.
-func (du *DRoomUpdate) SetDownUserID(s string) *DRoomUpdate {
-	du.mutation.SetDownUserID(s)
+// SetBUserID sets the "b_user_id" field.
+func (du *DRoomUpdate) SetBUserID(s string) *DRoomUpdate {
+	du.mutation.SetBUserID(s)
 	return du
 }
 
-// SetNillableDownUserID sets the "down_user_id" field if the given value is not nil.
-func (du *DRoomUpdate) SetNillableDownUserID(s *string) *DRoomUpdate {
+// SetNillableBUserID sets the "b_user_id" field if the given value is not nil.
+func (du *DRoomUpdate) SetNillableBUserID(s *string) *DRoomUpdate {
 	if s != nil {
-		du.SetDownUserID(*s)
+		du.SetBUserID(*s)
 	}
 	return du
 }
 
-// ClearDownUserID clears the value of the "down_user_id" field.
-func (du *DRoomUpdate) ClearDownUserID() *DRoomUpdate {
-	du.mutation.ClearDownUserID()
+// ClearBUserID clears the value of the "b_user_id" field.
+func (du *DRoomUpdate) ClearBUserID() *DRoomUpdate {
+	du.mutation.ClearBUserID()
+	return du
+}
+
+// SetNextTurnUserID sets the "next_turn_user_id" field.
+func (du *DRoomUpdate) SetNextTurnUserID(s string) *DRoomUpdate {
+	du.mutation.SetNextTurnUserID(s)
+	return du
+}
+
+// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
+func (du *DRoomUpdate) SetNillableNextTurnUserID(s *string) *DRoomUpdate {
+	if s != nil {
+		du.SetNextTurnUserID(*s)
+	}
+	return du
+}
+
+// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
+func (du *DRoomUpdate) ClearNextTurnUserID() *DRoomUpdate {
+	du.mutation.ClearNextTurnUserID()
 	return du
 }
 
@@ -216,30 +236,43 @@ func (du *DRoomUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: droom.FieldPanel,
 		})
 	}
-	if value, ok := du.mutation.UpUserID(); ok {
+	if value, ok := du.mutation.WUserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldUpUserID,
+			Column: droom.FieldWUserID,
 		})
 	}
-	if du.mutation.UpUserIDCleared() {
+	if du.mutation.WUserIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: droom.FieldUpUserID,
+			Column: droom.FieldWUserID,
 		})
 	}
-	if value, ok := du.mutation.DownUserID(); ok {
+	if value, ok := du.mutation.BUserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldDownUserID,
+			Column: droom.FieldBUserID,
 		})
 	}
-	if du.mutation.DownUserIDCleared() {
+	if du.mutation.BUserIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: droom.FieldDownUserID,
+			Column: droom.FieldBUserID,
+		})
+	}
+	if value, ok := du.mutation.NextTurnUserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: droom.FieldNextTurnUserID,
+		})
+	}
+	if du.mutation.NextTurnUserIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: droom.FieldNextTurnUserID,
 		})
 	}
 	if value, ok := du.mutation.CreateTime(); ok {
@@ -308,43 +341,63 @@ func (duo *DRoomUpdateOne) ClearPanel() *DRoomUpdateOne {
 	return duo
 }
 
-// SetUpUserID sets the "up_user_id" field.
-func (duo *DRoomUpdateOne) SetUpUserID(s string) *DRoomUpdateOne {
-	duo.mutation.SetUpUserID(s)
+// SetWUserID sets the "w_user_id" field.
+func (duo *DRoomUpdateOne) SetWUserID(s string) *DRoomUpdateOne {
+	duo.mutation.SetWUserID(s)
 	return duo
 }
 
-// SetNillableUpUserID sets the "up_user_id" field if the given value is not nil.
-func (duo *DRoomUpdateOne) SetNillableUpUserID(s *string) *DRoomUpdateOne {
+// SetNillableWUserID sets the "w_user_id" field if the given value is not nil.
+func (duo *DRoomUpdateOne) SetNillableWUserID(s *string) *DRoomUpdateOne {
 	if s != nil {
-		duo.SetUpUserID(*s)
+		duo.SetWUserID(*s)
 	}
 	return duo
 }
 
-// ClearUpUserID clears the value of the "up_user_id" field.
-func (duo *DRoomUpdateOne) ClearUpUserID() *DRoomUpdateOne {
-	duo.mutation.ClearUpUserID()
+// ClearWUserID clears the value of the "w_user_id" field.
+func (duo *DRoomUpdateOne) ClearWUserID() *DRoomUpdateOne {
+	duo.mutation.ClearWUserID()
 	return duo
 }
 
-// SetDownUserID sets the "down_user_id" field.
-func (duo *DRoomUpdateOne) SetDownUserID(s string) *DRoomUpdateOne {
-	duo.mutation.SetDownUserID(s)
+// SetBUserID sets the "b_user_id" field.
+func (duo *DRoomUpdateOne) SetBUserID(s string) *DRoomUpdateOne {
+	duo.mutation.SetBUserID(s)
 	return duo
 }
 
-// SetNillableDownUserID sets the "down_user_id" field if the given value is not nil.
-func (duo *DRoomUpdateOne) SetNillableDownUserID(s *string) *DRoomUpdateOne {
+// SetNillableBUserID sets the "b_user_id" field if the given value is not nil.
+func (duo *DRoomUpdateOne) SetNillableBUserID(s *string) *DRoomUpdateOne {
 	if s != nil {
-		duo.SetDownUserID(*s)
+		duo.SetBUserID(*s)
 	}
 	return duo
 }
 
-// ClearDownUserID clears the value of the "down_user_id" field.
-func (duo *DRoomUpdateOne) ClearDownUserID() *DRoomUpdateOne {
-	duo.mutation.ClearDownUserID()
+// ClearBUserID clears the value of the "b_user_id" field.
+func (duo *DRoomUpdateOne) ClearBUserID() *DRoomUpdateOne {
+	duo.mutation.ClearBUserID()
+	return duo
+}
+
+// SetNextTurnUserID sets the "next_turn_user_id" field.
+func (duo *DRoomUpdateOne) SetNextTurnUserID(s string) *DRoomUpdateOne {
+	duo.mutation.SetNextTurnUserID(s)
+	return duo
+}
+
+// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
+func (duo *DRoomUpdateOne) SetNillableNextTurnUserID(s *string) *DRoomUpdateOne {
+	if s != nil {
+		duo.SetNextTurnUserID(*s)
+	}
+	return duo
+}
+
+// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
+func (duo *DRoomUpdateOne) ClearNextTurnUserID() *DRoomUpdateOne {
+	duo.mutation.ClearNextTurnUserID()
 	return duo
 }
 
@@ -481,30 +534,43 @@ func (duo *DRoomUpdateOne) sqlSave(ctx context.Context) (_node *DRoom, err error
 			Column: droom.FieldPanel,
 		})
 	}
-	if value, ok := duo.mutation.UpUserID(); ok {
+	if value, ok := duo.mutation.WUserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldUpUserID,
+			Column: droom.FieldWUserID,
 		})
 	}
-	if duo.mutation.UpUserIDCleared() {
+	if duo.mutation.WUserIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: droom.FieldUpUserID,
+			Column: droom.FieldWUserID,
 		})
 	}
-	if value, ok := duo.mutation.DownUserID(); ok {
+	if value, ok := duo.mutation.BUserID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: droom.FieldDownUserID,
+			Column: droom.FieldBUserID,
 		})
 	}
-	if duo.mutation.DownUserIDCleared() {
+	if duo.mutation.BUserIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: droom.FieldDownUserID,
+			Column: droom.FieldBUserID,
+		})
+	}
+	if value, ok := duo.mutation.NextTurnUserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: droom.FieldNextTurnUserID,
+		})
+	}
+	if duo.mutation.NextTurnUserIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: droom.FieldNextTurnUserID,
 		})
 	}
 	if value, ok := duo.mutation.CreateTime(); ok {

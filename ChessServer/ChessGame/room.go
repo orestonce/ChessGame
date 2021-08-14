@@ -12,10 +12,9 @@ import (
 type GameRoomManager struct{}
 
 type GameRoom struct {
-	RoomId         string
-	PanelFull      [LINE_COUNT][COLUMN_COUNT]GamePiece
-	NextTurnUserId string
-	Data           *ent.DRoom
+	RoomId    string
+	PanelFull [LINE_COUNT][COLUMN_COUNT]GamePiece
+	Data      *ent.DRoom
 }
 
 func (this *GameRoom) IsEmpty() bool {
@@ -29,7 +28,7 @@ func (this *GameRoom) UserLeave(session *ent.DSession) {
 		log.Println("GameRoom.UserLeave", err)
 	}
 	data := this.Data
-	err = gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).SetPanel(data.Panel).SetUpUserID(data.UpUserID).SetDownUserID(data.DownUserID).Exec(context.Background())
+	err = gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).SetPanel(data.Panel).SetWUserID(data.WUserID).SetBUserID(data.BUserID).Exec(context.Background())
 	if err != nil {
 		log.Println("GamePanel onUserLeave", err)
 	}

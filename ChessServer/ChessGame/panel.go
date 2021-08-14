@@ -7,6 +7,7 @@ import (
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"log"
+	"strings"
 	"unicode"
 )
 
@@ -18,17 +19,42 @@ const (
 type GamePiece byte
 
 func (this *GameRoom) LoadPanelFromData() {
-	this.PanelFull = [LINE_COUNT][COLUMN_COUNT]GamePiece{
-		{'C', 'M', 'X', 'S', 'J', 'S', 'X', 'M', 'C'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', 'P', '0', '0', '0', '0', '0', 'P', '0'},
-		{'B', '0', 'B', '0', 'B', '0', 'B', '0', 'B'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'b', '0', 'b', '0', 'b', '0', 'b', '0', 'b'},
-		{'0', 'p', '0', '0', '0', '0', '0', 'p', '0'},
-		{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
-		{'c', 'm', 'x', 's', 'j', 's', 'x', 'm', 'c'},
+	if this.Data == nil || this.Data.Panel == "" {
+		this.PanelFull = [LINE_COUNT][COLUMN_COUNT]GamePiece{
+			{'r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'},
+			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
+			{'0', 'c', '0', '0', '0', '0', '0', 'c', '0'},
+			{'p', '0', 'p', '0', 'p', '0', 'p', '0', 'p'},
+			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
+			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
+			{'P', '0', 'P', '0', 'P', '0', 'P', '0', 'P'},
+			{'0', 'C', '0', '0', '0', '0', '0', 'C', '0'},
+			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
+			{'R', 'N', 'B', 'A', 'K', 'A', 'B', 'N', 'R'},
+		}
+	} else {
+		lineData := strings.Split(this.Data.Panel, "/")
+		for line := 0; line < LINE_COUNT; line++ {
+			r := strings.NewReader(lineData[line])
+			for col := 0; col < COLUMN_COUNT; {
+				ch, err := r.ReadByte()
+				if err != nil {
+					log.Println("Error panel data", this.Data.Panel, lineData[line], err)
+					return
+				}
+				if '0' < ch && ch <= '9' {
+					emptyCnt := int(ch - '0')
+					for emptyCnt > 0 && col < COLUMN_COUNT {
+						this.PanelFull[line][col] = '0'
+						col++
+						emptyCnt--
+					}
+				} else {
+					this.PanelFull[line][col] = GamePiece(ch)
+					col++
+				}
+			}
+		}
 	}
 }
 
@@ -37,11 +63,10 @@ func (this *GameRoom) SaveRoomDataToDb() {
 	if data == nil {
 		return
 	}
-	var resp SyncPanelMessage
-	this.formatPanelFull(&resp)
-	data.Panel = resp.PanelFull
+	data.Panel = this.formatPanelV2()
 	_, err := gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).
-		SetUpUserID(data.UpUserID).SetDownUserID(data.DownUserID).SetPanel(resp.PanelFull).SetIsGameRunning(data.IsGameRunning).Save(context.Background())
+		SetWUserID(data.WUserID).SetBUserID(data.BUserID).SetPanel(data.Panel).SetIsGameRunning(data.IsGameRunning).
+		SetNextTurnUserID(data.NextTurnUserID).Save(context.Background())
 	if err != nil {
 		log.Println("GameRoom.SaveRoomDataToDb", err)
 	}
@@ -49,12 +74,12 @@ func (this *GameRoom) SaveRoomDataToDb() {
 
 func (this *GameRoom) onUserLeave(userId string) {
 	winUserId := ``
-	if this.Data.DownUserID == userId {
-		this.Data.DownUserID = ``
-		winUserId = this.Data.UpUserID
-	} else if this.Data.UpUserID == userId {
-		this.Data.UpUserID = ``
-		winUserId = this.Data.UpUserID
+	if this.Data.BUserID == userId {
+		this.Data.BUserID = ``
+		winUserId = this.Data.WUserID
+	} else if this.Data.WUserID == userId {
+		this.Data.WUserID = ``
+		winUserId = this.Data.WUserID
 	} else {
 		return
 	}
@@ -72,29 +97,28 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 	if !from.IsValid() || !to.IsValid() {
 		return false
 	}
-	if this.NextTurnUserId != session.UserID {
+	if this.Data.NextTurnUserID != session.UserID {
 		return false
 	}
 
-	if fromPiece.IsUpper() && this.NextTurnUserId != this.Data.UpUserID ||
-		fromPiece.IsDown() && this.NextTurnUserId != this.Data.DownUserID {
+	if fromPiece.IsW() && this.Data.NextTurnUserID != this.Data.WUserID || fromPiece.IsB() && this.Data.NextTurnUserID != this.Data.BUserID {
 		return false
 	}
 
-	if fromPiece.IsNull() || (fromPiece.IsDown() && toPiece.IsDown()) || (fromPiece.IsUpper() && toPiece.IsUpper()) {
+	if fromPiece.IsNull() || (fromPiece.IsB() && toPiece.IsB()) || (fromPiece.IsW() && toPiece.IsW()) {
 		return false
 	}
 	dLine := to.Line - from.Line
 	dColumn := to.Column - from.Column
 	var bCrossRiver bool
-	if fromPiece.IsUpper() {
-		bCrossRiver = (to.Line > 4)
+	if fromPiece.IsW() {
+		bCrossRiver = to.Line > 4
 	} else {
-		bCrossRiver = (to.Line < 4)
+		bCrossRiver = to.Line < 4
 	}
 
 	switch fromPiece.ToLower() {
-	case 'c': // 车
+	case 'r': // 车
 		if from.Line == to.Line || from.Column == to.Column {
 			if rangeHasPiece(this, from, to) {
 				return false
@@ -102,7 +126,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		} else {
 			return false
 		}
-	case 'm':
+	case 'n': // 马
 		// 2个自然数相乘, 等于2只有 [1x2、2x1]才符合要求
 		if abs(dLine)*abs(dColumn) != 2 {
 			return false
@@ -119,7 +143,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if !this.getPiece(mustEmptyPoint).IsNull() {
 			return false
 		}
-	case 'x':
+	case 'b': // 象
 		if bCrossRiver { // 过河了
 			return false
 		}
@@ -132,14 +156,14 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if !piece.IsNull() {
 			return false
 		}
-	case 's':
+	case 'a': // 士
 		if !fitRangeJiangShi(to) {
 			return false
 		}
 		if abs(dLine*dColumn) != 1 {
 			return false
 		}
-	case 'j':
+	case 'k': // 将
 		if !fitRangeJiangShi(to) {
 			return false
 		}
@@ -154,7 +178,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 			return true
 		}
 		return false
-	case 'p':
+	case 'c': // 炮
 		if dLine != 0 && dColumn != 0 {
 			return false
 		}
@@ -179,7 +203,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 			return true
 		}
 		return false
-	case 'b':
+	case 'p': // 兵
 		// 左右移动, 如果已经过河-> 可以, 否则 -> 不行
 		if abs(dColumn) == 1 && dLine == 0 {
 			if !bCrossRiver {
@@ -188,7 +212,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 			return true
 		} else if abs(dLine) == 1 && dColumn == 0 { // 上下移动, 不准后退
 			var goback bool
-			if fromPiece.IsUpper() {
+			if fromPiece.IsW() {
 				goback = dLine < 0
 			} else {
 				goback = dLine > 0
@@ -255,16 +279,16 @@ func (this *GameRoom) getPiece(p PiecePoint) GamePiece {
 	return this.PanelFull[p.Line][p.Column]
 }
 
-func (this *GamePiece) IsUpper() bool {
-	return unicode.IsUpper(rune(*this))
-}
-
-func (this *GamePiece) IsDown() bool {
+func (this *GamePiece) IsW() bool {
 	return unicode.IsLower(rune(*this))
 }
 
+func (this *GamePiece) IsB() bool {
+	return unicode.IsUpper(rune(*this))
+}
+
 func (this GamePiece) IsNull() bool {
-	return !this.IsUpper() && !this.IsDown()
+	return !this.IsW() && !this.IsB()
 }
 
 type GameOverNotice struct {
@@ -278,21 +302,21 @@ func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 	this.PanelFull[from.Line][from.Column] = '0'
 
 	winUserId := ``
-	if toPiece.ToLower() == 'j' {
-		winUserId = this.NextTurnUserId
+	if toPiece.ToLower() == 'k' {
+		winUserId = this.Data.NextTurnUserID
 	}
-	oldNextTurnUserId := this.NextTurnUserId
-	if this.NextTurnUserId == this.Data.DownUserID {
-		this.NextTurnUserId = this.Data.UpUserID
+	oldNextTurnUserId := this.Data.NextTurnUserID
+	if this.Data.NextTurnUserID == this.Data.BUserID {
+		this.Data.NextTurnUserID = this.Data.WUserID
 	} else {
-		this.NextTurnUserId = this.Data.DownUserID
+		this.Data.NextTurnUserID = this.Data.BUserID
 	}
-	sessionList := getSessionListBy(dsession.UserID(this.NextTurnUserId))
+	sessionList := getSessionListBy(dsession.UserID(this.Data.NextTurnUserID))
 	if len(sessionList) == 0 {
 		log.Println("nextUser is nil")
 		return
 	}
-	nextIsUpper := this.NextTurnUserId == this.Data.UpUserID
+	nextIsUpper := this.Data.NextTurnUserID == this.Data.WUserID
 	cannotMovePiece := true
 	for line := int32(0); line < LINE_COUNT && cannotMovePiece && winUserId == ``; line++ {
 		for column := int32(0); column < COLUMN_COUNT && cannotMovePiece; column++ {
@@ -301,7 +325,7 @@ func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 				Column: column,
 			}
 			thisPiece := this.getPiece(thisPoint)
-			if (nextIsUpper && thisPiece.IsUpper()) || (!nextIsUpper && thisPiece.IsDown()) {
+			if (nextIsUpper && thisPiece.IsW()) || (!nextIsUpper && thisPiece.IsB()) {
 				resp := this.RpcGetSuggestion(sessionList[0], GetSuggestionRequest{
 					FromPoint: thisPoint,
 				})
@@ -330,24 +354,18 @@ func (this *GameRoom) onGameOver(winUserId string) {
 	this.BroadcastToAll(pkt)
 }
 
-func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, username string) {
+func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, userId string) {
 	resp.ShowReGame = false
 	resp.ShowSiteDown = false
-	user := getUserByName(username)
-	if user == nil {
-		return
-	}
-	userId := user.ID
-
-	if this.Data.UpUserID != `` && this.Data.DownUserID != `` && !this.Data.IsGameRunning {
-		if this.Data.DownUserID == userId || this.Data.UpUserID == userId {
+	if this.Data.WUserID != `` && this.Data.BUserID != `` && !this.Data.IsGameRunning {
+		if this.Data.BUserID == userId || this.Data.WUserID == userId {
 			resp.ShowReGame = true
 		}
 	}
 	if !this.Data.IsGameRunning {
-		if this.Data.DownUserID == `` && this.Data.DownUserID != username {
+		if this.Data.BUserID == `` && this.Data.WUserID != userId {
 			resp.ShowSiteDown = true
-		} else if this.Data.UpUserID == `` && this.Data.DownUserID != username {
+		} else if this.Data.WUserID == `` && this.Data.BUserID != userId {
 			resp.ShowSiteDown = true
 		}
 	}
@@ -361,8 +379,43 @@ func (this *GameRoom) formatPanelFull(resp *SyncPanelMessage) {
 		}
 	}
 	resp.PanelFull = w.String()
-	resp.UpperUsername = getUserNameByIdIgnoreEmpty(this.Data.UpUserID)
-	resp.DownUsername = getUserNameByIdIgnoreEmpty(this.Data.DownUserID)
+	resp.UpperUsername = getUserNameByIdIgnoreEmpty(this.Data.WUserID)
+	resp.DownUsername = getUserNameByIdIgnoreEmpty(this.Data.BUserID)
 	resp.IsGameRunning = this.Data.IsGameRunning
-	resp.NextTurnUsername = getUserNameByIdIgnoreEmpty(this.NextTurnUserId)
+	resp.NextTurnUsername = getUserNameByIdIgnoreEmpty(this.Data.NextTurnUserID)
+}
+
+func (this *GameRoom) formatPanelV2() string {
+	w := &bytes.Buffer{}
+	for line := 0; line < LINE_COUNT; line++ {
+		emptyCnt := 0
+		for column := 0; column < COLUMN_COUNT; column++ {
+			if this.PanelFull[line][column] == '0' {
+				emptyCnt++
+				continue
+			}
+			if emptyCnt > 0 {
+				w.WriteByte(byte('0' + emptyCnt))
+				emptyCnt = 0
+			}
+			w.WriteByte(byte(this.PanelFull[line][column]))
+		}
+		if emptyCnt > 0 {
+			w.WriteByte(byte('0' + emptyCnt))
+		}
+		if line == LINE_COUNT-1 {
+			w.WriteByte(' ')
+		} else {
+			w.WriteString("/")
+		}
+	}
+	//rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w
+	if this.Data.NextTurnUserID == this.Data.WUserID {
+		w.WriteByte('w')
+	} else {
+		w.WriteByte('b')
+	}
+	str := w.String()
+	log.Println("format", str)
+	return str
 }

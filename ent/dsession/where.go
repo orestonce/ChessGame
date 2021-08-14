@@ -99,13 +99,6 @@ func UserID(v string) predicate.DSession {
 	})
 }
 
-// UserName applies equality check predicate on the "user_name" field. It's identical to UserNameEQ.
-func UserName(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserName), v))
-	})
-}
-
 // RoomID applies equality check predicate on the "room_id" field. It's identical to RoomIDEQ.
 func RoomID(v string) predicate.DSession {
 	return predicate.DSession(func(s *sql.Selector) {
@@ -228,117 +221,6 @@ func UserIDEqualFold(v string) predicate.DSession {
 func UserIDContainsFold(v string) predicate.DSession {
 	return predicate.DSession(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldUserID), v))
-	})
-}
-
-// UserNameEQ applies the EQ predicate on the "user_name" field.
-func UserNameEQ(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameNEQ applies the NEQ predicate on the "user_name" field.
-func UserNameNEQ(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameIn applies the In predicate on the "user_name" field.
-func UserNameIn(vs ...string) predicate.DSession {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.DSession(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldUserName), v...))
-	})
-}
-
-// UserNameNotIn applies the NotIn predicate on the "user_name" field.
-func UserNameNotIn(vs ...string) predicate.DSession {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.DSession(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldUserName), v...))
-	})
-}
-
-// UserNameGT applies the GT predicate on the "user_name" field.
-func UserNameGT(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameGTE applies the GTE predicate on the "user_name" field.
-func UserNameGTE(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameLT applies the LT predicate on the "user_name" field.
-func UserNameLT(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameLTE applies the LTE predicate on the "user_name" field.
-func UserNameLTE(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameContains applies the Contains predicate on the "user_name" field.
-func UserNameContains(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameHasPrefix applies the HasPrefix predicate on the "user_name" field.
-func UserNameHasPrefix(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameHasSuffix applies the HasSuffix predicate on the "user_name" field.
-func UserNameHasSuffix(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameEqualFold applies the EqualFold predicate on the "user_name" field.
-func UserNameEqualFold(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldUserName), v))
-	})
-}
-
-// UserNameContainsFold applies the ContainsFold predicate on the "user_name" field.
-func UserNameContainsFold(v string) predicate.DSession {
-	return predicate.DSession(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldUserName), v))
 	})
 }
 

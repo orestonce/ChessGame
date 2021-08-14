@@ -13,8 +13,9 @@ var (
 		{Name: "id", Type: field.TypeString},
 		{Name: "is_game_running", Type: field.TypeBool, Nullable: true, Default: false},
 		{Name: "panel", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "up_user_id", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "down_user_id", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "w_user_id", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "b_user_id", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "next_turn_user_id", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "create_time", Type: field.TypeTime},
 	}
 	// DroomsTable holds the schema information for the "drooms" table.
@@ -27,7 +28,6 @@ var (
 	DsessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeString, Default: ""},
-		{Name: "user_name", Type: field.TypeString, Default: ""},
 		{Name: "room_id", Type: field.TypeString, Default: ""},
 		{Name: "create_time", Type: field.TypeTime},
 	}

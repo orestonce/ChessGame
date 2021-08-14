@@ -23,26 +23,26 @@ func init() {
 	droomDescPanel := droomFields[2].Descriptor()
 	// droom.DefaultPanel holds the default value on creation for the panel field.
 	droom.DefaultPanel = droomDescPanel.Default.(string)
-	// droomDescUpUserID is the schema descriptor for up_user_id field.
-	droomDescUpUserID := droomFields[3].Descriptor()
-	// droom.DefaultUpUserID holds the default value on creation for the up_user_id field.
-	droom.DefaultUpUserID = droomDescUpUserID.Default.(string)
-	// droomDescDownUserID is the schema descriptor for down_user_id field.
-	droomDescDownUserID := droomFields[4].Descriptor()
-	// droom.DefaultDownUserID holds the default value on creation for the down_user_id field.
-	droom.DefaultDownUserID = droomDescDownUserID.Default.(string)
+	// droomDescWUserID is the schema descriptor for w_user_id field.
+	droomDescWUserID := droomFields[3].Descriptor()
+	// droom.DefaultWUserID holds the default value on creation for the w_user_id field.
+	droom.DefaultWUserID = droomDescWUserID.Default.(string)
+	// droomDescBUserID is the schema descriptor for b_user_id field.
+	droomDescBUserID := droomFields[4].Descriptor()
+	// droom.DefaultBUserID holds the default value on creation for the b_user_id field.
+	droom.DefaultBUserID = droomDescBUserID.Default.(string)
+	// droomDescNextTurnUserID is the schema descriptor for next_turn_user_id field.
+	droomDescNextTurnUserID := droomFields[5].Descriptor()
+	// droom.DefaultNextTurnUserID holds the default value on creation for the next_turn_user_id field.
+	droom.DefaultNextTurnUserID = droomDescNextTurnUserID.Default.(string)
 	dsessionFields := schema.DSession{}.Fields()
 	_ = dsessionFields
 	// dsessionDescUserID is the schema descriptor for user_id field.
 	dsessionDescUserID := dsessionFields[1].Descriptor()
 	// dsession.DefaultUserID holds the default value on creation for the user_id field.
 	dsession.DefaultUserID = dsessionDescUserID.Default.(string)
-	// dsessionDescUserName is the schema descriptor for user_name field.
-	dsessionDescUserName := dsessionFields[2].Descriptor()
-	// dsession.DefaultUserName holds the default value on creation for the user_name field.
-	dsession.DefaultUserName = dsessionDescUserName.Default.(string)
 	// dsessionDescRoomID is the schema descriptor for room_id field.
-	dsessionDescRoomID := dsessionFields[3].Descriptor()
+	dsessionDescRoomID := dsessionFields[2].Descriptor()
 	// dsession.DefaultRoomID holds the default value on creation for the room_id field.
 	dsession.DefaultRoomID = dsessionDescRoomID.Default.(string)
 	duserFields := schema.DUser{}.Fields()

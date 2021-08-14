@@ -106,17 +106,24 @@ func Panel(v string) predicate.DRoom {
 	})
 }
 
-// UpUserID applies equality check predicate on the "up_user_id" field. It's identical to UpUserIDEQ.
-func UpUserID(v string) predicate.DRoom {
+// WUserID applies equality check predicate on the "w_user_id" field. It's identical to WUserIDEQ.
+func WUserID(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpUserID), v))
+		s.Where(sql.EQ(s.C(FieldWUserID), v))
 	})
 }
 
-// DownUserID applies equality check predicate on the "down_user_id" field. It's identical to DownUserIDEQ.
-func DownUserID(v string) predicate.DRoom {
+// BUserID applies equality check predicate on the "b_user_id" field. It's identical to BUserIDEQ.
+func BUserID(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDownUserID), v))
+		s.Where(sql.EQ(s.C(FieldBUserID), v))
+	})
+}
+
+// NextTurnUserID applies equality check predicate on the "next_turn_user_id" field. It's identical to NextTurnUserIDEQ.
+func NextTurnUserID(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextTurnUserID), v))
 	})
 }
 
@@ -280,22 +287,22 @@ func PanelContainsFold(v string) predicate.DRoom {
 	})
 }
 
-// UpUserIDEQ applies the EQ predicate on the "up_user_id" field.
-func UpUserIDEQ(v string) predicate.DRoom {
+// WUserIDEQ applies the EQ predicate on the "w_user_id" field.
+func WUserIDEQ(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpUserID), v))
+		s.Where(sql.EQ(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDNEQ applies the NEQ predicate on the "up_user_id" field.
-func UpUserIDNEQ(v string) predicate.DRoom {
+// WUserIDNEQ applies the NEQ predicate on the "w_user_id" field.
+func WUserIDNEQ(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpUserID), v))
+		s.Where(sql.NEQ(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDIn applies the In predicate on the "up_user_id" field.
-func UpUserIDIn(vs ...string) predicate.DRoom {
+// WUserIDIn applies the In predicate on the "w_user_id" field.
+func WUserIDIn(vs ...string) predicate.DRoom {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -307,12 +314,12 @@ func UpUserIDIn(vs ...string) predicate.DRoom {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldUpUserID), v...))
+		s.Where(sql.In(s.C(FieldWUserID), v...))
 	})
 }
 
-// UpUserIDNotIn applies the NotIn predicate on the "up_user_id" field.
-func UpUserIDNotIn(vs ...string) predicate.DRoom {
+// WUserIDNotIn applies the NotIn predicate on the "w_user_id" field.
+func WUserIDNotIn(vs ...string) predicate.DRoom {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -324,103 +331,103 @@ func UpUserIDNotIn(vs ...string) predicate.DRoom {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldUpUserID), v...))
+		s.Where(sql.NotIn(s.C(FieldWUserID), v...))
 	})
 }
 
-// UpUserIDGT applies the GT predicate on the "up_user_id" field.
-func UpUserIDGT(v string) predicate.DRoom {
+// WUserIDGT applies the GT predicate on the "w_user_id" field.
+func WUserIDGT(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpUserID), v))
+		s.Where(sql.GT(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDGTE applies the GTE predicate on the "up_user_id" field.
-func UpUserIDGTE(v string) predicate.DRoom {
+// WUserIDGTE applies the GTE predicate on the "w_user_id" field.
+func WUserIDGTE(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpUserID), v))
+		s.Where(sql.GTE(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDLT applies the LT predicate on the "up_user_id" field.
-func UpUserIDLT(v string) predicate.DRoom {
+// WUserIDLT applies the LT predicate on the "w_user_id" field.
+func WUserIDLT(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpUserID), v))
+		s.Where(sql.LT(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDLTE applies the LTE predicate on the "up_user_id" field.
-func UpUserIDLTE(v string) predicate.DRoom {
+// WUserIDLTE applies the LTE predicate on the "w_user_id" field.
+func WUserIDLTE(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpUserID), v))
+		s.Where(sql.LTE(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDContains applies the Contains predicate on the "up_user_id" field.
-func UpUserIDContains(v string) predicate.DRoom {
+// WUserIDContains applies the Contains predicate on the "w_user_id" field.
+func WUserIDContains(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldUpUserID), v))
+		s.Where(sql.Contains(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDHasPrefix applies the HasPrefix predicate on the "up_user_id" field.
-func UpUserIDHasPrefix(v string) predicate.DRoom {
+// WUserIDHasPrefix applies the HasPrefix predicate on the "w_user_id" field.
+func WUserIDHasPrefix(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldUpUserID), v))
+		s.Where(sql.HasPrefix(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDHasSuffix applies the HasSuffix predicate on the "up_user_id" field.
-func UpUserIDHasSuffix(v string) predicate.DRoom {
+// WUserIDHasSuffix applies the HasSuffix predicate on the "w_user_id" field.
+func WUserIDHasSuffix(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldUpUserID), v))
+		s.Where(sql.HasSuffix(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDIsNil applies the IsNil predicate on the "up_user_id" field.
-func UpUserIDIsNil() predicate.DRoom {
+// WUserIDIsNil applies the IsNil predicate on the "w_user_id" field.
+func WUserIDIsNil() predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldUpUserID)))
+		s.Where(sql.IsNull(s.C(FieldWUserID)))
 	})
 }
 
-// UpUserIDNotNil applies the NotNil predicate on the "up_user_id" field.
-func UpUserIDNotNil() predicate.DRoom {
+// WUserIDNotNil applies the NotNil predicate on the "w_user_id" field.
+func WUserIDNotNil() predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldUpUserID)))
+		s.Where(sql.NotNull(s.C(FieldWUserID)))
 	})
 }
 
-// UpUserIDEqualFold applies the EqualFold predicate on the "up_user_id" field.
-func UpUserIDEqualFold(v string) predicate.DRoom {
+// WUserIDEqualFold applies the EqualFold predicate on the "w_user_id" field.
+func WUserIDEqualFold(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldUpUserID), v))
+		s.Where(sql.EqualFold(s.C(FieldWUserID), v))
 	})
 }
 
-// UpUserIDContainsFold applies the ContainsFold predicate on the "up_user_id" field.
-func UpUserIDContainsFold(v string) predicate.DRoom {
+// WUserIDContainsFold applies the ContainsFold predicate on the "w_user_id" field.
+func WUserIDContainsFold(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldUpUserID), v))
+		s.Where(sql.ContainsFold(s.C(FieldWUserID), v))
 	})
 }
 
-// DownUserIDEQ applies the EQ predicate on the "down_user_id" field.
-func DownUserIDEQ(v string) predicate.DRoom {
+// BUserIDEQ applies the EQ predicate on the "b_user_id" field.
+func BUserIDEQ(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDownUserID), v))
+		s.Where(sql.EQ(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDNEQ applies the NEQ predicate on the "down_user_id" field.
-func DownUserIDNEQ(v string) predicate.DRoom {
+// BUserIDNEQ applies the NEQ predicate on the "b_user_id" field.
+func BUserIDNEQ(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDownUserID), v))
+		s.Where(sql.NEQ(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDIn applies the In predicate on the "down_user_id" field.
-func DownUserIDIn(vs ...string) predicate.DRoom {
+// BUserIDIn applies the In predicate on the "b_user_id" field.
+func BUserIDIn(vs ...string) predicate.DRoom {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -432,12 +439,12 @@ func DownUserIDIn(vs ...string) predicate.DRoom {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldDownUserID), v...))
+		s.Where(sql.In(s.C(FieldBUserID), v...))
 	})
 }
 
-// DownUserIDNotIn applies the NotIn predicate on the "down_user_id" field.
-func DownUserIDNotIn(vs ...string) predicate.DRoom {
+// BUserIDNotIn applies the NotIn predicate on the "b_user_id" field.
+func BUserIDNotIn(vs ...string) predicate.DRoom {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -449,84 +456,209 @@ func DownUserIDNotIn(vs ...string) predicate.DRoom {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldDownUserID), v...))
+		s.Where(sql.NotIn(s.C(FieldBUserID), v...))
 	})
 }
 
-// DownUserIDGT applies the GT predicate on the "down_user_id" field.
-func DownUserIDGT(v string) predicate.DRoom {
+// BUserIDGT applies the GT predicate on the "b_user_id" field.
+func BUserIDGT(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDownUserID), v))
+		s.Where(sql.GT(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDGTE applies the GTE predicate on the "down_user_id" field.
-func DownUserIDGTE(v string) predicate.DRoom {
+// BUserIDGTE applies the GTE predicate on the "b_user_id" field.
+func BUserIDGTE(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDownUserID), v))
+		s.Where(sql.GTE(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDLT applies the LT predicate on the "down_user_id" field.
-func DownUserIDLT(v string) predicate.DRoom {
+// BUserIDLT applies the LT predicate on the "b_user_id" field.
+func BUserIDLT(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDownUserID), v))
+		s.Where(sql.LT(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDLTE applies the LTE predicate on the "down_user_id" field.
-func DownUserIDLTE(v string) predicate.DRoom {
+// BUserIDLTE applies the LTE predicate on the "b_user_id" field.
+func BUserIDLTE(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDownUserID), v))
+		s.Where(sql.LTE(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDContains applies the Contains predicate on the "down_user_id" field.
-func DownUserIDContains(v string) predicate.DRoom {
+// BUserIDContains applies the Contains predicate on the "b_user_id" field.
+func BUserIDContains(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDownUserID), v))
+		s.Where(sql.Contains(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDHasPrefix applies the HasPrefix predicate on the "down_user_id" field.
-func DownUserIDHasPrefix(v string) predicate.DRoom {
+// BUserIDHasPrefix applies the HasPrefix predicate on the "b_user_id" field.
+func BUserIDHasPrefix(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDownUserID), v))
+		s.Where(sql.HasPrefix(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDHasSuffix applies the HasSuffix predicate on the "down_user_id" field.
-func DownUserIDHasSuffix(v string) predicate.DRoom {
+// BUserIDHasSuffix applies the HasSuffix predicate on the "b_user_id" field.
+func BUserIDHasSuffix(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDownUserID), v))
+		s.Where(sql.HasSuffix(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDIsNil applies the IsNil predicate on the "down_user_id" field.
-func DownUserIDIsNil() predicate.DRoom {
+// BUserIDIsNil applies the IsNil predicate on the "b_user_id" field.
+func BUserIDIsNil() predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDownUserID)))
+		s.Where(sql.IsNull(s.C(FieldBUserID)))
 	})
 }
 
-// DownUserIDNotNil applies the NotNil predicate on the "down_user_id" field.
-func DownUserIDNotNil() predicate.DRoom {
+// BUserIDNotNil applies the NotNil predicate on the "b_user_id" field.
+func BUserIDNotNil() predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDownUserID)))
+		s.Where(sql.NotNull(s.C(FieldBUserID)))
 	})
 }
 
-// DownUserIDEqualFold applies the EqualFold predicate on the "down_user_id" field.
-func DownUserIDEqualFold(v string) predicate.DRoom {
+// BUserIDEqualFold applies the EqualFold predicate on the "b_user_id" field.
+func BUserIDEqualFold(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDownUserID), v))
+		s.Where(sql.EqualFold(s.C(FieldBUserID), v))
 	})
 }
 
-// DownUserIDContainsFold applies the ContainsFold predicate on the "down_user_id" field.
-func DownUserIDContainsFold(v string) predicate.DRoom {
+// BUserIDContainsFold applies the ContainsFold predicate on the "b_user_id" field.
+func BUserIDContainsFold(v string) predicate.DRoom {
 	return predicate.DRoom(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDownUserID), v))
+		s.Where(sql.ContainsFold(s.C(FieldBUserID), v))
+	})
+}
+
+// NextTurnUserIDEQ applies the EQ predicate on the "next_turn_user_id" field.
+func NextTurnUserIDEQ(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDNEQ applies the NEQ predicate on the "next_turn_user_id" field.
+func NextTurnUserIDNEQ(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDIn applies the In predicate on the "next_turn_user_id" field.
+func NextTurnUserIDIn(vs ...string) predicate.DRoom {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DRoom(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNextTurnUserID), v...))
+	})
+}
+
+// NextTurnUserIDNotIn applies the NotIn predicate on the "next_turn_user_id" field.
+func NextTurnUserIDNotIn(vs ...string) predicate.DRoom {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DRoom(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNextTurnUserID), v...))
+	})
+}
+
+// NextTurnUserIDGT applies the GT predicate on the "next_turn_user_id" field.
+func NextTurnUserIDGT(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDGTE applies the GTE predicate on the "next_turn_user_id" field.
+func NextTurnUserIDGTE(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDLT applies the LT predicate on the "next_turn_user_id" field.
+func NextTurnUserIDLT(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDLTE applies the LTE predicate on the "next_turn_user_id" field.
+func NextTurnUserIDLTE(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDContains applies the Contains predicate on the "next_turn_user_id" field.
+func NextTurnUserIDContains(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDHasPrefix applies the HasPrefix predicate on the "next_turn_user_id" field.
+func NextTurnUserIDHasPrefix(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDHasSuffix applies the HasSuffix predicate on the "next_turn_user_id" field.
+func NextTurnUserIDHasSuffix(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDIsNil applies the IsNil predicate on the "next_turn_user_id" field.
+func NextTurnUserIDIsNil() predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNextTurnUserID)))
+	})
+}
+
+// NextTurnUserIDNotNil applies the NotNil predicate on the "next_turn_user_id" field.
+func NextTurnUserIDNotNil() predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNextTurnUserID)))
+	})
+}
+
+// NextTurnUserIDEqualFold applies the EqualFold predicate on the "next_turn_user_id" field.
+func NextTurnUserIDEqualFold(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNextTurnUserID), v))
+	})
+}
+
+// NextTurnUserIDContainsFold applies the ContainsFold predicate on the "next_turn_user_id" field.
+func NextTurnUserIDContainsFold(v string) predicate.DRoom {
+	return predicate.DRoom(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNextTurnUserID), v))
 	})
 }
 

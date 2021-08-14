@@ -4,22 +4,22 @@
         <file>images/up.png</file>
         <file>images/forcuse.png</file>
         <file>images/down.png</file>
-        <file>images/d-b.png</file>
-        <file>images/d-c.png</file>
-        <file>images/d-j.png</file>
-        <file>images/d-m.png</file>
-        <file>images/d-p.png</file>
-        <file>images/d-s.png</file>
-        <file>images/d-x.png</file>
+        <file>images/br.png</file>
+        <file>images/bn.png</file>
+        <file>images/bb.png</file>
+        <file>images/ba.png</file>
+        <file>images/bk.png</file>
+        <file>images/bc.png</file>
+        <file>images/bp.png</file>
         <file>images/icon.ico</file>
         <file>images/icon-set-server.png</file>
-        <file>images/u-b.png</file>
-        <file>images/u-c.png</file>
-        <file>images/u-j.png</file>
-        <file>images/u-m.png</file>
-        <file>images/u-p.png</file>
-        <file>images/u-s.png</file>
-        <file>images/u-x.png</file>
+        <file>images/wr.png</file>
+        <file>images/wn.png</file>
+        <file>images/wb.png</file>
+        <file>images/wa.png</file>
+        <file>images/wk.png</file>
+        <file>images/wc.png</file>
+        <file>images/wp.png</file>
         <file>images/icon-register.png</file>
     </qresource>
 </RCC>

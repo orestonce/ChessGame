@@ -1,21 +1,24 @@
 package main
 
 import (
-	"github.com/orestonce/ChessGame/ymd/ymdError"
+	"io/ioutil"
 	"os"
-	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
-	var err error
-	err = os.Setenv(`GOOS`, `linux`)
-	ymdError.PanicIfError(err)
-	err = os.Setenv(`GOARCH`, `amd64`)
-	ymdError.PanicIfError(err)
-	err = os.MkdirAll(`bin`, 0755)
-	ymdError.PanicIfError(err)
-	err = os.Chdir(`bin`)
-	ymdError.PanicIfError(err)
-	err = exec.Command(`go`, `build`, `github.com/orestonce/ChessGame/ChessServer`).Run()
-	ymdError.PanicIfError(err)
+	root := "D:\\go-projects\\ChessGame\\ChessClient\\images"
+	list, err := ioutil.ReadDir(root)
+	if err != nil {
+		panic(err)
+	}
+	for _, one := range list {
+		origin := filepath.Join(root, one.Name())
+		after := filepath.Join(root, strings.ReplaceAll(strings.ReplaceAll(one.Name(), "u-", "w"), "d-", "b"))
+		err = os.Rename(origin, after)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

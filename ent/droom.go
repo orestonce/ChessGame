@@ -20,10 +20,12 @@ type DRoom struct {
 	IsGameRunning bool `json:"is_game_running,omitempty"`
 	// Panel holds the value of the "panel" field.
 	Panel string `json:"panel,omitempty"`
-	// UpUserID holds the value of the "up_user_id" field.
-	UpUserID string `json:"up_user_id,omitempty"`
-	// DownUserID holds the value of the "down_user_id" field.
-	DownUserID string `json:"down_user_id,omitempty"`
+	// WUserID holds the value of the "w_user_id" field.
+	WUserID string `json:"w_user_id,omitempty"`
+	// BUserID holds the value of the "b_user_id" field.
+	BUserID string `json:"b_user_id,omitempty"`
+	// NextTurnUserID holds the value of the "next_turn_user_id" field.
+	NextTurnUserID string `json:"next_turn_user_id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 }
@@ -35,7 +37,7 @@ func (*DRoom) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case droom.FieldIsGameRunning:
 			values[i] = new(sql.NullBool)
-		case droom.FieldID, droom.FieldPanel, droom.FieldUpUserID, droom.FieldDownUserID:
+		case droom.FieldID, droom.FieldPanel, droom.FieldWUserID, droom.FieldBUserID, droom.FieldNextTurnUserID:
 			values[i] = new(sql.NullString)
 		case droom.FieldCreateTime:
 			values[i] = new(sql.NullTime)
@@ -72,17 +74,23 @@ func (d *DRoom) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				d.Panel = value.String
 			}
-		case droom.FieldUpUserID:
+		case droom.FieldWUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field up_user_id", values[i])
+				return fmt.Errorf("unexpected type %T for field w_user_id", values[i])
 			} else if value.Valid {
-				d.UpUserID = value.String
+				d.WUserID = value.String
 			}
-		case droom.FieldDownUserID:
+		case droom.FieldBUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field down_user_id", values[i])
+				return fmt.Errorf("unexpected type %T for field b_user_id", values[i])
 			} else if value.Valid {
-				d.DownUserID = value.String
+				d.BUserID = value.String
+			}
+		case droom.FieldNextTurnUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field next_turn_user_id", values[i])
+			} else if value.Valid {
+				d.NextTurnUserID = value.String
 			}
 		case droom.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -122,10 +130,12 @@ func (d *DRoom) String() string {
 	builder.WriteString(fmt.Sprintf("%v", d.IsGameRunning))
 	builder.WriteString(", panel=")
 	builder.WriteString(d.Panel)
-	builder.WriteString(", up_user_id=")
-	builder.WriteString(d.UpUserID)
-	builder.WriteString(", down_user_id=")
-	builder.WriteString(d.DownUserID)
+	builder.WriteString(", w_user_id=")
+	builder.WriteString(d.WUserID)
+	builder.WriteString(", b_user_id=")
+	builder.WriteString(d.BUserID)
+	builder.WriteString(", next_turn_user_id=")
+	builder.WriteString(d.NextTurnUserID)
 	builder.WriteString(", create_time=")
 	builder.WriteString(d.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')

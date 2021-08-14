@@ -33,18 +33,19 @@ const (
 // DRoomMutation represents an operation that mutates the DRoom nodes in the graph.
 type DRoomMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *string
-	is_game_running *bool
-	panel           *string
-	up_user_id      *string
-	down_user_id    *string
-	create_time     *time.Time
-	clearedFields   map[string]struct{}
-	done            bool
-	oldValue        func(context.Context) (*DRoom, error)
-	predicates      []predicate.DRoom
+	op                Op
+	typ               string
+	id                *string
+	is_game_running   *bool
+	panel             *string
+	w_user_id         *string
+	b_user_id         *string
+	next_turn_user_id *string
+	create_time       *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*DRoom, error)
+	predicates        []predicate.DRoom
 }
 
 var _ ent.Mutation = (*DRoomMutation)(nil)
@@ -230,102 +231,151 @@ func (m *DRoomMutation) ResetPanel() {
 	delete(m.clearedFields, droom.FieldPanel)
 }
 
-// SetUpUserID sets the "up_user_id" field.
-func (m *DRoomMutation) SetUpUserID(s string) {
-	m.up_user_id = &s
+// SetWUserID sets the "w_user_id" field.
+func (m *DRoomMutation) SetWUserID(s string) {
+	m.w_user_id = &s
 }
 
-// UpUserID returns the value of the "up_user_id" field in the mutation.
-func (m *DRoomMutation) UpUserID() (r string, exists bool) {
-	v := m.up_user_id
+// WUserID returns the value of the "w_user_id" field in the mutation.
+func (m *DRoomMutation) WUserID() (r string, exists bool) {
+	v := m.w_user_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUpUserID returns the old "up_user_id" field's value of the DRoom entity.
+// OldWUserID returns the old "w_user_id" field's value of the DRoom entity.
 // If the DRoom object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DRoomMutation) OldUpUserID(ctx context.Context) (v string, err error) {
+func (m *DRoomMutation) OldWUserID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpUserID is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldWUserID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpUserID requires an ID field in the mutation")
+		return v, fmt.Errorf("OldWUserID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpUserID: %w", err)
+		return v, fmt.Errorf("querying old value for OldWUserID: %w", err)
 	}
-	return oldValue.UpUserID, nil
+	return oldValue.WUserID, nil
 }
 
-// ClearUpUserID clears the value of the "up_user_id" field.
-func (m *DRoomMutation) ClearUpUserID() {
-	m.up_user_id = nil
-	m.clearedFields[droom.FieldUpUserID] = struct{}{}
+// ClearWUserID clears the value of the "w_user_id" field.
+func (m *DRoomMutation) ClearWUserID() {
+	m.w_user_id = nil
+	m.clearedFields[droom.FieldWUserID] = struct{}{}
 }
 
-// UpUserIDCleared returns if the "up_user_id" field was cleared in this mutation.
-func (m *DRoomMutation) UpUserIDCleared() bool {
-	_, ok := m.clearedFields[droom.FieldUpUserID]
+// WUserIDCleared returns if the "w_user_id" field was cleared in this mutation.
+func (m *DRoomMutation) WUserIDCleared() bool {
+	_, ok := m.clearedFields[droom.FieldWUserID]
 	return ok
 }
 
-// ResetUpUserID resets all changes to the "up_user_id" field.
-func (m *DRoomMutation) ResetUpUserID() {
-	m.up_user_id = nil
-	delete(m.clearedFields, droom.FieldUpUserID)
+// ResetWUserID resets all changes to the "w_user_id" field.
+func (m *DRoomMutation) ResetWUserID() {
+	m.w_user_id = nil
+	delete(m.clearedFields, droom.FieldWUserID)
 }
 
-// SetDownUserID sets the "down_user_id" field.
-func (m *DRoomMutation) SetDownUserID(s string) {
-	m.down_user_id = &s
+// SetBUserID sets the "b_user_id" field.
+func (m *DRoomMutation) SetBUserID(s string) {
+	m.b_user_id = &s
 }
 
-// DownUserID returns the value of the "down_user_id" field in the mutation.
-func (m *DRoomMutation) DownUserID() (r string, exists bool) {
-	v := m.down_user_id
+// BUserID returns the value of the "b_user_id" field in the mutation.
+func (m *DRoomMutation) BUserID() (r string, exists bool) {
+	v := m.b_user_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDownUserID returns the old "down_user_id" field's value of the DRoom entity.
+// OldBUserID returns the old "b_user_id" field's value of the DRoom entity.
 // If the DRoom object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DRoomMutation) OldDownUserID(ctx context.Context) (v string, err error) {
+func (m *DRoomMutation) OldBUserID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldDownUserID is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldBUserID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldDownUserID requires an ID field in the mutation")
+		return v, fmt.Errorf("OldBUserID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDownUserID: %w", err)
+		return v, fmt.Errorf("querying old value for OldBUserID: %w", err)
 	}
-	return oldValue.DownUserID, nil
+	return oldValue.BUserID, nil
 }
 
-// ClearDownUserID clears the value of the "down_user_id" field.
-func (m *DRoomMutation) ClearDownUserID() {
-	m.down_user_id = nil
-	m.clearedFields[droom.FieldDownUserID] = struct{}{}
+// ClearBUserID clears the value of the "b_user_id" field.
+func (m *DRoomMutation) ClearBUserID() {
+	m.b_user_id = nil
+	m.clearedFields[droom.FieldBUserID] = struct{}{}
 }
 
-// DownUserIDCleared returns if the "down_user_id" field was cleared in this mutation.
-func (m *DRoomMutation) DownUserIDCleared() bool {
-	_, ok := m.clearedFields[droom.FieldDownUserID]
+// BUserIDCleared returns if the "b_user_id" field was cleared in this mutation.
+func (m *DRoomMutation) BUserIDCleared() bool {
+	_, ok := m.clearedFields[droom.FieldBUserID]
 	return ok
 }
 
-// ResetDownUserID resets all changes to the "down_user_id" field.
-func (m *DRoomMutation) ResetDownUserID() {
-	m.down_user_id = nil
-	delete(m.clearedFields, droom.FieldDownUserID)
+// ResetBUserID resets all changes to the "b_user_id" field.
+func (m *DRoomMutation) ResetBUserID() {
+	m.b_user_id = nil
+	delete(m.clearedFields, droom.FieldBUserID)
+}
+
+// SetNextTurnUserID sets the "next_turn_user_id" field.
+func (m *DRoomMutation) SetNextTurnUserID(s string) {
+	m.next_turn_user_id = &s
+}
+
+// NextTurnUserID returns the value of the "next_turn_user_id" field in the mutation.
+func (m *DRoomMutation) NextTurnUserID() (r string, exists bool) {
+	v := m.next_turn_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextTurnUserID returns the old "next_turn_user_id" field's value of the DRoom entity.
+// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DRoomMutation) OldNextTurnUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNextTurnUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNextTurnUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextTurnUserID: %w", err)
+	}
+	return oldValue.NextTurnUserID, nil
+}
+
+// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
+func (m *DRoomMutation) ClearNextTurnUserID() {
+	m.next_turn_user_id = nil
+	m.clearedFields[droom.FieldNextTurnUserID] = struct{}{}
+}
+
+// NextTurnUserIDCleared returns if the "next_turn_user_id" field was cleared in this mutation.
+func (m *DRoomMutation) NextTurnUserIDCleared() bool {
+	_, ok := m.clearedFields[droom.FieldNextTurnUserID]
+	return ok
+}
+
+// ResetNextTurnUserID resets all changes to the "next_turn_user_id" field.
+func (m *DRoomMutation) ResetNextTurnUserID() {
+	m.next_turn_user_id = nil
+	delete(m.clearedFields, droom.FieldNextTurnUserID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -383,18 +433,21 @@ func (m *DRoomMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DRoomMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.is_game_running != nil {
 		fields = append(fields, droom.FieldIsGameRunning)
 	}
 	if m.panel != nil {
 		fields = append(fields, droom.FieldPanel)
 	}
-	if m.up_user_id != nil {
-		fields = append(fields, droom.FieldUpUserID)
+	if m.w_user_id != nil {
+		fields = append(fields, droom.FieldWUserID)
 	}
-	if m.down_user_id != nil {
-		fields = append(fields, droom.FieldDownUserID)
+	if m.b_user_id != nil {
+		fields = append(fields, droom.FieldBUserID)
+	}
+	if m.next_turn_user_id != nil {
+		fields = append(fields, droom.FieldNextTurnUserID)
 	}
 	if m.create_time != nil {
 		fields = append(fields, droom.FieldCreateTime)
@@ -411,10 +464,12 @@ func (m *DRoomMutation) Field(name string) (ent.Value, bool) {
 		return m.IsGameRunning()
 	case droom.FieldPanel:
 		return m.Panel()
-	case droom.FieldUpUserID:
-		return m.UpUserID()
-	case droom.FieldDownUserID:
-		return m.DownUserID()
+	case droom.FieldWUserID:
+		return m.WUserID()
+	case droom.FieldBUserID:
+		return m.BUserID()
+	case droom.FieldNextTurnUserID:
+		return m.NextTurnUserID()
 	case droom.FieldCreateTime:
 		return m.CreateTime()
 	}
@@ -430,10 +485,12 @@ func (m *DRoomMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldIsGameRunning(ctx)
 	case droom.FieldPanel:
 		return m.OldPanel(ctx)
-	case droom.FieldUpUserID:
-		return m.OldUpUserID(ctx)
-	case droom.FieldDownUserID:
-		return m.OldDownUserID(ctx)
+	case droom.FieldWUserID:
+		return m.OldWUserID(ctx)
+	case droom.FieldBUserID:
+		return m.OldBUserID(ctx)
+	case droom.FieldNextTurnUserID:
+		return m.OldNextTurnUserID(ctx)
 	case droom.FieldCreateTime:
 		return m.OldCreateTime(ctx)
 	}
@@ -459,19 +516,26 @@ func (m *DRoomMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPanel(v)
 		return nil
-	case droom.FieldUpUserID:
+	case droom.FieldWUserID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUpUserID(v)
+		m.SetWUserID(v)
 		return nil
-	case droom.FieldDownUserID:
+	case droom.FieldBUserID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDownUserID(v)
+		m.SetBUserID(v)
+		return nil
+	case droom.FieldNextTurnUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextTurnUserID(v)
 		return nil
 	case droom.FieldCreateTime:
 		v, ok := value.(time.Time)
@@ -516,11 +580,14 @@ func (m *DRoomMutation) ClearedFields() []string {
 	if m.FieldCleared(droom.FieldPanel) {
 		fields = append(fields, droom.FieldPanel)
 	}
-	if m.FieldCleared(droom.FieldUpUserID) {
-		fields = append(fields, droom.FieldUpUserID)
+	if m.FieldCleared(droom.FieldWUserID) {
+		fields = append(fields, droom.FieldWUserID)
 	}
-	if m.FieldCleared(droom.FieldDownUserID) {
-		fields = append(fields, droom.FieldDownUserID)
+	if m.FieldCleared(droom.FieldBUserID) {
+		fields = append(fields, droom.FieldBUserID)
+	}
+	if m.FieldCleared(droom.FieldNextTurnUserID) {
+		fields = append(fields, droom.FieldNextTurnUserID)
 	}
 	return fields
 }
@@ -542,11 +609,14 @@ func (m *DRoomMutation) ClearField(name string) error {
 	case droom.FieldPanel:
 		m.ClearPanel()
 		return nil
-	case droom.FieldUpUserID:
-		m.ClearUpUserID()
+	case droom.FieldWUserID:
+		m.ClearWUserID()
 		return nil
-	case droom.FieldDownUserID:
-		m.ClearDownUserID()
+	case droom.FieldBUserID:
+		m.ClearBUserID()
+		return nil
+	case droom.FieldNextTurnUserID:
+		m.ClearNextTurnUserID()
 		return nil
 	}
 	return fmt.Errorf("unknown DRoom nullable field %s", name)
@@ -562,11 +632,14 @@ func (m *DRoomMutation) ResetField(name string) error {
 	case droom.FieldPanel:
 		m.ResetPanel()
 		return nil
-	case droom.FieldUpUserID:
-		m.ResetUpUserID()
+	case droom.FieldWUserID:
+		m.ResetWUserID()
 		return nil
-	case droom.FieldDownUserID:
-		m.ResetDownUserID()
+	case droom.FieldBUserID:
+		m.ResetBUserID()
+		return nil
+	case droom.FieldNextTurnUserID:
+		m.ResetNextTurnUserID()
 		return nil
 	case droom.FieldCreateTime:
 		m.ResetCreateTime()
@@ -630,7 +703,6 @@ type DSessionMutation struct {
 	typ           string
 	id            *string
 	user_id       *string
-	user_name     *string
 	room_id       *string
 	create_time   *time.Time
 	clearedFields map[string]struct{}
@@ -760,42 +832,6 @@ func (m *DSessionMutation) ResetUserID() {
 	m.user_id = nil
 }
 
-// SetUserName sets the "user_name" field.
-func (m *DSessionMutation) SetUserName(s string) {
-	m.user_name = &s
-}
-
-// UserName returns the value of the "user_name" field in the mutation.
-func (m *DSessionMutation) UserName() (r string, exists bool) {
-	v := m.user_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserName returns the old "user_name" field's value of the DSession entity.
-// If the DSession object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DSessionMutation) OldUserName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUserName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUserName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserName: %w", err)
-	}
-	return oldValue.UserName, nil
-}
-
-// ResetUserName resets all changes to the "user_name" field.
-func (m *DSessionMutation) ResetUserName() {
-	m.user_name = nil
-}
-
 // SetRoomID sets the "room_id" field.
 func (m *DSessionMutation) SetRoomID(s string) {
 	m.room_id = &s
@@ -887,12 +923,9 @@ func (m *DSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DSessionMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 3)
 	if m.user_id != nil {
 		fields = append(fields, dsession.FieldUserID)
-	}
-	if m.user_name != nil {
-		fields = append(fields, dsession.FieldUserName)
 	}
 	if m.room_id != nil {
 		fields = append(fields, dsession.FieldRoomID)
@@ -910,8 +943,6 @@ func (m *DSessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case dsession.FieldUserID:
 		return m.UserID()
-	case dsession.FieldUserName:
-		return m.UserName()
 	case dsession.FieldRoomID:
 		return m.RoomID()
 	case dsession.FieldCreateTime:
@@ -927,8 +958,6 @@ func (m *DSessionMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case dsession.FieldUserID:
 		return m.OldUserID(ctx)
-	case dsession.FieldUserName:
-		return m.OldUserName(ctx)
 	case dsession.FieldRoomID:
 		return m.OldRoomID(ctx)
 	case dsession.FieldCreateTime:
@@ -948,13 +977,6 @@ func (m *DSessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
-		return nil
-	case dsession.FieldUserName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserName(v)
 		return nil
 	case dsession.FieldRoomID:
 		v, ok := value.(string)
@@ -1021,9 +1043,6 @@ func (m *DSessionMutation) ResetField(name string) error {
 	switch name {
 	case dsession.FieldUserID:
 		m.ResetUserID()
-		return nil
-	case dsession.FieldUserName:
-		m.ResetUserName()
 		return nil
 	case dsession.FieldRoomID:
 		m.ResetRoomID()

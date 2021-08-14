@@ -41,20 +41,6 @@ func (du *DSessionUpdate) SetNillableUserID(s *string) *DSessionUpdate {
 	return du
 }
 
-// SetUserName sets the "user_name" field.
-func (du *DSessionUpdate) SetUserName(s string) *DSessionUpdate {
-	du.mutation.SetUserName(s)
-	return du
-}
-
-// SetNillableUserName sets the "user_name" field if the given value is not nil.
-func (du *DSessionUpdate) SetNillableUserName(s *string) *DSessionUpdate {
-	if s != nil {
-		du.SetUserName(*s)
-	}
-	return du
-}
-
 // SetRoomID sets the "room_id" field.
 func (du *DSessionUpdate) SetRoomID(s string) *DSessionUpdate {
 	du.mutation.SetRoomID(s)
@@ -159,13 +145,6 @@ func (du *DSessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: dsession.FieldUserID,
 		})
 	}
-	if value, ok := du.mutation.UserName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: dsession.FieldUserName,
-		})
-	}
 	if value, ok := du.mutation.RoomID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -209,20 +188,6 @@ func (duo *DSessionUpdateOne) SetUserID(s string) *DSessionUpdateOne {
 func (duo *DSessionUpdateOne) SetNillableUserID(s *string) *DSessionUpdateOne {
 	if s != nil {
 		duo.SetUserID(*s)
-	}
-	return duo
-}
-
-// SetUserName sets the "user_name" field.
-func (duo *DSessionUpdateOne) SetUserName(s string) *DSessionUpdateOne {
-	duo.mutation.SetUserName(s)
-	return duo
-}
-
-// SetNillableUserName sets the "user_name" field if the given value is not nil.
-func (duo *DSessionUpdateOne) SetNillableUserName(s *string) *DSessionUpdateOne {
-	if s != nil {
-		duo.SetUserName(*s)
 	}
 	return duo
 }
@@ -353,13 +318,6 @@ func (duo *DSessionUpdateOne) sqlSave(ctx context.Context) (_node *DSession, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: dsession.FieldUserID,
-		})
-	}
-	if value, ok := duo.mutation.UserName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: dsession.FieldUserName,
 		})
 	}
 	if value, ok := duo.mutation.RoomID(); ok {

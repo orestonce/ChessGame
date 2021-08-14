@@ -34,20 +34,6 @@ func (dc *DSessionCreate) SetNillableUserID(s *string) *DSessionCreate {
 	return dc
 }
 
-// SetUserName sets the "user_name" field.
-func (dc *DSessionCreate) SetUserName(s string) *DSessionCreate {
-	dc.mutation.SetUserName(s)
-	return dc
-}
-
-// SetNillableUserName sets the "user_name" field if the given value is not nil.
-func (dc *DSessionCreate) SetNillableUserName(s *string) *DSessionCreate {
-	if s != nil {
-		dc.SetUserName(*s)
-	}
-	return dc
-}
-
 // SetRoomID sets the "room_id" field.
 func (dc *DSessionCreate) SetRoomID(s string) *DSessionCreate {
 	dc.mutation.SetRoomID(s)
@@ -149,10 +135,6 @@ func (dc *DSessionCreate) defaults() {
 		v := dsession.DefaultUserID
 		dc.mutation.SetUserID(v)
 	}
-	if _, ok := dc.mutation.UserName(); !ok {
-		v := dsession.DefaultUserName
-		dc.mutation.SetUserName(v)
-	}
 	if _, ok := dc.mutation.RoomID(); !ok {
 		v := dsession.DefaultRoomID
 		dc.mutation.SetRoomID(v)
@@ -163,9 +145,6 @@ func (dc *DSessionCreate) defaults() {
 func (dc *DSessionCreate) check() error {
 	if _, ok := dc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "user_id"`)}
-	}
-	if _, ok := dc.mutation.UserName(); !ok {
-		return &ValidationError{Name: "user_name", err: errors.New(`ent: missing required field "user_name"`)}
 	}
 	if _, ok := dc.mutation.RoomID(); !ok {
 		return &ValidationError{Name: "room_id", err: errors.New(`ent: missing required field "room_id"`)}
@@ -209,14 +188,6 @@ func (dc *DSessionCreate) createSpec() (*DSession, *sqlgraph.CreateSpec) {
 			Column: dsession.FieldUserID,
 		})
 		_node.UserID = value
-	}
-	if value, ok := dc.mutation.UserName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: dsession.FieldUserName,
-		})
-		_node.UserName = value
 	}
 	if value, ok := dc.mutation.RoomID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

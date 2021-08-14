@@ -104,18 +104,17 @@ func (this *GameUser) RpcLogin(req LoginRequest) (resp LoginResponse) {
 		resp.ErrMsg = ErrRoomIdInvalid
 		return
 	}
-	if this.Session.UserName != `` || this.Session.RoomID != `` {
+	if this.Session.UserID != `` || this.Session.RoomID != `` {
 		resp.ErrMsg = ErrLoginRepeat
 		return
 	}
-	_, err = gDbClient.DSession.Update().Where(dsession.ID(this.Session.ID)).SetUserID(user.ID).SetUserName(user.Name).SetRoomID(req.RoomId).Save(context.Background())
+	_, err = gDbClient.DSession.Update().Where(dsession.ID(this.Session.ID)).SetUserID(user.ID).SetRoomID(req.RoomId).Save(context.Background())
 	if err != nil {
 		log.Println("DSession.Update", err)
 		resp.ErrMsg = ErrUnknown
 		return
 	}
 	this.Session.UserID = user.ID
-	this.Session.UserName = user.Name
 	this.Session.RoomID = req.RoomId
 	gGame.OnUserLogin(this)
 	return
@@ -138,7 +137,7 @@ type ChatMessage struct {
 func (this *GameRoom) RpcChat(session *ent.DSession, req ChatRequest) (resp ChatResponse) {
 	message := ChatMessage{
 		TimeStr:  ymdTime.DefaultFormat(time.Now()),
-		Username: session.UserName,
+		Username: getUserNameByIdIgnoreEmpty(session.UserID),
 		Text:     req.Text,
 	}
 	for _, session := range this.getSessionList() {
@@ -159,6 +158,7 @@ type SyncPanelMessage struct {
 	NextTurnUsername string
 	ShowReGame       bool
 	ShowSiteDown     bool
+	ShowStandUp      bool
 }
 
 type TakeSiteRequest struct{}
@@ -174,17 +174,18 @@ func (this *GameRoom) RpcTakeSite(session *ent.DSession, req TakeSiteRequest) (r
 	}
 	userId := session.UserID
 
-	if this.Data.UpUserID == `` && this.Data.DownUserID != userId {
-		this.Data.UpUserID = userId
-	} else if this.Data.DownUserID == `` && this.Data.UpUserID != userId {
-		this.Data.DownUserID = userId
+	if this.Data.WUserID == `` && this.Data.BUserID != userId {
+		this.Data.WUserID = userId
+	} else if this.Data.BUserID == `` && this.Data.WUserID != userId {
+		this.Data.BUserID = userId
 	} else {
 		resp.ErrMsg = ErrNoPosition
 		return
 	}
-	if this.Data.DownUserID != `` && this.Data.UpUserID != `` {
+	if this.Data.BUserID != `` && this.Data.WUserID != `` {
 		this.Data.IsGameRunning = true
-		this.NextTurnUserId = this.Data.DownUserID
+		this.Data.NextTurnUserID = this.Data.WUserID
+		this.Data.Panel = ""
 		this.LoadPanelFromData()
 	}
 	this.sync2Client(nil)
@@ -238,7 +239,6 @@ func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionR
 		}
 	}
 	resp.FromPoint = req.FromPoint
-
 	return
 }
 
@@ -252,13 +252,14 @@ func (this *GameRoom) RpcReGame(session *ent.DSession, req ReGameRequest) (resp 
 		resp.ErrMsg = ErrGameIsRunning
 		return
 	}
-	if this.Data.DownUserID == `` || this.Data.UpUserID == `` {
+	if this.Data.BUserID == `` || this.Data.WUserID == `` {
 		resp.ErrMsg = ErrUserNotEnough
 		return
 	}
 	this.Data.IsGameRunning = true
+	this.Data.Panel = ""
 	this.LoadPanelFromData()
-	this.NextTurnUserId = this.Data.UpUserID
+	this.Data.NextTurnUserID = this.Data.WUserID
 	this.sync2Client(nil)
 	return
 }
@@ -273,7 +274,7 @@ func (this *GameRoom) sync2Client(user *GameUser) {
 		sessionList = getSessionListBy(dsession.RoomID(this.RoomId))
 	}
 	for _, session := range sessionList {
-		this.formatShowStatus(&s, session.UserName)
+		this.formatShowStatus(&s, session.UserID)
 		sendNoticeToSession(session.ID, s)
 	}
 	this.SaveRoomDataToDb()
