@@ -16,8 +16,6 @@ func main() {
 	ymdError.PanicIfError(err)
 	err = os.Chdir(`bin`)
 	ymdError.PanicIfError(err)
-	err = exec.Command(`go`, `build`, `github.com/orestonce/ChessGame/ChessServer/ChessGame`).Run()
-	ymdError.PanicIfError(err)
-	err = exec.Command(`go`, `build`, `github.com/orestonce/ChessGame/ChessServer/ChessGate`).Run()
+	err = exec.Command(`go`, `build`, `github.com/orestonce/ChessGame/ChessServer`).Run()
 	ymdError.PanicIfError(err)
 }
