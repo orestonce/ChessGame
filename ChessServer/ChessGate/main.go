@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string, pnginx bool) {
+func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string) {
 	ln, err := net.Listen("tcp", laddr)
 	if err != nil {
 		log.Fatal("Cannot listen to", laddr, err)
@@ -24,18 +24,15 @@ func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string, 
 			WriteBufferSize:   4 * 1024,
 			EnableCompression: true,
 		}
-		conn, err := upgreader.Upgrade(writer, request, nil)
+		var conn *websocket.Conn
+		conn, err = upgreader.Upgrade(writer, request, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		clientIp, _, _ := net.SplitHostPort(request.RemoteAddr)
-		if pnginx {
-			clientIp = request.Header.Get(`X-Real-IP`)
-		}
 		gateway.NewSession(ChessGateClient{
 			ws: conn,
-		}, clientIp)
+		})
 		conn.Close()
 	})
 	http.Serve(ln, mux)

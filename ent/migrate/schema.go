@@ -57,6 +57,7 @@ var (
 		{Name: "id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "password_hash", Type: field.TypeString},
+		{Name: "create_time", Type: field.TypeTime},
 	}
 	// DusersTable holds the schema information for the "dusers" table.
 	DusersTable = &schema.Table{

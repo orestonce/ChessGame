@@ -3,6 +3,8 @@
 package duser
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"github.com/orestonce/ChessGame/ent/predicate"
 )
@@ -101,6 +103,13 @@ func Name(v string) predicate.DUser {
 func PasswordHash(v string) predicate.DUser {
 	return predicate.DUser(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPasswordHash), v))
+	})
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
 	})
 }
 
@@ -323,6 +332,82 @@ func PasswordHashEqualFold(v string) predicate.DUser {
 func PasswordHashContainsFold(v string) predicate.DUser {
 	return predicate.DUser(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPasswordHash), v))
+	})
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.DUser {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DUser(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreateTime), v...))
+	})
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.DUser {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.DUser(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
+	})
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.DUser {
+	return predicate.DUser(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreateTime), v))
 	})
 }
 

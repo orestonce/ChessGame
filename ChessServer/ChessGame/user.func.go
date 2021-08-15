@@ -65,7 +65,7 @@ func (this *GameUser) RpcRegister(req RegisterRequest) (resp RegisterResponse) {
 		resp.ErrMsg = ErrUnknown
 		return resp
 	}
-	_, err = gDbClient.DUser.Create().SetID(uuid.NewString()).SetName(req.Username).SetPasswordHash(string(hashByte)).Save(context.Background())
+	_, err = gDbClient.DUser.Create().SetID(uuid.NewString()).SetName(req.Username).SetPasswordHash(string(hashByte)).SetCreateTime(time.Now()).Save(context.Background())
 	if err != nil {
 		log.Println("GameUser.RpcRegister", err)
 		resp.ErrMsg = ErrUnknown

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -28,6 +29,12 @@ func (dc *DUserCreate) SetName(s string) *DUserCreate {
 // SetPasswordHash sets the "password_hash" field.
 func (dc *DUserCreate) SetPasswordHash(s string) *DUserCreate {
 	dc.mutation.SetPasswordHash(s)
+	return dc
+}
+
+// SetCreateTime sets the "create_time" field.
+func (dc *DUserCreate) SetCreateTime(t time.Time) *DUserCreate {
+	dc.mutation.SetCreateTime(t)
 	return dc
 }
 
@@ -123,6 +130,9 @@ func (dc *DUserCreate) check() error {
 			return &ValidationError{Name: "password_hash", err: fmt.Errorf(`ent: validator failed for field "password_hash": %w`, err)}
 		}
 	}
+	if _, ok := dc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+	}
 	if v, ok := dc.mutation.ID(); ok {
 		if err := duser.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
@@ -172,6 +182,14 @@ func (dc *DUserCreate) createSpec() (*DUser, *sqlgraph.CreateSpec) {
 			Column: duser.FieldPasswordHash,
 		})
 		_node.PasswordHash = value
+	}
+	if value, ok := dc.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: duser.FieldCreateTime,
+		})
+		_node.CreateTime = value
 	}
 	return _node, _spec
 }

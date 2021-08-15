@@ -11,6 +11,8 @@ const (
 	FieldName = "name"
 	// FieldPasswordHash holds the string denoting the password_hash field in the database.
 	FieldPasswordHash = "password_hash"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// Table holds the table name of the duser in the database.
 	Table = "dusers"
 )
@@ -20,6 +22,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldPasswordHash,
+	FieldCreateTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

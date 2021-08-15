@@ -1626,6 +1626,7 @@ type DUserMutation struct {
 	id            *string
 	name          *string
 	password_hash *string
+	create_time   *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*DUser, error)
@@ -1789,6 +1790,42 @@ func (m *DUserMutation) ResetPasswordHash() {
 	m.password_hash = nil
 }
 
+// SetCreateTime sets the "create_time" field.
+func (m *DUserMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *DUserMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the DUser entity.
+// If the DUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DUserMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *DUserMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
 // Where appends a list predicates to the DUserMutation builder.
 func (m *DUserMutation) Where(ps ...predicate.DUser) {
 	m.predicates = append(m.predicates, ps...)
@@ -1808,12 +1845,15 @@ func (m *DUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DUserMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, duser.FieldName)
 	}
 	if m.password_hash != nil {
 		fields = append(fields, duser.FieldPasswordHash)
+	}
+	if m.create_time != nil {
+		fields = append(fields, duser.FieldCreateTime)
 	}
 	return fields
 }
@@ -1827,6 +1867,8 @@ func (m *DUserMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case duser.FieldPasswordHash:
 		return m.PasswordHash()
+	case duser.FieldCreateTime:
+		return m.CreateTime()
 	}
 	return nil, false
 }
@@ -1840,6 +1882,8 @@ func (m *DUserMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldName(ctx)
 	case duser.FieldPasswordHash:
 		return m.OldPasswordHash(ctx)
+	case duser.FieldCreateTime:
+		return m.OldCreateTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown DUser field %s", name)
 }
@@ -1862,6 +1906,13 @@ func (m *DUserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPasswordHash(v)
+		return nil
+	case duser.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DUser field %s", name)
@@ -1917,6 +1968,9 @@ func (m *DUserMutation) ResetField(name string) error {
 		return nil
 	case duser.FieldPasswordHash:
 		m.ResetPasswordHash()
+		return nil
+	case duser.FieldCreateTime:
+		m.ResetCreateTime()
 		return nil
 	}
 	return fmt.Errorf("unknown DUser field %s", name)

@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -19,6 +20,8 @@ type DUser struct {
 	Name string `json:"name,omitempty"`
 	// PasswordHash holds the value of the "password_hash" field.
 	PasswordHash string `json:"password_hash,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,6 +31,8 @@ func (*DUser) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case duser.FieldID, duser.FieldName, duser.FieldPasswordHash:
 			values[i] = new(sql.NullString)
+		case duser.FieldCreateTime:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type DUser", columns[i])
 		}
@@ -61,6 +66,12 @@ func (d *DUser) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				d.PasswordHash = value.String
 			}
+		case duser.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				d.CreateTime = value.Time
+			}
 		}
 	}
 	return nil
@@ -93,6 +104,8 @@ func (d *DUser) String() string {
 	builder.WriteString(d.Name)
 	builder.WriteString(", password_hash=")
 	builder.WriteString(d.PasswordHash)
+	builder.WriteString(", create_time=")
+	builder.WriteString(d.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

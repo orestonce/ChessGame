@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -35,6 +36,12 @@ func (du *DUserUpdate) SetName(s string) *DUserUpdate {
 // SetPasswordHash sets the "password_hash" field.
 func (du *DUserUpdate) SetPasswordHash(s string) *DUserUpdate {
 	du.mutation.SetPasswordHash(s)
+	return du
+}
+
+// SetCreateTime sets the "create_time" field.
+func (du *DUserUpdate) SetCreateTime(t time.Time) *DUserUpdate {
+	du.mutation.SetCreateTime(t)
 	return du
 }
 
@@ -150,6 +157,13 @@ func (du *DUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: duser.FieldPasswordHash,
 		})
 	}
+	if value, ok := du.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: duser.FieldCreateTime,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{duser.Label}
@@ -178,6 +192,12 @@ func (duo *DUserUpdateOne) SetName(s string) *DUserUpdateOne {
 // SetPasswordHash sets the "password_hash" field.
 func (duo *DUserUpdateOne) SetPasswordHash(s string) *DUserUpdateOne {
 	duo.mutation.SetPasswordHash(s)
+	return duo
+}
+
+// SetCreateTime sets the "create_time" field.
+func (duo *DUserUpdateOne) SetCreateTime(t time.Time) *DUserUpdateOne {
+	duo.mutation.SetCreateTime(t)
 	return duo
 }
 
@@ -315,6 +335,13 @@ func (duo *DUserUpdateOne) sqlSave(ctx context.Context) (_node *DUser, err error
 			Type:   field.TypeString,
 			Value:  value,
 			Column: duser.FieldPasswordHash,
+		})
+	}
+	if value, ok := duo.mutation.CreateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: duser.FieldCreateTime,
 		})
 	}
 	_node = &DUser{config: duo.config}

@@ -1,25 +1,19 @@
 package ymdQuickRestart
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"github.com/orestonce/ChessGame/ymd/ymdError"
+	"github.com/google/uuid"
 	"github.com/orestonce/ChessGame/ymd/ymdJson"
 	"github.com/orestonce/ChessGame/ymd/ymdRedis"
-	"github.com/orestonce/ChessGame/ymd/ymdTime"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 )
 
 type GatewayService struct {
-	req           RedisInfo
-	redisClient   *ymdRedis.RedisClient
-	locker        sync.Mutex
-	startId       string
-	nextSessionId int
-	sessionMap    map[string]*gatewaySession
+	req         RedisInfo
+	redisClient *ymdRedis.RedisClient
+	locker      sync.Mutex
+	sessionMap  map[string]*gatewaySession
 }
 
 type gatewaySession struct {
@@ -29,13 +23,9 @@ type gatewaySession struct {
 
 func NewGatewayService(req RedisInfo) *GatewayService {
 	redisClient := ymdRedis.NewRedisClient(req.RedisAddr)
-	startId := make([]byte, 10)
-	_, err := rand.Read(startId)
-	ymdError.PanicIfError(err)
 	this := &GatewayService{
 		req:         req,
 		redisClient: redisClient,
-		startId:     hex.EncodeToString(startId),
 		sessionMap:  map[string]*gatewaySession{},
 	}
 	for sessionId := range redisClient.MustHGetAll(req.GatewaySession()) {
@@ -71,19 +61,12 @@ type GatewaySessionRunner interface {
 }
 
 func (this *GatewayService) getNextSessionId() string {
-	var tmpSid int
-	this.locker.Lock()
-	this.nextSessionId++
-	tmpSid = this.nextSessionId
-	this.locker.Unlock()
-
-	sessionId := this.startId + "-" + strconv.Itoa(tmpSid)
-	return sessionId
+	return uuid.NewString()
 }
 
-func (this *GatewayService) NewSession(runner GatewaySessionRunner, clientIp string) {
+func (this *GatewayService) NewSession(runner GatewaySessionRunner) {
 	sessionId := this.getNextSessionId()
-	log.Println(sessionId, "session open ", clientIp)
+	log.Println(sessionId, "session open ", sessionId)
 
 	toClientMsgCh := make(chan RedisExchange, 10)
 	this.locker.Lock()
@@ -101,11 +84,6 @@ func (this *GatewayService) NewSession(runner GatewaySessionRunner, clientIp str
 			runner.CloseClient()
 		})
 	}
-	this.redisClient.MustHSetNx(this.req.GatewaySession(), sessionId, ymdJson.MustMarshalToString(GatewayConnInfo{
-		SessionId:   sessionId,
-		ConnectTime: ymdTime.DefaultFormat(time.Now()),
-		ClientIp:    clientIp,
-	}))
 	this.redisClient.MustRPush(this.req.LogicIn(), ymdJson.MustMarshalToString(RedisExchange{
 		MsgType:   MTGatewayNew,
 		SessionId: sessionId,

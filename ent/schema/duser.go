@@ -16,6 +16,7 @@ func (DUser) Fields() []ent.Field {
 		field.String("id").NotEmpty(),
 		field.String("name").NotEmpty().Unique(),
 		field.String("password_hash").NotEmpty(),
+		field.Time("create_time"),
 	}
 }
 

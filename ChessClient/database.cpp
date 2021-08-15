@@ -10,7 +10,7 @@ static const char *k2Username = "k2Username";
 static const char *k2Password = "k2Password";
 static const char *k2RoomId = "k2RoomId";
 static const char *k2RememberPassword = "k2RememberPassword";
-static const char *default_address = "ws://127.0.0.1:8912/ChessGame";
+static const char *default_address = "ws://49.233.210.51:8912/ChessGame";
 
 Database *Database::GetInstance()
 {
