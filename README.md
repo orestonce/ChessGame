@@ -70,19 +70,19 @@ server {
   `git clone https://github.com/orestonce/ChessGame`
 2. 设置 `GOPATH` 为克隆下来的的目录， 开始编译linux_amd64版服务端程序
   `GOPATH=$(pwd) go run src/BuildServer/main.go`
-3. 编译完成，会生产 bin/ChessGame bin/ChessGate 两个二进制文件
-4. 部署到服务器: 假设redis地址为127.0.0.1:6379, 服务器地址为ws://192.168.56.111:8912/ChessGame, 部署前缀为chess001
+3. 编译完成，会产生1个二进制文件 bin/ChessServer
+4. 部署到服务器: 假设redis地址为127.0.0.1:6379, 服务器地址为ws://192.168.56.111:8912/ChessGame, 部署前缀为chess001, 数据库为 "root:@tcp(mysql_server:3306)/chess?parseTime=true&charset=utf8"
   ````
   # 启动gateway
-  ./ChessGate -laddr 192.168.56.111:8912 -raddr 127.0.0.1:6379 -rprefix chess001 -wspath /ChessGame
+  ./ChessServer Gate --laddr 192.168.56.111:8912 --raddr 127.0.0.1:6379 -rprefix chess001
   # 启动game
-  ./ChessGame -raddr 127.0.0.1:6379 -rprefix chess001 -spath /tmp/ChessGame
+  ./ChessServer Game --raddr 127.0.0.1:6379 -rprefix chess001 --mysql_schema "root:@tcp(mysql_server:3306)/chess?parseTime=true&charset=utf8"
   ````
 ![v2.5服务端1](screenshot/v2.5-server1.png)
 ## 编译、配置客户端
 1. 克隆本仓库代码到本地
   `git clone https://github.com/orestonce/ChessGame`
-2. 打开 `src/ChessClient/ChessClient.pro` ，开始编译
+2. 打开 `ChessClient/ChessClient.pro` ，开始编译
   `ctrl + r`
 3. 在登陆页面点击 "设置服务器" 按钮, 输入服务器连接地址: `ws://192.168.56.111:8912/ChessGame`, 点击确认
 4. 回到登陆页面后，点击注册，输入用户名、密码点击确认即可注册成功
