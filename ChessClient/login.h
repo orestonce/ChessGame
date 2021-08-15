@@ -12,10 +12,6 @@ namespace Ui
   class Login;
 }
 
-namespace chess
-{
-  struct SSC_LOGIN_ACK;
-}
 class Login : public QMainWindow
 {
     Q_OBJECT

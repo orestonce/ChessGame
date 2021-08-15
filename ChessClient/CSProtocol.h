@@ -223,7 +223,6 @@ public :
 	QJsonObject ToJsonObject() const;
 	bool FromJsonObject(QJsonObject obj);
 public :
-	PiecePoint FromPoint ;
 	QVector<PiecePoint> CanMoveToList ;
 } GetSuggestionResponse;
 

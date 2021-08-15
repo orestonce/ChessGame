@@ -673,7 +673,6 @@ QByteArray GetSuggestionResponse::EncodeToQByteArray() const
 QJsonObject GetSuggestionResponse::ToJsonObject() const
 {
 	QJsonObject data;
-	data["FromPoint"] = this->FromPoint.ToJsonObject();
 
 	{
 		QJsonArray array;
@@ -698,7 +697,6 @@ bool GetSuggestionResponse::DecodeFromQByteArray(const QByteArray& bin)
 
 bool GetSuggestionResponse::FromJsonObject(QJsonObject data)
 {
-	this->FromPoint.FromJsonObject(data["FromPoint"].toObject());
 
 	{
 		QJsonArray array = data["CanMoveToList"].toArray();

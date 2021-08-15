@@ -27,13 +27,14 @@ public:
     void Load(const SyncPanelMessage& resp);
     GamePoint GetPoint(int iLine, int iColumn);
     GamePoint GetPoint(QPoint p);
-    bool AmUpper();
+    bool IsBlack();
     bool IsPointValied(QPoint p);
     void ClearPoint(QPoint& p);
     bool IsTurnMe();
-    bool IsTurnUpper();
+    bool IsTurnW();
     bool SameTeamWithMe(QPoint p);
     bool IsInSuggestionList(PiecePoint p);
+    QString FormatPanel();
 public:
     QString WUsername ;
     QString WUserId;

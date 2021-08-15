@@ -18,7 +18,7 @@ void GameCore::Load(const SyncPanelMessage &resp)
             if ('0' < ch && ch <= '9') {
                 int emptyCnt = int(int(ch) - '0');
                 while (emptyCnt > 0 && col < COLUMN_END) {
-                    m_arrChessPanel[line][col] = '0';
+                    m_arrChessPanel[line][col] = EPieceTeamNone;
                     col++;
                     emptyCnt--;
                 }
@@ -36,7 +36,6 @@ void GameCore::Load(const SyncPanelMessage &resp)
             if (idx > LINE_END * COLUMN_END ) {
                 continue;
             }
-            qDebug() << "data" << m_arrChessPanel[iLine][iColumn];
         }
     }
     this->WUsername = resp.WUserName;
@@ -61,9 +60,9 @@ GamePoint GameCore::GetPoint(QPoint p)
     return this->GetPoint(p.y(), p.x());
 }
 
-bool GameCore::AmUpper()
+bool GameCore::IsBlack()
 {
-    return this->WUserId == this->MyUserId;
+    return this->BUserId == this->MyUserId;
 }
 
 bool GameCore::IsPointValied(QPoint p)
@@ -83,7 +82,7 @@ bool GameCore::IsTurnMe()
     return this->NextTurnUserId == this->MyUserId;
 }
 
-bool GameCore::IsTurnUpper()
+bool GameCore::IsTurnW()
 {
     return this->NextTurnUserId == this->WUserId;
 }
@@ -91,10 +90,10 @@ bool GameCore::IsTurnUpper()
 bool GameCore::SameTeamWithMe(QPoint p)
 {
     auto data = this->GetPoint(p).Data;
-    if (this->MyUserId == this->WUserId) {
+    if (this->MyUserId == this->BUserId) {
         return islower(data);
     }
-    if (this->MyUserId == this->BUserId ) {
+    if (this->MyUserId == this->WUserId ) {
         return isupper(data);
     }
     return false;
@@ -110,6 +109,39 @@ bool GameCore::IsInSuggestionList(PiecePoint p)
         }
     }
     return false;
+}
+
+QString GameCore::FormatPanel()
+{
+    QString out;
+    for (int iLine =0; iLine < LINE_END; iLine++) {
+        int emptyCount = 0;
+        for (int iCol =0; iCol < COLUMN_END; iCol++) {
+            if (this->m_arrChessPanel[iLine][iCol] == '0' ) {
+                emptyCount++;
+                continue;
+            }
+            if (emptyCount>0) {
+                out.append(QChar('0' + emptyCount));
+                emptyCount=0;
+            }
+            out.append(QChar(this->m_arrChessPanel[iLine][iCol]));
+        }
+        if (emptyCount > 0) {
+            out.append(QChar('0' + emptyCount));
+        }
+        if (iLine == LINE_END-1) {
+            out.append(QChar(' '));
+        } else {
+            out.append(QChar('/'));
+        }
+    }
+    if (this->NextTurnUserId == this->WUserId) {
+        out.append(QChar('w'));
+    } else {
+        out.append(QChar('b'));
+    }
+    return out;
 }
 
 GameCore::GameCore()

@@ -1,4 +1,5 @@
 #include "login.h"
+#include "gamepanel.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]){
@@ -6,6 +7,7 @@ int main(int argc, char *argv[]){
 
     Login w;
     w.show();
+
     return a.exec();
 }
 

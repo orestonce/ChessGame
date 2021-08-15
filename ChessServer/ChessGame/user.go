@@ -32,7 +32,7 @@ func userHandleClientMessage(msg ymdQuickRestart.RedisExchange) {
 			Session: session,
 		}).MethodByName(callPacket.Method)
 		if !method.IsValid() {
-			log.Println("Unkown method", callPacket.Method)
+			log.Println("Unknown method", callPacket.Method)
 			return
 		}
 		request := reflect.New(method.Type().In(0)).Interface()

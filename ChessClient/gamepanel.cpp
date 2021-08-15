@@ -81,6 +81,8 @@ bool GamePanel::Init(const QString &username, const QString &password, const QSt
         this->repaint();
     });
     ui->showText->append("链接服务器成功...");
+    ui->pushButton_ReGame->setVisible(false);
+    ui->pushButton_TakeSite->setVisible(false);
     LoginRequest req;
     req.Username = username;
     req.Password = password;
@@ -119,7 +121,11 @@ void GamePanel::LoadGameCore()
 {
     if ( core->IsGameRunning )
     {
-        ui->label_GameStatus->setText ( trUtf8("游戏正在运行") );
+        QString str=trUtf8("游戏正在运行");
+        if (core->IsTurnMe()) {
+            str += trUtf8("-该我出手");
+        }
+        ui->label_GameStatus->setText ( str );
     }
     else
     {
@@ -129,37 +135,37 @@ void GamePanel::LoadGameCore()
     ui->pushButton_TakeSite->setVisible(core->ShowSiteDown);
 
 
-    const char *turnUsername = NULL;
+    const char *turnPicture = NULL;
     const char *down = ":/images/down.png";
     const char *upper= ":/images/up.png";
 
-    if (core->AmUpper())
+    if (core->IsBlack())
     {
-        ui->upUserLabel->setText(core->BUsername);
-        ui->downUserLabel->setText(core->WUsername);
+        ui->upUserLabel->setText(core->WUsername);
+        ui->downUserLabel->setText(core->BUsername);
         if (core->IsTurnMe())
         {
-            turnUsername = down;
+            turnPicture = down;
         }
         else
         {
-            turnUsername = upper;
+            turnPicture = upper;
         }
     }
     else
     {
-        ui->upUserLabel->setText(core->WUsername);
-        ui->downUserLabel->setText(core->BUsername);
-        if (core->IsTurnUpper())
+        ui->upUserLabel->setText(core->BUsername);
+        ui->downUserLabel->setText(core->WUsername);
+        if (core->IsTurnW())
         {
-            turnUsername = upper;
+            turnPicture = down;
         }
         else
         {
-            turnUsername = down;
+            turnPicture = upper;
         }
     }
-    ui->chooselabel->setPixmap(QPixmap(turnUsername));
+    ui->chooselabel->setPixmap(QPixmap(turnPicture));
 }
 
 void GamePanel::paintEvent(QPaintEvent *)
@@ -222,7 +228,6 @@ void GamePanel::mousePressEvent(QMouseEvent *e)
             return;
         }
         core->SuggestionPointToList = resp.CanMoveToList;
-        qDebug() <<"建议长度" << core->SuggestionPointToList.length();
     }
     else if (core->IsPointValied(core->SelectedPointFrom) && core->IsInSuggestionList(piece))
     {
@@ -281,17 +286,16 @@ void GamePanel::showErrorAndClose(QString msg)
 
 QPoint GamePanel::logicChangeToXY(const QPoint& point)
 {
-
     QPoint p = point;
     //对黑棋进行处理
-    if ( core->AmUpper() )
+    if ( core->IsBlack() )
     {
         p.rx () = GameCore::COLUMN_END - p.x () -1 ;
         p.ry () = GameCore::LINE_END - p.y () -1 ;
     }
 
-    p.rx() = (p.x()+1)* 40 -  3;
-    p.ry() = (p.y()+1)* 40 + 4;
+    p.rx() = (p.x()+1)* 40-3;
+    p.ry() = (p.y()+1)* 40+4;
 
     return p;
 }
@@ -300,10 +304,10 @@ QPoint GamePanel::xyChangeToLogic(const QPoint& point)
 {
     QPoint p;
 
-    p.rx() = (point.x() -  8)/40 -1 ;
-    p.ry() = (point.y() +2)/40 -1 ;
+    p.rx() = (point.x()-8)/40 -1;
+    p.ry() = (point.y()+2)/40 -1;
     //对黑棋进行处理
-    if ( core->AmUpper() )
+    if ( core->IsBlack() )
     {
         p.rx () = GameCore::COLUMN_END - p.x () -1 ;
         p.ry () = GameCore::LINE_END - p.y ()  -1;

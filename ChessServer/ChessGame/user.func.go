@@ -258,7 +258,6 @@ type GetSuggestionRequest struct {
 }
 
 type GetSuggestionResponse struct {
-	FromPoint     PiecePoint
 	CanMoveToList []PiecePoint
 }
 
@@ -271,7 +270,6 @@ func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionR
 			}
 		}
 	}
-	resp.FromPoint = req.FromPoint
 	return
 }
 
