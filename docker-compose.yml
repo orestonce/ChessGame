@@ -3,11 +3,18 @@ services:
   redis:
     restart: always
     image: redis:latest
-
+  mysql_server:
+    build:
+      context: ./
+      target: mysql_server
+    restart: always
+    volumes:
+      - ./data:/var/lib/mysql
   gateway:
     restart: always
     depends_on:
       - redis
+      - mysql_server
     build:
       context: ./
       target: cg_gateway
@@ -17,8 +24,7 @@ services:
     restart: always
     depends_on:
       - redis
+      - mysql_server
     build:
       context: ./
       target: cg_game
-    volumes:
-      - ./data:/data

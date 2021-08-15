@@ -1,4 +1,4 @@
-﻿#include "login.h"
+#include "login.h"
 #include "gamepanel.h"
 #include "registerdialog.h"
 #include "ui_login.h"

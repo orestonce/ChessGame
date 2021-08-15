@@ -1,4 +1,4 @@
-﻿/// \login.h
+/// \login.h
 /// \brief 登录界面
 /// \author 汪超
 

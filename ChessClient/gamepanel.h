@@ -1,4 +1,4 @@
-﻿#ifndef GAMEPANEL_H
+#ifndef GAMEPANEL_H
 #define GAMEPANEL_H
 
 #include <QDialog>

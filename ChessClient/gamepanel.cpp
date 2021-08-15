@@ -1,4 +1,4 @@
-﻿#include "gamepanel.h"
+#include "gamepanel.h"
 #include "gamecore.h"
 #include "login.h"
 #include "ui_gamepanel.h"
