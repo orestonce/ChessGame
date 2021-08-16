@@ -39,7 +39,9 @@
 ## 引用项目
 * 服务端:
     * [websocket](https://github.com/gorilla/websocket)
-    * [goleveldb](https://github.com/syndtr/goleveldb)
+    * [ent](https://github.com/ent/ent)
+    * [bcrypt](https://golang.org/x/crypto/bcrypt)
+    * [cobra](https://github.com/spf13/cobra)
 
 ## nginx代理websocket注意事项
 * 真实的ChessServer监听在127.0.0.1:8912位置, nginx配置为
