@@ -370,16 +370,6 @@ func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, userId string) {
 	}
 }
 
-func (this *GameRoom) formatPanelFull(resp *SyncPanelMessage) {
-	resp.PanelFull = this.formatPanelV2()
-	resp.WUserName = getUserNameByIdIgnoreEmpty(this.Data.WUserID)
-	resp.WUserId = this.Data.WUserID
-	resp.BUserName = getUserNameByIdIgnoreEmpty(this.Data.BUserID)
-	resp.BUserId = this.Data.BUserID
-	resp.IsGameRunning = this.Data.IsGameRunning
-	resp.NextTurnUserId = this.Data.NextTurnUserID
-}
-
 func (this *GameRoom) formatPanelV2() string {
 	w := &bytes.Buffer{}
 	for line := 0; line < LINE_COUNT; line++ {
