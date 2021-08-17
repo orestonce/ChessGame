@@ -2,9 +2,7 @@ package ChessGame
 
 import (
 	"bytes"
-	"context"
 	"github.com/orestonce/ChessGame/ent"
-	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"log"
 	"strings"
@@ -63,37 +61,6 @@ func (this *GameRoom) LoadPanelFromData() {
 		} else {
 			log.Println("error next user id data", this.Data.Panel)
 		}
-	}
-}
-
-func (this *GameRoom) SaveRoomDataToDb() {
-	data := this.Data
-	if data == nil {
-		return
-	}
-	data.Panel = this.formatPanelV2()
-	_, err := gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).
-		SetWUserID(data.WUserID).SetBUserID(data.BUserID).SetPanel(data.Panel).SetIsGameRunning(data.IsGameRunning).Save(context.Background())
-	if err != nil {
-		log.Println("GameRoom.SaveRoomDataToDb", err)
-	}
-}
-
-func (this *GameRoom) onUserLeave(userId string) {
-	winUserId := ``
-	if this.Data.BUserID == userId {
-		this.Data.BUserID = ``
-		winUserId = this.Data.WUserID
-	} else if this.Data.WUserID == userId {
-		this.Data.WUserID = ``
-		winUserId = this.Data.BUserID
-	} else {
-		return
-	}
-	if this.Data.IsGameRunning {
-		this.onGameOver(winUserId)
-	} else {
-		this.sync2Client(nil)
 	}
 }
 
@@ -353,11 +320,10 @@ func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 func (this *GameRoom) onGameOver(winUserId string) {
 	this.Data.IsGameRunning = false
 	this.sync2Client(nil)
-	pkt := GameOverNotice{
+	this.BroadcastToAll(GameOverNotice{
 		IsPeace:     winUserId == ``,
 		WinUsername: getUserNameByIdIgnoreEmpty(winUserId),
-	}
-	this.BroadcastToAll(pkt)
+	})
 }
 
 func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, userId string) {

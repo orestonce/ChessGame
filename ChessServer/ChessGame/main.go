@@ -45,11 +45,11 @@ func RunChessGame(redis ymdQuickRestart.RedisInfo, mysql_schema string) {
 			case ymdQuickRestart.MTGatewayRead:
 				userHandleClientMessage(msg)
 			case ymdQuickRestart.MTGatewayClose:
-				kickSession(msg.SessionId)
+				kickSessionById(msg.SessionId)
 			}
 		})
 		if errMsg != `` {
-			kickSession(msg.SessionId)
+			kickSessionById(msg.SessionId)
 			log.Println(msg.SessionId, "Unknown error", errMsg, stack)
 		}
 	}

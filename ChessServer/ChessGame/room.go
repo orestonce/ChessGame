@@ -20,16 +20,31 @@ func (this *GameRoom) IsEmpty() bool {
 }
 
 func (this *GameRoom) UserLeave(session *ent.DSession) {
-	this.onUserLeave(session.UserID)
+	winUserId := ``
+	if this.Data.BUserID == session.UserID {
+		this.Data.BUserID = ``
+		winUserId = this.Data.WUserID
+	} else if this.Data.WUserID == session.UserID {
+		this.Data.WUserID = ``
+		winUserId = this.Data.BUserID
+	}
 	_, err := gDbClient.DSession.Delete().Where(dsession.ID(session.ID)).Exec(context.Background())
 	if err != nil {
 		log.Println("GameRoom.UserLeave", err)
+		return
 	}
 	data := this.Data
 	err = gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).SetPanel(data.Panel).SetWUserID(data.WUserID).SetBUserID(data.BUserID).Exec(context.Background())
 	if err != nil {
 		log.Println("GamePanel onUserLeave", err)
+		return
 	}
+	if this.Data.IsGameRunning {
+		this.onGameOver(winUserId)
+	} else {
+		this.sync2Client(nil)
+	}
+
 }
 
 func (this *GameRoom) BroadcastToAll(a interface{}) {

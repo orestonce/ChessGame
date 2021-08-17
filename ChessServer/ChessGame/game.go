@@ -21,14 +21,18 @@ func insertSession(sessionId string) {
 	}
 }
 
-func kickSession(sessionId string) {
+func kickSessionById(sessionId string) {
 	session := getSessionById(sessionId)
 	if session == nil {
 		return
 	}
-	_, err := gDbClient.DSession.Delete().Where(dsession.ID(sessionId)).Exec(context.Background())
+	kickSession(session)
+}
+
+func kickSession(session *ent.DSession) {
+	_, err := gDbClient.DSession.Delete().Where(dsession.ID(session.ID)).Exec(context.Background())
 	if err != nil {
-		log.Println("Game.kickSession", err, sessionId)
+		log.Println("Game.kickSessionById", err, session.ID)
 		return
 	}
 	room := getRoomById(session.RoomID)
@@ -37,11 +41,12 @@ func kickSession(sessionId string) {
 		if room.IsEmpty() {
 			_, err = gDbClient.DRoom.Delete().Where(droom.ID(room.RoomId)).Exec(context.Background())
 			if err != nil {
-				log.Println("Game.kickSession", err)
+				log.Println("Game.kickSessionById", err)
+				return
 			}
 		}
 	}
-	gLogic.KickSession(sessionId)
+	gLogic.KickSession(session.ID)
 }
 
 func getRoomById(id string) *GameRoom {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
 	"github.com/orestonce/ChessGame/ymd/ymdJson"
@@ -197,7 +198,7 @@ func (this *GameUser) RpcLogin(req LoginRequest) (resp LoginResponse) {
 			sendNoticeToSession(oldSession.ID, ServerKickYou{
 				ErrMsg: ErrNextLogin,
 			})
-			kickSession(oldSession.ID)
+			kickSession(oldSession)
 		}
 	}
 	room := getRoomById(this.Session.RoomID)
@@ -388,7 +389,15 @@ func (this *GameRoom) sync2Client(user *GameUser) {
 		this.formatShowStatus(&resp, session.UserID)
 		sendNoticeToSession(session.ID, resp)
 	}
-	this.SaveRoomDataToDb()
+	data := this.Data
+	if data == nil {
+		return
+	}
+	data.Panel = this.formatPanelV2()
+	_, err := gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).SetWUserID(data.WUserID).SetBUserID(data.BUserID).SetPanel(data.Panel).SetIsGameRunning(data.IsGameRunning).Save(context.Background())
+	if err != nil {
+		log.Println("GameRoom.SaveRoomDataToDb", err)
+	}
 }
 
 func (this *PiecePoint) IsValid() bool {
