@@ -549,19 +549,18 @@ func (m *DChatMutation) ResetEdge(name string) error {
 // DRoomMutation represents an operation that mutates the DRoom nodes in the graph.
 type DRoomMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *string
-	is_game_running   *bool
-	panel             *string
-	w_user_id         *string
-	b_user_id         *string
-	next_turn_user_id *string
-	create_time       *time.Time
-	clearedFields     map[string]struct{}
-	done              bool
-	oldValue          func(context.Context) (*DRoom, error)
-	predicates        []predicate.DRoom
+	op              Op
+	typ             string
+	id              *string
+	is_game_running *bool
+	panel           *string
+	w_user_id       *string
+	b_user_id       *string
+	create_time     *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*DRoom, error)
+	predicates      []predicate.DRoom
 }
 
 var _ ent.Mutation = (*DRoomMutation)(nil)
@@ -845,55 +844,6 @@ func (m *DRoomMutation) ResetBUserID() {
 	delete(m.clearedFields, droom.FieldBUserID)
 }
 
-// SetNextTurnUserID sets the "next_turn_user_id" field.
-func (m *DRoomMutation) SetNextTurnUserID(s string) {
-	m.next_turn_user_id = &s
-}
-
-// NextTurnUserID returns the value of the "next_turn_user_id" field in the mutation.
-func (m *DRoomMutation) NextTurnUserID() (r string, exists bool) {
-	v := m.next_turn_user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNextTurnUserID returns the old "next_turn_user_id" field's value of the DRoom entity.
-// If the DRoom object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DRoomMutation) OldNextTurnUserID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldNextTurnUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldNextTurnUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNextTurnUserID: %w", err)
-	}
-	return oldValue.NextTurnUserID, nil
-}
-
-// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
-func (m *DRoomMutation) ClearNextTurnUserID() {
-	m.next_turn_user_id = nil
-	m.clearedFields[droom.FieldNextTurnUserID] = struct{}{}
-}
-
-// NextTurnUserIDCleared returns if the "next_turn_user_id" field was cleared in this mutation.
-func (m *DRoomMutation) NextTurnUserIDCleared() bool {
-	_, ok := m.clearedFields[droom.FieldNextTurnUserID]
-	return ok
-}
-
-// ResetNextTurnUserID resets all changes to the "next_turn_user_id" field.
-func (m *DRoomMutation) ResetNextTurnUserID() {
-	m.next_turn_user_id = nil
-	delete(m.clearedFields, droom.FieldNextTurnUserID)
-}
-
 // SetCreateTime sets the "create_time" field.
 func (m *DRoomMutation) SetCreateTime(t time.Time) {
 	m.create_time = &t
@@ -949,7 +899,7 @@ func (m *DRoomMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DRoomMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.is_game_running != nil {
 		fields = append(fields, droom.FieldIsGameRunning)
 	}
@@ -961,9 +911,6 @@ func (m *DRoomMutation) Fields() []string {
 	}
 	if m.b_user_id != nil {
 		fields = append(fields, droom.FieldBUserID)
-	}
-	if m.next_turn_user_id != nil {
-		fields = append(fields, droom.FieldNextTurnUserID)
 	}
 	if m.create_time != nil {
 		fields = append(fields, droom.FieldCreateTime)
@@ -984,8 +931,6 @@ func (m *DRoomMutation) Field(name string) (ent.Value, bool) {
 		return m.WUserID()
 	case droom.FieldBUserID:
 		return m.BUserID()
-	case droom.FieldNextTurnUserID:
-		return m.NextTurnUserID()
 	case droom.FieldCreateTime:
 		return m.CreateTime()
 	}
@@ -1005,8 +950,6 @@ func (m *DRoomMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldWUserID(ctx)
 	case droom.FieldBUserID:
 		return m.OldBUserID(ctx)
-	case droom.FieldNextTurnUserID:
-		return m.OldNextTurnUserID(ctx)
 	case droom.FieldCreateTime:
 		return m.OldCreateTime(ctx)
 	}
@@ -1045,13 +988,6 @@ func (m *DRoomMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBUserID(v)
-		return nil
-	case droom.FieldNextTurnUserID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNextTurnUserID(v)
 		return nil
 	case droom.FieldCreateTime:
 		v, ok := value.(time.Time)
@@ -1102,9 +1038,6 @@ func (m *DRoomMutation) ClearedFields() []string {
 	if m.FieldCleared(droom.FieldBUserID) {
 		fields = append(fields, droom.FieldBUserID)
 	}
-	if m.FieldCleared(droom.FieldNextTurnUserID) {
-		fields = append(fields, droom.FieldNextTurnUserID)
-	}
 	return fields
 }
 
@@ -1131,9 +1064,6 @@ func (m *DRoomMutation) ClearField(name string) error {
 	case droom.FieldBUserID:
 		m.ClearBUserID()
 		return nil
-	case droom.FieldNextTurnUserID:
-		m.ClearNextTurnUserID()
-		return nil
 	}
 	return fmt.Errorf("unknown DRoom nullable field %s", name)
 }
@@ -1153,9 +1083,6 @@ func (m *DRoomMutation) ResetField(name string) error {
 		return nil
 	case droom.FieldBUserID:
 		m.ResetBUserID()
-		return nil
-	case droom.FieldNextTurnUserID:
-		m.ResetNextTurnUserID()
 		return nil
 	case droom.FieldCreateTime:
 		m.ResetCreateTime()

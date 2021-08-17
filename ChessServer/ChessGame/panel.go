@@ -55,6 +55,14 @@ func (this *GameRoom) LoadPanelFromData() {
 				}
 			}
 		}
+		ch := this.Data.Panel[len(this.Data.Panel)-1]
+		if ch == 'w' {
+			this.NextTurnUserID = this.Data.WUserID
+		} else if ch == 'b' {
+			this.NextTurnUserID = this.Data.BUserID
+		} else {
+			log.Println("error next user id data", this.Data.Panel)
+		}
 	}
 }
 
@@ -65,8 +73,7 @@ func (this *GameRoom) SaveRoomDataToDb() {
 	}
 	data.Panel = this.formatPanelV2()
 	_, err := gDbClient.DRoom.Update().Where(droom.ID(this.RoomId)).
-		SetWUserID(data.WUserID).SetBUserID(data.BUserID).SetPanel(data.Panel).SetIsGameRunning(data.IsGameRunning).
-		SetNextTurnUserID(data.NextTurnUserID).Save(context.Background())
+		SetWUserID(data.WUserID).SetBUserID(data.BUserID).SetPanel(data.Panel).SetIsGameRunning(data.IsGameRunning).Save(context.Background())
 	if err != nil {
 		log.Println("GameRoom.SaveRoomDataToDb", err)
 	}
@@ -97,28 +104,28 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 	if !from.IsValid() || !to.IsValid() {
 		return false
 	}
-	if this.Data.NextTurnUserID != session.UserID {
+	if this.NextTurnUserID != session.UserID {
 		return false
 	}
 
-	if (fromPiece.IsW() && this.Data.NextTurnUserID != this.Data.WUserID) || (fromPiece.IsB() && this.Data.NextTurnUserID != this.Data.BUserID) {
+	if (fromPiece.IsW() && this.NextTurnUserID != this.Data.WUserID) || (fromPiece.IsB() && this.NextTurnUserID != this.Data.BUserID) {
 		return false
 	}
 
 	if fromPiece.IsNull() || (fromPiece.IsB() && toPiece.IsB()) || (fromPiece.IsW() && toPiece.IsW()) {
 		return false
 	}
-	dLine := to.Line - from.Line
-	dColumn := to.Column - from.Column
+	dLine := to.Y - from.Y
+	dColumn := to.X - from.X
 	var bCrossRiver bool
 	if fromPiece.IsB() {
-		bCrossRiver = to.Line > 4
+		bCrossRiver = to.Y > 4
 	} else {
-		bCrossRiver = to.Line <= 4
+		bCrossRiver = to.Y <= 4
 	}
 	switch fromPiece.ToLower() {
 	case 'r': // 车
-		if from.Line == to.Line || from.Column == to.Column {
+		if from.Y == to.Y || from.X == to.X {
 			if rangeHasPiece(this, from, to) {
 				return false
 			}
@@ -133,11 +140,11 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		// 计算蹩脚点坐标
 		var mustEmptyPoint PiecePoint
 		if abs(dLine) == 2 { // 纵向移动
-			mustEmptyPoint.Column = from.Column
-			mustEmptyPoint.Line = (from.Line + to.Line) / 2
+			mustEmptyPoint.X = from.X
+			mustEmptyPoint.Y = (from.Y + to.Y) / 2
 		} else { // 横向移动
-			mustEmptyPoint.Column = (from.Column + to.Column) / 2
-			mustEmptyPoint.Line = from.Line
+			mustEmptyPoint.X = (from.X + to.X) / 2
+			mustEmptyPoint.Y = from.Y
 		}
 		if !this.getPiece(mustEmptyPoint).IsNull() {
 			return false
@@ -149,8 +156,8 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if abs(dLine) != 2 || abs(dColumn) != 2 {
 			return false
 		}
-		from.Line += dLine / 2
-		from.Column += dColumn / 2
+		from.Y += dLine / 2
+		from.X += dColumn / 2
 		piece := this.getPiece(from)
 		if !piece.IsNull() {
 			return false
@@ -181,14 +188,14 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if dLine != 0 && dColumn != 0 {
 			return false
 		}
-		dL := getD(from.Line, to.Line)
-		dC := getD(from.Column, to.Column)
+		dL := getD(from.Y, to.Y)
+		dC := getD(from.X, to.X)
 		midHasPieceCount := 0
 		for {
-			from.Line += dL
-			from.Column += dC
+			from.Y += dL
+			from.X += dC
 
-			if from.Line == to.Line && from.Column == to.Column {
+			if from.Y == to.Y && from.X == to.X {
 				break
 			}
 			if !this.getPiece(from).IsNull() {
@@ -242,14 +249,14 @@ func getD(fromP, toP int32) int32 {
 }
 
 func rangeHasPiece(this *GameRoom, from, to PiecePoint) bool {
-	dL := getD(from.Line, to.Line)
-	dC := getD(from.Column, to.Column)
+	dL := getD(from.Y, to.Y)
+	dC := getD(from.X, to.X)
 
 	for {
-		from.Line += dL
-		from.Column += dC
+		from.Y += dL
+		from.X += dC
 
-		if from.Line == to.Line && from.Column == to.Column {
+		if from.Y == to.Y && from.X == to.X {
 			break
 		}
 		if !this.getPiece(from).IsNull() {
@@ -260,7 +267,7 @@ func rangeHasPiece(this *GameRoom, from, to PiecePoint) bool {
 }
 
 func fitRangeJiangShi(p PiecePoint) bool {
-	return p.Column >= 3 && p.Column <= 5 && (p.Line <= 2 || p.Line >= 7)
+	return p.X >= 3 && p.X <= 5 && (p.Y <= 2 || p.Y >= 7)
 }
 
 func abs(a int32) int32 {
@@ -275,7 +282,7 @@ func (this *GamePiece) ToLower() rune {
 }
 
 func (this *GameRoom) getPiece(p PiecePoint) GamePiece {
-	return this.PanelFull[p.Line][p.Column]
+	return this.PanelFull[p.Y][p.X]
 }
 
 func (this GamePiece) IsW() bool {
@@ -297,31 +304,31 @@ type GameOverNotice struct {
 
 func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 	toPiece := this.getPiece(to)
-	this.PanelFull[to.Line][to.Column] = this.PanelFull[from.Line][from.Column]
-	this.PanelFull[from.Line][from.Column] = '0'
+	this.PanelFull[to.Y][to.X] = this.PanelFull[from.Y][from.X]
+	this.PanelFull[from.Y][from.X] = '0'
 
 	winUserId := ``
 	if toPiece.ToLower() == 'k' {
-		winUserId = this.Data.NextTurnUserID
+		winUserId = this.NextTurnUserID
 	}
-	oldNextTurnUserId := this.Data.NextTurnUserID
-	if this.Data.NextTurnUserID == this.Data.BUserID {
-		this.Data.NextTurnUserID = this.Data.WUserID
+	oldNextTurnUserId := this.NextTurnUserID
+	if this.NextTurnUserID == this.Data.BUserID {
+		this.NextTurnUserID = this.Data.WUserID
 	} else {
-		this.Data.NextTurnUserID = this.Data.BUserID
+		this.NextTurnUserID = this.Data.BUserID
 	}
-	sessionList := getSessionListBy(dsession.UserID(this.Data.NextTurnUserID))
+	sessionList := getSessionListBy(dsession.UserID(this.NextTurnUserID))
 	if len(sessionList) == 0 {
 		log.Println("nextUser is nil")
 		return
 	}
-	nextIsW := this.Data.NextTurnUserID == this.Data.WUserID
+	nextIsW := this.NextTurnUserID == this.Data.WUserID
 	cannotMovePiece := true
 	for line := int32(0); line < LINE_COUNT && cannotMovePiece && winUserId == ``; line++ {
 		for column := int32(0); column < COLUMN_COUNT && cannotMovePiece; column++ {
 			thisPoint := PiecePoint{
-				Line:   line,
-				Column: column,
+				Y: line,
+				X: column,
 			}
 			thisPiece := this.getPiece(thisPoint)
 			if (nextIsW && thisPiece.IsW()) || (!nextIsW && thisPiece.IsB()) {
@@ -395,7 +402,7 @@ func (this *GameRoom) formatPanelV2() string {
 		}
 	}
 	//rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w
-	if this.Data.NextTurnUserID == this.Data.WUserID {
+	if this.NextTurnUserID == this.Data.WUserID {
 		w.WriteByte('w')
 	} else {
 		w.WriteByte('b')

@@ -32,7 +32,6 @@ const (
 	ErrUnknown                 = `未知错误`
 )
 
-
 type GameUser struct {
 	Session *ent.DSession
 }
@@ -102,7 +101,6 @@ func sendNoticeToSession(sessionId string, a interface{}) {
 	noticePacket := ymdJson.MustMarshal(packet)
 	gLogic.WriteSession(sessionId, noticePacket)
 }
-
 
 type PingRequest struct{}
 type PingResponse struct{}
@@ -293,7 +291,7 @@ func (this *GameRoom) RpcTakeSite(session *ent.DSession, req TakeSiteRequest) (r
 	}
 	if this.Data.BUserID != `` && this.Data.WUserID != `` {
 		this.Data.IsGameRunning = true
-		this.Data.NextTurnUserID = this.Data.WUserID
+		this.NextTurnUserID = this.Data.WUserID
 		this.Data.Panel = ""
 		this.LoadPanelFromData()
 	}
@@ -303,13 +301,13 @@ func (this *GameRoom) RpcTakeSite(session *ent.DSession, req TakeSiteRequest) (r
 }
 
 type PiecePoint struct {
-	Line   int32
-	Column int32
+	X int32
+	Y int32
 }
 
 type MovePieceRequest struct {
-	FromPoint PiecePoint
-	ToPoint   PiecePoint
+	From PiecePoint
+	To   PiecePoint
 }
 
 type MovePieceResponse struct {
@@ -321,11 +319,11 @@ func (this *GameRoom) RpcMovePiece(session *ent.DSession, req MovePieceRequest) 
 		resp.ErrMsg = ErrGameIsNotRunning
 		return
 	}
-	if !this.CanMove(session, req.FromPoint, req.ToPoint) {
+	if !this.CanMove(session, req.From, req.To) {
 		resp.ErrMsg = ErrCannotMove
 		return
 	}
-	this.DoMove(req.FromPoint, req.ToPoint)
+	this.DoMove(req.From, req.To)
 	return
 }
 
@@ -340,7 +338,7 @@ type GetSuggestionResponse struct {
 func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionRequest) (resp GetSuggestionResponse) {
 	for line := int32(0); line < LINE_COUNT; line++ {
 		for column := int32(0); column < COLUMN_COUNT; column++ {
-			to := PiecePoint{Line: line, Column: column}
+			to := PiecePoint{Y: line, X: column}
 			if this.CanMove(session, req.FromPoint, to) {
 				resp.CanMoveToList = append(resp.CanMoveToList, to)
 			}
@@ -366,7 +364,7 @@ func (this *GameRoom) RpcReGame(session *ent.DSession, req ReGameRequest) (resp 
 	this.Data.IsGameRunning = true
 	this.Data.Panel = ""
 	this.LoadPanelFromData()
-	this.Data.NextTurnUserID = this.Data.WUserID
+	this.NextTurnUserID = this.Data.WUserID
 	this.sync2Client(nil)
 	return
 }
@@ -379,7 +377,7 @@ func (this *GameRoom) sync2Client(user *GameUser) {
 	resp.BUserName = getUserNameByIdIgnoreEmpty(this.Data.BUserID)
 	resp.BUserId = this.Data.BUserID
 	resp.IsGameRunning = this.Data.IsGameRunning
-	resp.NextTurnUserId = this.Data.NextTurnUserID
+	resp.NextTurnUserId = this.NextTurnUserID
 	var sessionList []*ent.DSession
 	if user != nil {
 		sessionList = append(sessionList, user.Session)
@@ -394,5 +392,5 @@ func (this *GameRoom) sync2Client(user *GameUser) {
 }
 
 func (this *PiecePoint) IsValid() bool {
-	return 0 <= this.Line && this.Line < 10 && 0 <= this.Column && this.Column < 9
+	return 0 <= this.Y && this.Y < 10 && 0 <= this.X && this.X < 9
 }

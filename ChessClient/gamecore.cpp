@@ -103,7 +103,7 @@ bool GameCore::IsInSuggestionList(PiecePoint p)
 {
     for (auto it=SuggestionPointToList.begin(); it != SuggestionPointToList.end(); ++it)
     {
-        if (p.Line == it->Line && p.Column == it->Column)
+        if (p.Y == it->Y && p.X == it->X)
         {
             return true;
         }

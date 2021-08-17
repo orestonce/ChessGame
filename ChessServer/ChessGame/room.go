@@ -9,9 +9,10 @@ import (
 )
 
 type GameRoom struct {
-	RoomId    string
-	PanelFull [LINE_COUNT][COLUMN_COUNT]GamePiece
-	Data      *ent.DRoom
+	RoomId         string
+	PanelFull      [LINE_COUNT][COLUMN_COUNT]GamePiece
+	NextTurnUserID string
+	Data           *ent.DRoom
 }
 
 func (this *GameRoom) IsEmpty() bool {

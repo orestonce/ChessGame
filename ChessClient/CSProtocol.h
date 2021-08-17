@@ -26,8 +26,8 @@ public :
 	QJsonObject ToJsonObject() const;
 	bool FromJsonObject(QJsonObject obj);
 public :
-	int Line ;
-	int Column ;
+	int X ;
+	int Y ;
 } PiecePoint;
 
 typedef struct SyncPanelMessage : public RpcAbstract
@@ -236,8 +236,8 @@ public :
 	QJsonObject ToJsonObject() const;
 	bool FromJsonObject(QJsonObject obj);
 public :
-	PiecePoint FromPoint ;
-	PiecePoint ToPoint ;
+	PiecePoint From ;
+	PiecePoint To ;
 } MovePieceRequest;
 
 typedef struct MovePieceResponse : public RpcAbstract

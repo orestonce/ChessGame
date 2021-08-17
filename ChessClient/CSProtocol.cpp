@@ -16,8 +16,8 @@ void NoticeBase::RegisterPiecePoint(std::function<void (const PiecePoint&)> fn)
 }
 PiecePoint::PiecePoint()
 {
-	this->Line = 0;
-	this->Column = 0;
+	this->X = 0;
+	this->Y = 0;
 }
 
 QByteArray PiecePoint::EncodeToQByteArray() const
@@ -35,8 +35,8 @@ QByteArray PiecePoint::EncodeToQByteArray() const
 QJsonObject PiecePoint::ToJsonObject() const
 {
 	QJsonObject data;
-	data["Line"] = this->Line;
-	data["Column"] = this->Column;
+	data["X"] = this->X;
+	data["Y"] = this->Y;
 
 	return data;
 }
@@ -53,8 +53,8 @@ bool PiecePoint::DecodeFromQByteArray(const QByteArray& bin)
 
 bool PiecePoint::FromJsonObject(QJsonObject data)
 {
-	this->Line = data["Line"].toInt();
-	this->Column = data["Column"].toInt();
+	this->X = data["X"].toInt();
+	this->Y = data["Y"].toInt();
 
 	return true;
 }
@@ -728,8 +728,8 @@ QByteArray MovePieceRequest::EncodeToQByteArray() const
 QJsonObject MovePieceRequest::ToJsonObject() const
 {
 	QJsonObject data;
-	data["FromPoint"] = this->FromPoint.ToJsonObject();
-	data["ToPoint"] = this->ToPoint.ToJsonObject();
+	data["From"] = this->From.ToJsonObject();
+	data["To"] = this->To.ToJsonObject();
 
 	return data;
 }
@@ -746,8 +746,8 @@ bool MovePieceRequest::DecodeFromQByteArray(const QByteArray& bin)
 
 bool MovePieceRequest::FromJsonObject(QJsonObject data)
 {
-	this->FromPoint.FromJsonObject(data["FromPoint"].toObject());
-	this->ToPoint.FromJsonObject(data["ToPoint"].toObject());
+	this->From.FromJsonObject(data["From"].toObject());
+	this->To.FromJsonObject(data["To"].toObject());
 
 	return true;
 }

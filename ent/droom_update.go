@@ -107,26 +107,6 @@ func (du *DRoomUpdate) ClearBUserID() *DRoomUpdate {
 	return du
 }
 
-// SetNextTurnUserID sets the "next_turn_user_id" field.
-func (du *DRoomUpdate) SetNextTurnUserID(s string) *DRoomUpdate {
-	du.mutation.SetNextTurnUserID(s)
-	return du
-}
-
-// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
-func (du *DRoomUpdate) SetNillableNextTurnUserID(s *string) *DRoomUpdate {
-	if s != nil {
-		du.SetNextTurnUserID(*s)
-	}
-	return du
-}
-
-// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
-func (du *DRoomUpdate) ClearNextTurnUserID() *DRoomUpdate {
-	du.mutation.ClearNextTurnUserID()
-	return du
-}
-
 // SetCreateTime sets the "create_time" field.
 func (du *DRoomUpdate) SetCreateTime(t time.Time) *DRoomUpdate {
 	du.mutation.SetCreateTime(t)
@@ -262,19 +242,6 @@ func (du *DRoomUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: droom.FieldBUserID,
 		})
 	}
-	if value, ok := du.mutation.NextTurnUserID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: droom.FieldNextTurnUserID,
-		})
-	}
-	if du.mutation.NextTurnUserIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: droom.FieldNextTurnUserID,
-		})
-	}
 	if value, ok := du.mutation.CreateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -378,26 +345,6 @@ func (duo *DRoomUpdateOne) SetNillableBUserID(s *string) *DRoomUpdateOne {
 // ClearBUserID clears the value of the "b_user_id" field.
 func (duo *DRoomUpdateOne) ClearBUserID() *DRoomUpdateOne {
 	duo.mutation.ClearBUserID()
-	return duo
-}
-
-// SetNextTurnUserID sets the "next_turn_user_id" field.
-func (duo *DRoomUpdateOne) SetNextTurnUserID(s string) *DRoomUpdateOne {
-	duo.mutation.SetNextTurnUserID(s)
-	return duo
-}
-
-// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
-func (duo *DRoomUpdateOne) SetNillableNextTurnUserID(s *string) *DRoomUpdateOne {
-	if s != nil {
-		duo.SetNextTurnUserID(*s)
-	}
-	return duo
-}
-
-// ClearNextTurnUserID clears the value of the "next_turn_user_id" field.
-func (duo *DRoomUpdateOne) ClearNextTurnUserID() *DRoomUpdateOne {
-	duo.mutation.ClearNextTurnUserID()
 	return duo
 }
 
@@ -558,19 +505,6 @@ func (duo *DRoomUpdateOne) sqlSave(ctx context.Context) (_node *DRoom, err error
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: droom.FieldBUserID,
-		})
-	}
-	if value, ok := duo.mutation.NextTurnUserID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: droom.FieldNextTurnUserID,
-		})
-	}
-	if duo.mutation.NextTurnUserIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: droom.FieldNextTurnUserID,
 		})
 	}
 	if value, ok := duo.mutation.CreateTime(); ok {

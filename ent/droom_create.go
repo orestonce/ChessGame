@@ -76,20 +76,6 @@ func (dc *DRoomCreate) SetNillableBUserID(s *string) *DRoomCreate {
 	return dc
 }
 
-// SetNextTurnUserID sets the "next_turn_user_id" field.
-func (dc *DRoomCreate) SetNextTurnUserID(s string) *DRoomCreate {
-	dc.mutation.SetNextTurnUserID(s)
-	return dc
-}
-
-// SetNillableNextTurnUserID sets the "next_turn_user_id" field if the given value is not nil.
-func (dc *DRoomCreate) SetNillableNextTurnUserID(s *string) *DRoomCreate {
-	if s != nil {
-		dc.SetNextTurnUserID(*s)
-	}
-	return dc
-}
-
 // SetCreateTime sets the "create_time" field.
 func (dc *DRoomCreate) SetCreateTime(t time.Time) *DRoomCreate {
 	dc.mutation.SetCreateTime(t)
@@ -189,10 +175,6 @@ func (dc *DRoomCreate) defaults() {
 		v := droom.DefaultBUserID
 		dc.mutation.SetBUserID(v)
 	}
-	if _, ok := dc.mutation.NextTurnUserID(); !ok {
-		v := droom.DefaultNextTurnUserID
-		dc.mutation.SetNextTurnUserID(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -260,14 +242,6 @@ func (dc *DRoomCreate) createSpec() (*DRoom, *sqlgraph.CreateSpec) {
 			Column: droom.FieldBUserID,
 		})
 		_node.BUserID = value
-	}
-	if value, ok := dc.mutation.NextTurnUserID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: droom.FieldNextTurnUserID,
-		})
-		_node.NextTurnUserID = value
 	}
 	if value, ok := dc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

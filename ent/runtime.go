@@ -31,10 +31,6 @@ func init() {
 	droomDescBUserID := droomFields[4].Descriptor()
 	// droom.DefaultBUserID holds the default value on creation for the b_user_id field.
 	droom.DefaultBUserID = droomDescBUserID.Default.(string)
-	// droomDescNextTurnUserID is the schema descriptor for next_turn_user_id field.
-	droomDescNextTurnUserID := droomFields[5].Descriptor()
-	// droom.DefaultNextTurnUserID holds the default value on creation for the next_turn_user_id field.
-	droom.DefaultNextTurnUserID = droomDescNextTurnUserID.Default.(string)
 	dsessionFields := schema.DSession{}.Fields()
 	_ = dsessionFields
 	// dsessionDescUserID is the schema descriptor for user_id field.

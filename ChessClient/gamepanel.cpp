@@ -200,7 +200,7 @@ void GamePanel::paintEvent(QPaintEvent *)
     }
     for (auto it = core->SuggestionPointToList.begin(); it != core->SuggestionPointToList.end(); it++)
     {
-        QPoint p(it->Column, it->Line);
+        QPoint p(it->X, it->Y);
         painter.drawImage(logicChangeToXY(p), QImage(":/images/forcuse.png") );
     }
 }
@@ -209,8 +209,8 @@ void GamePanel::mousePressEvent(QMouseEvent *e)
 {
     QPoint selectPoint = xyChangeToLogic(e->pos());
     PiecePoint piece ;
-    piece.Line = selectPoint.y();
-    piece.Column = selectPoint.x();
+    piece.Y = selectPoint.y();
+    piece.X = selectPoint.x();
     if ( !core->IsPointValied(selectPoint) || !core->IsTurnMe() )
     {
         return ;
@@ -233,9 +233,9 @@ void GamePanel::mousePressEvent(QMouseEvent *e)
     {
         MovePieceRequest req;
         MovePieceResponse resp;
-        req.FromPoint.Line = core->SelectedPointFrom.y();
-        req.FromPoint.Column = core->SelectedPointFrom.x();
-        req.ToPoint = piece;
+        req.From.Y = core->SelectedPointFrom.y();
+        req.From.X = core->SelectedPointFrom.x();
+        req.To = piece;
 
         if (!rpchub->SendAndRecv(req, resp) || !resp.ErrMsg.isEmpty())
         {

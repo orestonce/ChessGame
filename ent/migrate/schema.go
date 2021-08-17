@@ -30,7 +30,6 @@ var (
 		{Name: "panel", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "w_user_id", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "b_user_id", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "next_turn_user_id", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "create_time", Type: field.TypeTime},
 	}
 	// DroomsTable holds the schema information for the "drooms" table.

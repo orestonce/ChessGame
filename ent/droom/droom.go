@@ -15,8 +15,6 @@ const (
 	FieldWUserID = "w_user_id"
 	// FieldBUserID holds the string denoting the b_user_id field in the database.
 	FieldBUserID = "b_user_id"
-	// FieldNextTurnUserID holds the string denoting the next_turn_user_id field in the database.
-	FieldNextTurnUserID = "next_turn_user_id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// Table holds the table name of the droom in the database.
@@ -30,7 +28,6 @@ var Columns = []string{
 	FieldPanel,
 	FieldWUserID,
 	FieldBUserID,
-	FieldNextTurnUserID,
 	FieldCreateTime,
 }
 
@@ -53,6 +50,4 @@ var (
 	DefaultWUserID string
 	// DefaultBUserID holds the default value on creation for the "b_user_id" field.
 	DefaultBUserID string
-	// DefaultNextTurnUserID holds the default value on creation for the "next_turn_user_id" field.
-	DefaultNextTurnUserID string
 )
