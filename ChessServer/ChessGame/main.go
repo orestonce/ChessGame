@@ -14,7 +14,7 @@ import (
 
 var gDbClient *ent.Client
 
-func RunChessGame(redis ymdQuickRestart.RedisInfo, mysql_schema string) {
+func RunChessGame(redis ymdQuickRestart.RedisInfo, mysqlSchema string) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	gLogic = ymdQuickRestart.NewLogicService(redis)
 	go func() {
@@ -26,7 +26,7 @@ func RunChessGame(redis ymdQuickRestart.RedisInfo, mysql_schema string) {
 		gLogic.Close()
 	}()
 	var err error
-	gDbClient, err = ent.Open("mysql", mysql_schema)
+	gDbClient, err = ent.Open("mysql", mysqlSchema)
 	if err != nil {
 		log.Fatal("InitChessGame ent.Open", err)
 		return

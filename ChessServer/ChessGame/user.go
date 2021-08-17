@@ -362,6 +362,10 @@ func (this *GameRoom) RpcReGame(session *ent.DSession, req ReGameRequest) (resp 
 		resp.ErrMsg = ErrUserNotEnough
 		return
 	}
+	if session.UserID != this.Data.WUserID && session.UserID != this.Data.BUserID {
+		resp.ErrMsg = ErrUnknown
+		return
+	}
 	this.Data.IsGameRunning = true
 	this.Data.Panel = ""
 	this.LoadPanelFromData()
@@ -400,5 +404,5 @@ func (this *GameRoom) sync2Client(user *GameUser) {
 }
 
 func (this *PiecePoint) IsValid() bool {
-	return 0 <= this.Y && this.Y < 10 && 0 <= this.X && this.X < 9
+	return 0 <= this.Y && this.Y < MAX_VALUE_Y && 0 <= this.X && this.X < MAX_VALUE_X
 }
