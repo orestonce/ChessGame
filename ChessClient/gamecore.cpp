@@ -4,36 +4,36 @@
 void GameCore::Load(const SyncPanelMessage &resp)
 {
     QStringList lineData = resp.PanelFull.split(QChar('/'));
-    for (int line=0; line < LINE_END; ++line) {
-        if (line >= lineData.length()) {
+    for (int y=0; y < MAX_VALUE_Y; ++y) {
+        if (y >= lineData.length()) {
             break;
         }
         int rIdx =0;
-        for(int col =0; col < COLUMN_END; ) {
-            if (rIdx >= lineData[line].length()) {
+        for(int x =0; x < MAX_VALUE_X; ) {
+            if (rIdx >= lineData[y].length()) {
                 break;
             }
-            char ch = lineData[line][rIdx].toLatin1();
+            char ch = lineData[y][rIdx].toLatin1();
             rIdx++;
             if ('0' < ch && ch <= '9') {
                 int emptyCnt = int(int(ch) - '0');
-                while (emptyCnt > 0 && col < COLUMN_END) {
-                    m_arrChessPanel[line][col] = EPieceTeamNone;
-                    col++;
+                while (emptyCnt > 0 && x < MAX_VALUE_X) {
+                    m_arrChessPanel[y][x] = EPieceTeamNone;
+                    x++;
                     emptyCnt--;
                 }
             } else {
-                m_arrChessPanel[line][col] = ch;
-                col++;
+                m_arrChessPanel[y][x] = ch;
+                x++;
             }
         }
     }
-    for(int iLine=0; iLine<LINE_END; ++iLine)
+    for(int y=0; y<MAX_VALUE_Y; ++y)
     {
-        for(int iColumn=0; iColumn<COLUMN_END; ++iColumn)
+        for(int x=0; x<MAX_VALUE_X; ++x)
         {
-            int idx = iLine*COLUMN_END + iColumn;
-            if (idx > LINE_END * COLUMN_END ) {
+            int idx = y*MAX_VALUE_X + x;
+            if (idx > MAX_VALUE_Y * MAX_VALUE_X ) {
                 continue;
             }
         }
@@ -69,7 +69,7 @@ bool GameCore::IsPointValied(QPoint p)
 {
     int x=p.x();
     int y=p.y();
-    return 0 <= x && x < COLUMN_END && 0 <= y && y < LINE_END;
+    return 0 <= x && x < MAX_VALUE_X && 0 <= y && y < MAX_VALUE_Y;
 }
 
 void GameCore::ClearPoint(QPoint &p)
@@ -114,10 +114,10 @@ bool GameCore::IsInSuggestionList(PiecePoint p)
 QString GameCore::FormatPanel()
 {
     QString out;
-    for (int iLine =0; iLine < LINE_END; iLine++) {
+    for (int y =0; y < MAX_VALUE_Y; y++) {
         int emptyCount = 0;
-        for (int iCol =0; iCol < COLUMN_END; iCol++) {
-            if (this->m_arrChessPanel[iLine][iCol] == '0' ) {
+        for (int x =0; x < MAX_VALUE_X; x++) {
+            if (this->m_arrChessPanel[y][x] == '0' ) {
                 emptyCount++;
                 continue;
             }
@@ -125,12 +125,12 @@ QString GameCore::FormatPanel()
                 out.append(QChar('0' + emptyCount));
                 emptyCount=0;
             }
-            out.append(QChar(this->m_arrChessPanel[iLine][iCol]));
+            out.append(QChar(this->m_arrChessPanel[y][x]));
         }
         if (emptyCount > 0) {
             out.append(QChar('0' + emptyCount));
         }
-        if (iLine == LINE_END-1) {
+        if (y == MAX_VALUE_Y-1) {
             out.append(QChar(' '));
         } else {
             out.append(QChar('/'));
@@ -150,11 +150,11 @@ GameCore::GameCore()
     this->ShowReGame = false;
     this->ShowSiteDown = false;
     //对用来接收棋子初始化信息的二维数组进行空值处理
-    for(int iLine=0; iLine<LINE_END; ++iLine)
+    for(int y=0; y<MAX_VALUE_Y; ++y)
     {
-        for(int iColumn=0; iColumn<COLUMN_END; ++iColumn)
+        for(int x=0; x<MAX_VALUE_X; ++x)
         {
-            m_arrChessPanel[iLine][iColumn]= EPieceTeamNone;
+            m_arrChessPanel[y][x]= EPieceTeamNone;
         }
     }
     this->ClearPoint(this->SelectedPointFrom);

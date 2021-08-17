@@ -18,8 +18,8 @@ public:
 class GameCore
 {
 public:
-    static const int LINE_END = 10;
-    static const int COLUMN_END = 9;
+    static const int MAX_VALUE_Y = 10;
+    static const int MAX_VALUE_X = 9;
     static const int HEARTBEAT_OVERTIME_SECONDS = 30;
     static const char EPieceTeamNone = '0';
 
@@ -44,7 +44,7 @@ public:
     QString NextTurnUserId;
     bool ShowSiteDown;
     bool ShowReGame;
-    char m_arrChessPanel[LINE_END][ COLUMN_END];
+    char m_arrChessPanel[MAX_VALUE_Y][ MAX_VALUE_X];
     QPoint SelectedPointFrom;
     QPoint SelectedPointTo;
     QVector<PiecePoint> SuggestionPointToList;

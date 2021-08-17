@@ -174,11 +174,11 @@ void GamePanel::paintEvent(QPaintEvent *)
 
     painter.drawImage(30, 40, QImage(":/images/XQSTUDIO.png"));
     // 初始化时，将棋子绘制到棋盘对于位置中
-    for(int iLine=0; iLine<GameCore::LINE_END; ++iLine)
+    for(int y=0; y<GameCore::MAX_VALUE_Y; ++y)
     {
-        for(int iRow=0; iRow<GameCore::COLUMN_END; ++iRow)
+        for(int x=0; x<GameCore::MAX_VALUE_X; ++x)
         {
-            auto point = core->GetPoint(iLine, iRow);
+            auto point = core->GetPoint(y, x);
 
             if ( point.IsEmpty() )
             {
@@ -186,7 +186,7 @@ void GamePanel::paintEvent(QPaintEvent *)
             }
 
             QString qstrImagePath = point.GetImageString();
-            painter.drawImage(logicChangeToXY(QPoint(iRow, iLine)),QImage(qstrImagePath));
+            painter.drawImage(logicChangeToXY(QPoint(x, y)),QImage(qstrImagePath));
         }
     }
 
@@ -290,8 +290,8 @@ QPoint GamePanel::logicChangeToXY(const QPoint& point)
     //对黑棋进行处理
     if ( core->IsBlack() )
     {
-        p.rx () = GameCore::COLUMN_END - p.x () -1 ;
-        p.ry () = GameCore::LINE_END - p.y () -1 ;
+        p.rx () = GameCore::MAX_VALUE_X - p.x () -1 ;
+        p.ry () = GameCore::MAX_VALUE_Y - p.y () -1 ;
     }
 
     p.rx() = (p.x()+1)* 40-3;
@@ -309,8 +309,8 @@ QPoint GamePanel::xyChangeToLogic(const QPoint& point)
     //对黑棋进行处理
     if ( core->IsBlack() )
     {
-        p.rx () = GameCore::COLUMN_END - p.x () -1 ;
-        p.ry () = GameCore::LINE_END - p.y ()  -1;
+        p.rx () = GameCore::MAX_VALUE_X - p.x () -1 ;
+        p.ry () = GameCore::MAX_VALUE_Y - p.y ()  -1;
     }
 
     return p;
