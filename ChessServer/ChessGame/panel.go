@@ -30,37 +30,38 @@ func (this *GameRoom) LoadPanelFromData() {
 			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
 			{'R', 'N', 'B', 'A', 'K', 'A', 'B', 'N', 'R'},
 		}
-	} else {
-		lineData := strings.Split(this.Data.Panel, "/")
-		for y := 0; y < MAX_VALUE_Y; y++ {
-			r := strings.NewReader(lineData[y])
-			for x := 0; x < MAX_VALUE_X; {
-				ch, err := r.ReadByte()
-				if err != nil {
-					log.Println("Error panel data", this.Data.Panel, lineData[y], err)
-					return
-				}
-				if '0' < ch && ch <= '9' {
-					emptyCnt := int(ch - '0')
-					for emptyCnt > 0 && x < MAX_VALUE_X {
-						this.PanelFull[y][x] = '0'
-						x++
-						emptyCnt--
-					}
-				} else {
-					this.PanelFull[y][x] = GamePiece(ch)
+		return
+	}
+	lineData := strings.Split(this.Data.Panel, "/")
+	for y := 0; y < MAX_VALUE_Y; y++ {
+		r := strings.NewReader(lineData[y])
+		for x := 0; x < MAX_VALUE_X; {
+			ch, err := r.ReadByte()
+			if err != nil {
+				log.Println("Error panel data", this.Data.Panel, lineData[y], err)
+				return
+			}
+			if '0' < ch && ch <= '9' {
+				emptyCnt := int(ch - '0')
+				for emptyCnt > 0 && x < MAX_VALUE_X {
+					this.PanelFull[y][x] = '0'
 					x++
+					emptyCnt--
 				}
+			} else {
+				this.PanelFull[y][x] = GamePiece(ch)
+				x++
 			}
 		}
-		ch := this.Data.Panel[len(this.Data.Panel)-1]
-		if ch == 'w' {
-			this.NextTurnUserID = this.Data.WUserID
-		} else if ch == 'b' {
-			this.NextTurnUserID = this.Data.BUserID
-		} else {
-			log.Println("error next user id data", this.Data.Panel)
-		}
+	}
+	ch := this.Data.Panel[len(this.Data.Panel)-1]
+	if ch == 'w' {
+		this.NextTurnUserID = this.Data.WUserID
+	} else if ch == 'b' {
+		this.NextTurnUserID = this.Data.BUserID
+	} else {
+		log.Println("error next user id data", this.Data.Panel)
+		return
 	}
 }
 
