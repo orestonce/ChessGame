@@ -337,9 +337,9 @@ type GetSuggestionResponse struct {
 }
 
 func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionRequest) (resp GetSuggestionResponse) {
-	for line := int32(0); line < LINE_COUNT; line++ {
-		for column := int32(0); column < COLUMN_COUNT; column++ {
-			to := PiecePoint{Y: line, X: column}
+	for y := int32(0); y < MAX_VALUE_Y; y++ {
+		for x := int32(0); x < MAX_VALUE_X; x++ {
+			to := PiecePoint{Y: y, X: x}
 			if this.CanMove(session, req.FromPoint, to) {
 				resp.CanMoveToList = append(resp.CanMoveToList, to)
 			}

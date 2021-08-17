@@ -10,7 +10,7 @@ import (
 
 type GameRoom struct {
 	RoomId         string
-	PanelFull      [LINE_COUNT][COLUMN_COUNT]GamePiece
+	PanelFull      [MAX_VALUE_Y][MAX_VALUE_X]GamePiece
 	NextTurnUserID string
 	Data           *ent.DRoom
 }

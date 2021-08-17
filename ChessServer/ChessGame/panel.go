@@ -10,15 +10,15 @@ import (
 )
 
 const (
-	LINE_COUNT   = 10
-	COLUMN_COUNT = 9
+	MAX_VALUE_Y = 10
+	MAX_VALUE_X = 9
 )
 
 type GamePiece byte
 
 func (this *GameRoom) LoadPanelFromData() {
 	if this.Data == nil || this.Data.Panel == "" {
-		this.PanelFull = [LINE_COUNT][COLUMN_COUNT]GamePiece{
+		this.PanelFull = [MAX_VALUE_Y][MAX_VALUE_X]GamePiece{
 			{'r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'},
 			{'0', '0', '0', '0', '0', '0', '0', '0', '0'},
 			{'0', 'c', '0', '0', '0', '0', '0', 'c', '0'},
@@ -32,24 +32,24 @@ func (this *GameRoom) LoadPanelFromData() {
 		}
 	} else {
 		lineData := strings.Split(this.Data.Panel, "/")
-		for line := 0; line < LINE_COUNT; line++ {
-			r := strings.NewReader(lineData[line])
-			for col := 0; col < COLUMN_COUNT; {
+		for y := 0; y < MAX_VALUE_Y; y++ {
+			r := strings.NewReader(lineData[y])
+			for x := 0; x < MAX_VALUE_X; {
 				ch, err := r.ReadByte()
 				if err != nil {
-					log.Println("Error panel data", this.Data.Panel, lineData[line], err)
+					log.Println("Error panel data", this.Data.Panel, lineData[y], err)
 					return
 				}
 				if '0' < ch && ch <= '9' {
 					emptyCnt := int(ch - '0')
-					for emptyCnt > 0 && col < COLUMN_COUNT {
-						this.PanelFull[line][col] = '0'
-						col++
+					for emptyCnt > 0 && x < MAX_VALUE_X {
+						this.PanelFull[y][x] = '0'
+						x++
 						emptyCnt--
 					}
 				} else {
-					this.PanelFull[line][col] = GamePiece(ch)
-					col++
+					this.PanelFull[y][x] = GamePiece(ch)
+					x++
 				}
 			}
 		}
@@ -82,8 +82,8 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 	if fromPiece.IsNull() || (fromPiece.IsB() && toPiece.IsB()) || (fromPiece.IsW() && toPiece.IsW()) {
 		return false
 	}
-	dLine := to.Y - from.Y
-	dColumn := to.X - from.X
+	dy := to.Y - from.Y
+	dx := to.X - from.X
 	var bCrossRiver bool
 	if fromPiece.IsB() {
 		bCrossRiver = to.Y > 4
@@ -101,12 +101,12 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		}
 	case 'n': // 马
 		// 2个自然数相乘, 等于2只有 [1x2、2x1]才符合要求
-		if abs(dLine)*abs(dColumn) != 2 {
+		if abs(dy)*abs(dx) != 2 {
 			return false
 		}
 		// 计算蹩脚点坐标
 		var mustEmptyPoint PiecePoint
-		if abs(dLine) == 2 { // 纵向移动
+		if abs(dy) == 2 { // 纵向移动
 			mustEmptyPoint.X = from.X
 			mustEmptyPoint.Y = (from.Y + to.Y) / 2
 		} else { // 横向移动
@@ -120,11 +120,11 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if bCrossRiver { // 过河了
 			return false
 		}
-		if abs(dLine) != 2 || abs(dColumn) != 2 {
+		if abs(dy) != 2 || abs(dx) != 2 {
 			return false
 		}
-		from.Y += dLine / 2
-		from.X += dColumn / 2
+		from.Y += dy / 2
+		from.X += dx / 2
 		piece := this.getPiece(from)
 		if !piece.IsNull() {
 			return false
@@ -133,7 +133,7 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		if !fitRangeJiangShi(to) {
 			return false
 		}
-		if abs(dLine*dColumn) != 1 {
+		if abs(dy*dx) != 1 {
 			return false
 		}
 	case 'k': // 将
@@ -142,17 +142,17 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		}
 		// "将" 有一个特殊走法
 		//   在同一列上, 起点和终点都是 "将", 并且起点终点之间没有多于的棋子, 起点的将能够直接到达终点的将
-		if dColumn == 0 {
+		if dx == 0 {
 			if toPiece.ToLower() == 'j' && !rangeHasPiece(this, from, to) {
 				return true
 			}
 		}
-		if (abs(dLine) == 1 && abs(dColumn) == 0) || (abs(dLine) == 0 && abs(dColumn) == 1) {
+		if (abs(dy) == 1 && abs(dx) == 0) || (abs(dy) == 0 && abs(dx) == 1) {
 			return true
 		}
 		return false
 	case 'c': // 炮
-		if dLine != 0 && dColumn != 0 {
+		if dy != 0 && dx != 0 {
 			return false
 		}
 		dL := getD(from.Y, to.Y)
@@ -178,17 +178,17 @@ func (this *GameRoom) CanMove(session *ent.DSession, from PiecePoint, to PiecePo
 		return false
 	case 'p': // 兵
 		// 左右移动, 如果已经过河-> 可以, 否则 -> 不行
-		if abs(dColumn) == 1 && dLine == 0 {
+		if abs(dx) == 1 && dy == 0 {
 			if !bCrossRiver {
 				return false
 			}
 			return true
-		} else if abs(dLine) == 1 && dColumn == 0 { // 上下移动, 不准后退
+		} else if abs(dy) == 1 && dx == 0 { // 上下移动, 不准后退
 			var goBack bool
 			if fromPiece.IsB() {
-				goBack = dLine < 0
+				goBack = dy < 0
 			} else {
-				goBack = dLine > 0
+				goBack = dy > 0
 			}
 			if goBack {
 				return false
@@ -291,11 +291,11 @@ func (this *GameRoom) DoMove(from PiecePoint, to PiecePoint) {
 	}
 	nextIsW := this.NextTurnUserID == this.Data.WUserID
 	cannotMovePiece := true
-	for line := int32(0); line < LINE_COUNT && cannotMovePiece && winUserId == ``; line++ {
-		for column := int32(0); column < COLUMN_COUNT && cannotMovePiece; column++ {
+	for y := int32(0); y < MAX_VALUE_Y && cannotMovePiece && winUserId == ``; y++ {
+		for x := int32(0); x < MAX_VALUE_X && cannotMovePiece; x++ {
 			thisPoint := PiecePoint{
-				Y: line,
-				X: column,
+				Y: y,
+				X: x,
 			}
 			thisPiece := this.getPiece(thisPoint)
 			if (nextIsW && thisPiece.IsW()) || (!nextIsW && thisPiece.IsB()) {
@@ -345,10 +345,10 @@ func (this *GameRoom) formatShowStatus(resp *SyncPanelMessage, userId string) {
 
 func (this *GameRoom) formatPanelV2() string {
 	w := &bytes.Buffer{}
-	for line := 0; line < LINE_COUNT; line++ {
+	for y := 0; y < MAX_VALUE_Y; y++ {
 		emptyCnt := 0
-		for column := 0; column < COLUMN_COUNT; column++ {
-			if this.PanelFull[line][column] == '0' {
+		for x := 0; x < MAX_VALUE_X; x++ {
+			if this.PanelFull[y][x] == '0' {
 				emptyCnt++
 				continue
 			}
@@ -356,12 +356,12 @@ func (this *GameRoom) formatPanelV2() string {
 				w.WriteByte(byte('0' + emptyCnt))
 				emptyCnt = 0
 			}
-			w.WriteByte(byte(this.PanelFull[line][column]))
+			w.WriteByte(byte(this.PanelFull[y][x]))
 		}
 		if emptyCnt > 0 {
 			w.WriteByte(byte('0' + emptyCnt))
 		}
-		if line == LINE_COUNT-1 {
+		if y == MAX_VALUE_Y-1 {
 			w.WriteByte(' ')
 		} else {
 			w.WriteString("/")
