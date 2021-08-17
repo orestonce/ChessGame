@@ -365,7 +365,6 @@ func (this *GameRoom) RpcReGame(session *ent.DSession, req ReGameRequest) (resp 
 	this.Data.IsGameRunning = true
 	this.Data.Panel = ""
 	this.LoadPanelFromData()
-	this.NextTurnUserID = this.Data.WUserID
 	this.sync2Client(nil)
 	return
 }
