@@ -22,6 +22,19 @@ func (f DChatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The DChessdbCacheFunc type is an adapter to allow the use of ordinary
+// function as DChessdbCache mutator.
+type DChessdbCacheFunc func(context.Context, *ent.DChessdbCacheMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DChessdbCacheFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DChessdbCacheMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DChessdbCacheMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DRoomFunc type is an adapter to allow the use of ordinary
 // function as DRoom mutator.
 type DRoomFunc func(context.Context, *ent.DRoomMutation) (ent.Value, error)

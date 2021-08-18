@@ -23,6 +23,19 @@ var (
 		Columns:    DchatsColumns,
 		PrimaryKey: []*schema.Column{DchatsColumns[0]},
 	}
+	// DchessdbCachesColumns holds the columns for the "dchessdb_caches" table.
+	DchessdbCachesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "board", Type: field.TypeString, Unique: true},
+		{Name: "resp", Type: field.TypeBytes},
+		{Name: "create_time", Type: field.TypeTime},
+	}
+	// DchessdbCachesTable holds the schema information for the "dchessdb_caches" table.
+	DchessdbCachesTable = &schema.Table{
+		Name:       "dchessdb_caches",
+		Columns:    DchessdbCachesColumns,
+		PrimaryKey: []*schema.Column{DchessdbCachesColumns[0]},
+	}
 	// DroomsColumns holds the columns for the "drooms" table.
 	DroomsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -67,6 +80,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DchatsTable,
+		DchessdbCachesTable,
 		DroomsTable,
 		DsessionsTable,
 		DusersTable,

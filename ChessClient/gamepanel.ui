@@ -374,6 +374,24 @@
     </item>
    </layout>
   </widget>
+  <widget class="QPushButton" name="pushButton_Chessdb">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>450</y>
+     <width>71</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Chessdb</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

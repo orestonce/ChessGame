@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/orestonce/ChessGame/ent/dchat"
+	"github.com/orestonce/ChessGame/ent/dchessdbcache"
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -26,10 +27,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDChat    = "DChat"
-	TypeDRoom    = "DRoom"
-	TypeDSession = "DSession"
-	TypeDUser    = "DUser"
+	TypeDChat         = "DChat"
+	TypeDChessdbCache = "DChessdbCache"
+	TypeDRoom         = "DRoom"
+	TypeDSession      = "DSession"
+	TypeDUser         = "DUser"
 )
 
 // DChatMutation represents an operation that mutates the DChat nodes in the graph.
@@ -544,6 +546,412 @@ func (m *DChatMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DChatMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown DChat edge %s", name)
+}
+
+// DChessdbCacheMutation represents an operation that mutates the DChessdbCache nodes in the graph.
+type DChessdbCacheMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	board         *string
+	resp          *[]byte
+	create_time   *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*DChessdbCache, error)
+	predicates    []predicate.DChessdbCache
+}
+
+var _ ent.Mutation = (*DChessdbCacheMutation)(nil)
+
+// dchessdbcacheOption allows management of the mutation configuration using functional options.
+type dchessdbcacheOption func(*DChessdbCacheMutation)
+
+// newDChessdbCacheMutation creates new mutation for the DChessdbCache entity.
+func newDChessdbCacheMutation(c config, op Op, opts ...dchessdbcacheOption) *DChessdbCacheMutation {
+	m := &DChessdbCacheMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDChessdbCache,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDChessdbCacheID sets the ID field of the mutation.
+func withDChessdbCacheID(id string) dchessdbcacheOption {
+	return func(m *DChessdbCacheMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DChessdbCache
+		)
+		m.oldValue = func(ctx context.Context) (*DChessdbCache, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DChessdbCache.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDChessdbCache sets the old DChessdbCache of the mutation.
+func withDChessdbCache(node *DChessdbCache) dchessdbcacheOption {
+	return func(m *DChessdbCacheMutation) {
+		m.oldValue = func(context.Context) (*DChessdbCache, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DChessdbCacheMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DChessdbCacheMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DChessdbCache entities.
+func (m *DChessdbCacheMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DChessdbCacheMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetBoard sets the "board" field.
+func (m *DChessdbCacheMutation) SetBoard(s string) {
+	m.board = &s
+}
+
+// Board returns the value of the "board" field in the mutation.
+func (m *DChessdbCacheMutation) Board() (r string, exists bool) {
+	v := m.board
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBoard returns the old "board" field's value of the DChessdbCache entity.
+// If the DChessdbCache object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChessdbCacheMutation) OldBoard(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldBoard is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldBoard requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBoard: %w", err)
+	}
+	return oldValue.Board, nil
+}
+
+// ResetBoard resets all changes to the "board" field.
+func (m *DChessdbCacheMutation) ResetBoard() {
+	m.board = nil
+}
+
+// SetResp sets the "resp" field.
+func (m *DChessdbCacheMutation) SetResp(b []byte) {
+	m.resp = &b
+}
+
+// Resp returns the value of the "resp" field in the mutation.
+func (m *DChessdbCacheMutation) Resp() (r []byte, exists bool) {
+	v := m.resp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResp returns the old "resp" field's value of the DChessdbCache entity.
+// If the DChessdbCache object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChessdbCacheMutation) OldResp(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldResp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldResp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResp: %w", err)
+	}
+	return oldValue.Resp, nil
+}
+
+// ResetResp resets all changes to the "resp" field.
+func (m *DChessdbCacheMutation) ResetResp() {
+	m.resp = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *DChessdbCacheMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *DChessdbCacheMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the DChessdbCache entity.
+// If the DChessdbCache object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DChessdbCacheMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *DChessdbCacheMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// Where appends a list predicates to the DChessdbCacheMutation builder.
+func (m *DChessdbCacheMutation) Where(ps ...predicate.DChessdbCache) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *DChessdbCacheMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (DChessdbCache).
+func (m *DChessdbCacheMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DChessdbCacheMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.board != nil {
+		fields = append(fields, dchessdbcache.FieldBoard)
+	}
+	if m.resp != nil {
+		fields = append(fields, dchessdbcache.FieldResp)
+	}
+	if m.create_time != nil {
+		fields = append(fields, dchessdbcache.FieldCreateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DChessdbCacheMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case dchessdbcache.FieldBoard:
+		return m.Board()
+	case dchessdbcache.FieldResp:
+		return m.Resp()
+	case dchessdbcache.FieldCreateTime:
+		return m.CreateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DChessdbCacheMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case dchessdbcache.FieldBoard:
+		return m.OldBoard(ctx)
+	case dchessdbcache.FieldResp:
+		return m.OldResp(ctx)
+	case dchessdbcache.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown DChessdbCache field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DChessdbCacheMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case dchessdbcache.FieldBoard:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBoard(v)
+		return nil
+	case dchessdbcache.FieldResp:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResp(v)
+		return nil
+	case dchessdbcache.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DChessdbCache field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DChessdbCacheMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DChessdbCacheMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DChessdbCacheMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DChessdbCache numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DChessdbCacheMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DChessdbCacheMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DChessdbCacheMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DChessdbCache nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DChessdbCacheMutation) ResetField(name string) error {
+	switch name {
+	case dchessdbcache.FieldBoard:
+		m.ResetBoard()
+		return nil
+	case dchessdbcache.FieldResp:
+		m.ResetResp()
+		return nil
+	case dchessdbcache.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown DChessdbCache field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DChessdbCacheMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DChessdbCacheMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DChessdbCacheMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DChessdbCacheMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DChessdbCacheMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DChessdbCacheMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DChessdbCacheMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DChessdbCache unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DChessdbCacheMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DChessdbCache edge %s", name)
 }
 
 // DRoomMutation represents an operation that mutates the DRoom nodes in the graph.

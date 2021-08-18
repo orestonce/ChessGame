@@ -18,14 +18,14 @@ func RunChessGate(laddr string, redis ymdQuickRestart.RedisInfo, wspath string) 
 	mux := http.NewServeMux()
 	gateway := ymdQuickRestart.NewGatewayService(redis)
 	mux.HandleFunc(wspath, func(writer http.ResponseWriter, request *http.Request) {
-		upgreader := websocket.Upgrader{
+		upgrader := &websocket.Upgrader{
 			HandshakeTimeout:  time.Second * 10,
 			ReadBufferSize:    2 * 1024,
 			WriteBufferSize:   4 * 1024,
 			EnableCompression: true,
 		}
 		var conn *websocket.Conn
-		conn, err = upgreader.Upgrade(writer, request, nil)
+		conn, err = upgrader.Upgrade(writer, request, nil)
 		if err != nil {
 			log.Println(err)
 			return

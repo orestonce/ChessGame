@@ -35,6 +35,8 @@ private slots:
     void on_sendButton_clicked();
     void on_pushButton_TakeSite_clicked();
     void on_pushButton_ReGame_clicked();
+    void on_pushButton_Chessdb_clicked();
+
 private:
     QPoint logicChangeToXY(const QPoint& point);
     QPoint xyChangeToLogic(const QPoint& point);

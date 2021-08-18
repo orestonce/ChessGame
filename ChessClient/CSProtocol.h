@@ -253,6 +253,32 @@ public :
 	QString ErrMsg ;
 } MovePieceResponse;
 
+typedef struct QueryChessdbRequest : public RpcAbstract
+{
+public :
+	QueryChessdbRequest();
+	virtual bool DecodeFromQByteArray(const QByteArray& bin) override final;
+	virtual QByteArray EncodeToQByteArray() const override final;
+	virtual QString GetMethod() const override final { return QString("RpcQueryChessdb"); }
+	QJsonObject ToJsonObject() const;
+	bool FromJsonObject(QJsonObject obj);
+public :
+} QueryChessdbRequest;
+
+typedef struct QueryChessdbResponse : public RpcAbstract
+{
+public :
+	QueryChessdbResponse();
+	virtual bool DecodeFromQByteArray(const QByteArray& bin) override final;
+	virtual QByteArray EncodeToQByteArray() const override final;
+	virtual QString GetMethod() const override final { return QString("RpcQueryChessdb"); }
+	QJsonObject ToJsonObject() const;
+	bool FromJsonObject(QJsonObject obj);
+public :
+	QString ErrMsg ;
+	QVector<MovePieceRequest> MoveList ;
+} QueryChessdbResponse;
+
 typedef struct ReGameRequest : public RpcAbstract
 {
 public :

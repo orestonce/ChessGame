@@ -9,6 +9,9 @@ import (
 // DChat is the predicate function for dchat builders.
 type DChat func(*sql.Selector)
 
+// DChessdbCache is the predicate function for dchessdbcache builders.
+type DChessdbCache func(*sql.Selector)
+
 // DRoom is the predicate function for droom builders.
 type DRoom func(*sql.Selector)
 

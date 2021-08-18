@@ -791,6 +791,101 @@ bool MovePieceResponse::FromJsonObject(QJsonObject data)
 
 	return true;
 }
+QueryChessdbRequest::QueryChessdbRequest()
+{
+}
+
+QByteArray QueryChessdbRequest::EncodeToQByteArray() const
+{
+	QJsonObject obj;
+    obj["PacketType"] = "PtRpcCall";
+	obj["Method"] = "RpcQueryChessdb";
+	obj["Data"] = this->ToJsonObject();
+
+	QJsonDocument doc;
+    doc.setObject(obj);
+    return doc.toJson();
+}
+
+QJsonObject QueryChessdbRequest::ToJsonObject() const
+{
+	QJsonObject data;
+
+	return data;
+}
+
+bool QueryChessdbRequest::DecodeFromQByteArray(const QByteArray& bin)
+{
+	QJsonObject obj = QJsonDocument::fromJson(bin).object();
+	if (obj["PacketType"].toString() != "PtRpcCall" || obj["Method"].toString() != "RpcQueryChessdb")
+	{
+		return false;
+	}
+	return this->FromJsonObject(obj["Data"].toObject());
+}
+
+bool QueryChessdbRequest::FromJsonObject(QJsonObject )
+{
+
+	return true;
+}
+QueryChessdbResponse::QueryChessdbResponse()
+{
+}
+
+QByteArray QueryChessdbResponse::EncodeToQByteArray() const
+{
+	QJsonObject obj;
+    obj["PacketType"] = "PtRpcReply";
+	obj["Method"] = "RpcQueryChessdb";
+	obj["Data"] = this->ToJsonObject();
+
+	QJsonDocument doc;
+    doc.setObject(obj);
+    return doc.toJson();
+}
+
+QJsonObject QueryChessdbResponse::ToJsonObject() const
+{
+	QJsonObject data;
+	data["ErrMsg"] = this->ErrMsg;
+
+	{
+		QJsonArray array;
+		for (auto it=this->MoveList.begin(); it != this->MoveList.end(); it++)
+		{
+			array.append( it->ToJsonObject() );
+		}
+		data["MoveList"] = array;
+	}
+	return data;
+}
+
+bool QueryChessdbResponse::DecodeFromQByteArray(const QByteArray& bin)
+{
+	QJsonObject obj = QJsonDocument::fromJson(bin).object();
+	if (obj["PacketType"].toString() != "PtRpcReply" || obj["Method"].toString() != "RpcQueryChessdb")
+	{
+		return false;
+	}
+	return this->FromJsonObject(obj["Data"].toObject());
+}
+
+bool QueryChessdbResponse::FromJsonObject(QJsonObject data)
+{
+	this->ErrMsg = data["ErrMsg"].toString();
+
+	{
+		QJsonArray array = data["MoveList"].toArray();
+		for (auto it=array.begin(); it != array.end(); it++)
+		{
+			MovePieceRequest temp;
+			temp.FromJsonObject((*it).toObject());
+			this->MoveList.push_back(temp);
+		}
+	}
+	return true;
+}
 ReGameRequest::ReGameRequest()
 {
 }

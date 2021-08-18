@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// DChat is the client for interacting with the DChat builders.
 	DChat *DChatClient
+	// DChessdbCache is the client for interacting with the DChessdbCache builders.
+	DChessdbCache *DChessdbCacheClient
 	// DRoom is the client for interacting with the DRoom builders.
 	DRoom *DRoomClient
 	// DSession is the client for interacting with the DSession builders.
@@ -156,6 +158,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.DChat = NewDChatClient(tx.config)
+	tx.DChessdbCache = NewDChessdbCacheClient(tx.config)
 	tx.DRoom = NewDRoomClient(tx.config)
 	tx.DSession = NewDSessionClient(tx.config)
 	tx.DUser = NewDUserClient(tx.config)

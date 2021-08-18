@@ -10,6 +10,7 @@ import (
 	"github.com/orestonce/ChessGame/ent/migrate"
 
 	"github.com/orestonce/ChessGame/ent/dchat"
+	"github.com/orestonce/ChessGame/ent/dchessdbcache"
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// DChat is the client for interacting with the DChat builders.
 	DChat *DChatClient
+	// DChessdbCache is the client for interacting with the DChessdbCache builders.
+	DChessdbCache *DChessdbCacheClient
 	// DRoom is the client for interacting with the DRoom builders.
 	DRoom *DRoomClient
 	// DSession is the client for interacting with the DSession builders.
@@ -45,6 +48,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.DChat = NewDChatClient(c.config)
+	c.DChessdbCache = NewDChessdbCacheClient(c.config)
 	c.DRoom = NewDRoomClient(c.config)
 	c.DSession = NewDSessionClient(c.config)
 	c.DUser = NewDUserClient(c.config)
@@ -79,12 +83,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		DChat:    NewDChatClient(cfg),
-		DRoom:    NewDRoomClient(cfg),
-		DSession: NewDSessionClient(cfg),
-		DUser:    NewDUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		DChat:         NewDChatClient(cfg),
+		DChessdbCache: NewDChessdbCacheClient(cfg),
+		DRoom:         NewDRoomClient(cfg),
+		DSession:      NewDSessionClient(cfg),
+		DUser:         NewDUserClient(cfg),
 	}, nil
 }
 
@@ -102,11 +107,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config:   cfg,
-		DChat:    NewDChatClient(cfg),
-		DRoom:    NewDRoomClient(cfg),
-		DSession: NewDSessionClient(cfg),
-		DUser:    NewDUserClient(cfg),
+		config:        cfg,
+		DChat:         NewDChatClient(cfg),
+		DChessdbCache: NewDChessdbCacheClient(cfg),
+		DRoom:         NewDRoomClient(cfg),
+		DSession:      NewDSessionClient(cfg),
+		DUser:         NewDUserClient(cfg),
 	}, nil
 }
 
@@ -137,6 +143,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.DChat.Use(hooks...)
+	c.DChessdbCache.Use(hooks...)
 	c.DRoom.Use(hooks...)
 	c.DSession.Use(hooks...)
 	c.DUser.Use(hooks...)
@@ -230,6 +237,96 @@ func (c *DChatClient) GetX(ctx context.Context, id string) *DChat {
 // Hooks returns the client hooks.
 func (c *DChatClient) Hooks() []Hook {
 	return c.hooks.DChat
+}
+
+// DChessdbCacheClient is a client for the DChessdbCache schema.
+type DChessdbCacheClient struct {
+	config
+}
+
+// NewDChessdbCacheClient returns a client for the DChessdbCache from the given config.
+func NewDChessdbCacheClient(c config) *DChessdbCacheClient {
+	return &DChessdbCacheClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dchessdbcache.Hooks(f(g(h())))`.
+func (c *DChessdbCacheClient) Use(hooks ...Hook) {
+	c.hooks.DChessdbCache = append(c.hooks.DChessdbCache, hooks...)
+}
+
+// Create returns a create builder for DChessdbCache.
+func (c *DChessdbCacheClient) Create() *DChessdbCacheCreate {
+	mutation := newDChessdbCacheMutation(c.config, OpCreate)
+	return &DChessdbCacheCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DChessdbCache entities.
+func (c *DChessdbCacheClient) CreateBulk(builders ...*DChessdbCacheCreate) *DChessdbCacheCreateBulk {
+	return &DChessdbCacheCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DChessdbCache.
+func (c *DChessdbCacheClient) Update() *DChessdbCacheUpdate {
+	mutation := newDChessdbCacheMutation(c.config, OpUpdate)
+	return &DChessdbCacheUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DChessdbCacheClient) UpdateOne(dc *DChessdbCache) *DChessdbCacheUpdateOne {
+	mutation := newDChessdbCacheMutation(c.config, OpUpdateOne, withDChessdbCache(dc))
+	return &DChessdbCacheUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DChessdbCacheClient) UpdateOneID(id string) *DChessdbCacheUpdateOne {
+	mutation := newDChessdbCacheMutation(c.config, OpUpdateOne, withDChessdbCacheID(id))
+	return &DChessdbCacheUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DChessdbCache.
+func (c *DChessdbCacheClient) Delete() *DChessdbCacheDelete {
+	mutation := newDChessdbCacheMutation(c.config, OpDelete)
+	return &DChessdbCacheDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DChessdbCacheClient) DeleteOne(dc *DChessdbCache) *DChessdbCacheDeleteOne {
+	return c.DeleteOneID(dc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DChessdbCacheClient) DeleteOneID(id string) *DChessdbCacheDeleteOne {
+	builder := c.Delete().Where(dchessdbcache.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DChessdbCacheDeleteOne{builder}
+}
+
+// Query returns a query builder for DChessdbCache.
+func (c *DChessdbCacheClient) Query() *DChessdbCacheQuery {
+	return &DChessdbCacheQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DChessdbCache entity by its id.
+func (c *DChessdbCacheClient) Get(ctx context.Context, id string) (*DChessdbCache, error) {
+	return c.Query().Where(dchessdbcache.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DChessdbCacheClient) GetX(ctx context.Context, id string) *DChessdbCache {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DChessdbCacheClient) Hooks() []Hook {
+	return c.hooks.DChessdbCache
 }
 
 // DRoomClient is a client for the DRoom schema.

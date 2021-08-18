@@ -2,8 +2,10 @@ package ChessGame
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/orestonce/ChessGame/ent"
+	"github.com/orestonce/ChessGame/ent/dchessdbcache"
 	"github.com/orestonce/ChessGame/ent/droom"
 	"github.com/orestonce/ChessGame/ent/dsession"
 	"github.com/orestonce/ChessGame/ent/duser"
@@ -11,8 +13,12 @@ import (
 	"github.com/orestonce/ChessGame/ymd/ymdQuickRestart"
 	"github.com/orestonce/ChessGame/ymd/ymdTime"
 	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -306,6 +312,10 @@ type PiecePoint struct {
 	Y int32
 }
 
+func (obj PiecePoint) String() string {
+	return fmt.Sprintf("PiecePoint(y = %v, x = %v)", obj.Y, obj.X)
+}
+
 type MovePieceRequest struct {
 	From PiecePoint
 	To   PiecePoint
@@ -346,6 +356,86 @@ func (this *GameRoom) RpcGetSuggestion(session *ent.DSession, req GetSuggestionR
 		}
 	}
 	return
+}
+
+type QueryChessdbRequest struct{}
+type QueryChessdbResponse struct {
+	ErrMsg   string
+	MoveList []MovePieceRequest
+}
+
+func (this *GameRoom) RpcQueryChessdb(session *ent.DSession, req QueryChessdbRequest) (resp QueryChessdbResponse) {
+	cache, err := gDbClient.DChessdbCache.Query().Where(dchessdbcache.Board(this.formatPanelV2())).Only(context.Background())
+	if err != nil {
+		if _, ok := err.(*ent.NotFoundError); !ok {
+			log.Println("error", err)
+			resp.ErrMsg = ErrUnknown
+			return
+		}
+		// http://www.chessdb.cn/chessdb.php?action=queryall&board=rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR%20w
+		var urlObj *url.URL
+		urlObj, err = url.Parse("http://www.chessdb.cn/chessdb.php?action=queryall")
+		if err != nil {
+			log.Println("GameRoom.queryAllFromChessdbWithCache", err)
+			resp.ErrMsg = ErrUnknown
+			return
+		}
+		q := urlObj.Query()
+		q.Set("board", this.formatPanelV2())
+		urlObj.RawQuery = q.Encode()
+		var resp0 *http.Response
+		resp0, err = http.DefaultClient.Get(urlObj.String())
+		if err != nil {
+			log.Println("GameRoom.queryAllFromChessdbWithCache http", err)
+			resp.ErrMsg = ErrUnknown
+			return
+		}
+		var data []byte
+		data, err = ioutil.ReadAll(resp0.Body)
+		if err != nil {
+			log.Println("GameRoom.queryAllFromChessdbWithCache http read", err)
+			resp0.Body.Close()
+			resp.ErrMsg = ErrUnknown
+			return
+		}
+		cache = &ent.DChessdbCache{
+			ID:         uuid.NewString(),
+			Board:      this.formatPanelV2(),
+			Resp:       data,
+			CreateTime: time.Now(),
+		}
+		err = gDbClient.DChessdbCache.Create().SetID(cache.ID).SetBoard(cache.Board).SetResp(cache.Resp).SetCreateTime(cache.CreateTime).Exec(context.Background())
+		if err != nil {
+			log.Println("GameRoom.queryAllFromChessdbWithCache save", err)
+			resp.ErrMsg = ErrUnknown
+			return
+		}
+	}
+	for _, groups := range regexp.MustCompile(`move:([a-i][0-9][a-i][0-9])`).FindAllStringSubmatch(string(cache.Resp), -1) {
+		from, to, ok := ParseFenMove(groups[1])
+		if !ok {
+			log.Println("GameRoom.queryAllFromChessdbWithCache", groups[1])
+			continue
+		}
+		resp.MoveList = append(resp.MoveList, MovePieceRequest{
+			From: from,
+			To:   to,
+		})
+	}
+	if len(resp.MoveList) == 0 {
+		resp.ErrMsg = "Chessdb 返回数据: " + string(cache.Resp)
+	}
+	return resp
+}
+
+func ParseFenMove(str string) (from PiecePoint, to PiecePoint, ok bool) {
+	if len(str) != 4 {
+		return from, to, false
+	}
+	if !regexp.MustCompile(`[a-i][0-9][a-i][0-9]`).MatchString(str) {
+		return from, to, false
+	}
+	return PiecePoint{X: int32(str[0] - 'a'), Y: int32(9 - (str[1] - '0'))}, PiecePoint{X: int32(str[2] - 'a'), Y: int32(9 - (str[3] - '0'))}, true
 }
 
 type ReGameRequest struct{}

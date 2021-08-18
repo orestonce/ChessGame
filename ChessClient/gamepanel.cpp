@@ -32,8 +32,6 @@ GamePanel::GamePanel(QWidget *parent) :
     connect(this, &GamePanel::finished, [&](){
         rpchub->close_websocket();
         rpchub->deleteLater();
-        timer->stop();
-        timer->deleteLater();
     });
 }
 
@@ -316,6 +314,7 @@ QPoint GamePanel::xyChangeToLogic(const QPoint& point)
     return p;
 }
 
+
 void GamePanel::on_sendButton_clicked()
 {
     QString context = ui->sendEdit->toPlainText();
@@ -353,3 +352,48 @@ void GamePanel::on_pushButton_ReGame_clicked()
     }
 }
 
+QPoint PiecePointToQPoint(PiecePoint p) {
+    return QPoint(p.X, p.Y);
+}
+
+void assign(QPoint& p1, PiecePoint& p2) {
+    p1.rx() = p2.X;
+    p1.ry() = p2.Y;
+}
+
+void GamePanel::on_pushButton_Chessdb_clicked()
+{
+    if (!this->core->IsGameRunning) {
+        return ;
+    }
+    if (!this->core->IsTurnMe()) {
+        return ;
+    }
+
+    QueryChessdbRequest req;
+    QueryChessdbResponse resp;
+    if (!rpchub->SendAndRecv(req, resp) || !resp.ErrMsg.isEmpty()) {
+        this->showError(resp.ErrMsg);
+        return;
+    }
+    if (resp.MoveList.empty()) {
+        return;
+    }
+
+    assign(core->SelectedPointFrom, resp.MoveList[0].From);
+    core->ClearPoint(core->SelectedPointTo);
+    core->SuggestionPointToList.clear();
+    core->SuggestionPointToList.append(resp.MoveList[0].From);
+    core->SuggestionPointToList.append(resp.MoveList[0].To);
+
+    this->repaint();
+
+    MovePieceRequest req1;
+    req1.From = resp.MoveList[0].From;
+    req1.To = resp.MoveList[0].To;
+    MovePieceResponse resp1;
+    if (!rpchub->SendAndRecv(req1, resp1) || !resp1.ErrMsg.isEmpty()) {
+        this->showError(resp.ErrMsg);
+        return;
+    }
+}
