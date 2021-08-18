@@ -34,6 +34,8 @@
  * 改进上个版本的明文储存密码的缺陷，使用[bcrypt](https://golang.org/x/crypto/bcrypt)对用户密码进行散列
  * 使用[FEN文件格式](https://www.xqbase.com/protocol/cchess_fen.htm)传递棋盘信息，规范化棋子名称
  * 合并了 gateway、game两个二进制，但是还是需要启动2个进程，使用[cobra](https://github.com/spf13/cobra) 处理命令行逻辑
+## v2.6.1版本改进
+ * 支持使用chessdb.cn的[云api接口](https://www.chessdb.cn/cloudbook_api.html)自动下棋
 ## ChessClient 需要
 * qt  >= 5.6
 ## 引用项目
@@ -71,7 +73,7 @@ server {
 1. 克隆本仓库代码到本地
   `git clone https://github.com/orestonce/ChessGame`
 2. 设置 `GOPATH` 为克隆下来的的目录， 开始编译linux_amd64版服务端程序
-  `GOPATH=$(pwd) go run src/BuildServer/main.go`
+  `go run src/BuildServer/main.go`
 3. 编译完成，会产生1个二进制文件 bin/ChessServer
 4. 部署到服务器: 假设redis地址为127.0.0.1:6379, 服务器地址为ws://192.168.56.111:8912/ChessGame, 部署前缀为chess001, 数据库为 "root:@tcp(mysql_server:3306)/chess?parseTime=true&charset=utf8"
   ````
