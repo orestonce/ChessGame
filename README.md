@@ -31,15 +31,17 @@
 ## v2.6版本改进
  * 引入mysql做数据储存引擎，不再使用game进程的内存保存数据。
  * 使用[ent](https://github.com/ent/ent)做内存实体映射数据库
- * 改进上个版本的明文储存密码的缺陷，使用[bcrypt](golang.org/x/crypto/bcrypt)对用户密码进行散列
+ * 改进上个版本的明文储存密码的缺陷，使用[bcrypt](https://golang.org/x/crypto/bcrypt)对用户密码进行散列
  * 使用[FEN文件格式](https://www.xqbase.com/protocol/cchess_fen.htm)传递棋盘信息，规范化棋子名称
- * 合并了 gateway、game两个二进制，但是还是需要启动2个进程，使用[cobra](github.com/spf13/cobra) 处理命令行逻辑
+ * 合并了 gateway、game两个二进制，但是还是需要启动2个进程，使用[cobra](https://github.com/spf13/cobra) 处理命令行逻辑
 ## ChessClient 需要
 * qt  >= 5.6
 ## 引用项目
 * 服务端:
     * [websocket](https://github.com/gorilla/websocket)
-    * [goleveldb](https://github.com/syndtr/goleveldb)
+    * [ent](https://github.com/ent/ent)
+    * [bcrypt](https://golang.org/x/crypto/bcrypt)
+    * [cobra](https://github.com/spf13/cobra)
 
 ## nginx代理websocket注意事项
 * 真实的ChessServer监听在127.0.0.1:8912位置, nginx配置为
