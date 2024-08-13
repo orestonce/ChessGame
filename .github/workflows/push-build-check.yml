@@ -1,0 +1,152 @@
+# This is a basic workflow to help you get started with Actions
+
+name: push-build-check
+
+# Controls when the workflow will run
+on: push
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build-windows-x86:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+    
+      - name: install qt static
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt5.6.3-Windows-x86-MinGW4.9.4-staticFull-20200104
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          $env:GOOS=windows
+          $env:GOARCH=386
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && mingw32-make release && cd ..
+          dir ChessClient\release\ChessClient.exe
+          
+          $env:GOOS=windows
+          $env:GOARCH=386
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_windows_386
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_windows_386
+          
+          $env:GOOS=windows
+          $env:GOARCH=amd64
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_windows_amd64
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_windows_amd64
+          
+          $env:GOOS=linux
+          $env:GOARCH=386
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_linux_386
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_linux_386
+          
+          $env:GOOS=linux
+          $env:GOARCH=amd64
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_linux_amd64
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_linux_amd64
+          
+          $env:GOOS=linux
+          $env:GOARCH=arm64
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_linux_arm64
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_linux_arm64
+          
+          $env:GOOS=darwin
+          $env:GOARCH=amd64
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_darwin_amd64
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_darwin_amd64
+          
+          $env:GOOS=darwin
+          $env:GOARCH=arm64
+          go mod tidy
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGame -o bin/ChessGame_darwin_arm64
+          go build github.com/orestonce/ChessGame/ChessServer/ChessGate -o bin/ChessGate_darwin_arm64
+          
+  build-windows-x64:
+    runs-on: windows-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: install qt static
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt5.15.7-Windows-x86_64-MinGW8.1.0-staticFull-20221104
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && mingw32-make release && cd ..
+          dir ChessClient\release\ChessClient.exe
+          
+  build-macos-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v3
+      - name: install qt
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt6.7.2-macOS-Universal-AppleClang15.0.0-noFramework-20240621
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          set -x
+          set -e
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && make && cd ..
+          cd ChessClient
+          macdeployqt ChessClient.app -dmg 
+          ls -alh ChessClient.dmg
+          file ChessClient.dmg
+          cd ./ChessClient.app
+          ./Contents/MacOS/ChessClient test-startup
+  build-macos-x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - name: install qt
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt6.7.2-macOS-Universal-AppleClang15.0.0-noFramework-20240621
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          set -x
+          set -e
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && make && cd ..
+          cd ChessClient
+          macdeployqt ChessClient.app -dmg 
+          ls -alh ChessClient.dmg
+          file ChessClient.dmg
+          cd ./ChessClient.app
+          ./Contents/MacOS/ChessClient test-startup
