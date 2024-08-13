@@ -61,13 +61,13 @@ void Login::on_loginButton_clicked()
 
     if(username.isEmpty())
     {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("用户名不能为空，请重新输入！"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","用户名不能为空，请重新输入！",QMessageBox::Ok);
         return ;
     } else if(password.isEmpty()) {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("密码不能为空，请重新输入！"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","密码不能为空，请重新输入！",QMessageBox::Ok);
         return ;
     } else if(roomId.isEmpty()) {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("房间不能为空，请重新输入！"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","房间不能为空，请重新输入！",QMessageBox::Ok);
         return ;
     }
     // 保存一下状态.

@@ -11,5 +11,5 @@ require (
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/spf13/cobra v1.2.1
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.26.0
 )

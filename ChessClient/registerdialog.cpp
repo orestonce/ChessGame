@@ -36,17 +36,17 @@ void RegisterDialog::on_pushButton_ok_clicked()
 
     if(userName.isEmpty())
     {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("用户名不能为空，请重新输入!"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","用户名不能为空，请重新输入!",QMessageBox::Ok);
         return ;
     }
     else if(password1.isEmpty())
     {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("密码不能为空，请重新输入!"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","密码不能为空，请重新输入!",QMessageBox::Ok);
         return ;
     }
     else if(password1 != password2)
     {
-        QMessageBox::information(this,trUtf8("警告"),trUtf8("密码不匹配!"),QMessageBox::Ok);
+        QMessageBox::information(this,"警告","密码不匹配!",QMessageBox::Ok);
         return ;
     }
 
@@ -67,11 +67,11 @@ void RegisterDialog::on_pushButton_ok_clicked()
             lastError = "未知错误.";
         }
         if (this->isVisible()){
-            QMessageBox::information(this, trUtf8("失败"), lastError);
+            QMessageBox::information(this, "失败", lastError);
         }
     } else {
         if (this->isVisible()){
-            QMessageBox::information(this, trUtf8("成功"), trUtf8("注册成功"));
+            QMessageBox::information(this, "成功", "注册成功");
         }
         this->close();
     }
