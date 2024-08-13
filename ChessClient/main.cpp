@@ -1,6 +1,7 @@
 #include "login.h"
 #include "gamepanel.h"
 #include <QApplication>
+#include <iostream>
 
 int main(int argc, char *argv[]){
     if(argc >= 2 && QString(argv[1]) == "test-startup")
