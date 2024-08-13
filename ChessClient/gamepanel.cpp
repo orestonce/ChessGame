@@ -119,15 +119,15 @@ void GamePanel::LoadGameCore()
 {
     if ( core->IsGameRunning )
     {
-        QString str=trUtf8("游戏正在运行");
+        QString str="游戏正在运行";
         if (core->IsTurnMe()) {
-            str += trUtf8("-该我出手");
+            str += "-该我出手";
         }
         ui->label_GameStatus->setText ( str );
     }
     else
     {
-        ui->label_GameStatus->setText ( trUtf8("游戏停止") );
+        ui->label_GameStatus->setText ("游戏停止");
     }
     ui->pushButton_ReGame->setVisible(core->ShowReGame);
     ui->pushButton_TakeSite->setVisible(core->ShowSiteDown);
