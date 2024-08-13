@@ -1,0 +1,92 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release-build-upload
+
+# Controls when the workflow will run
+on: 
+  release:
+    types: [ created ]
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build-upload_windows-x86:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+    
+      - name: install qt static
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt5.6.3-Windows-x86-MinGW4.9.4-staticFull-20200104
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          $env:GOOS=‘windows’
+          $env:GOARCH='386'
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && mingw32-make release && cd ..
+          dir ChessClient\release\ChessClient.exe
+          
+          $env:GOOS='linux'
+          $env:GOARCH='amd64'
+          go mod tidy
+          go build -o bin/ChessGame_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGame
+          go build -o bin/ChessGate_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+
+      - name: upload release ChessClient_windows_x86_qt
+        uses: Guerra24/upload-to-release@v1
+        with:
+          name: ChessClient_windows_x86_qt-${{ github.ref_name }}.exe
+          path: ChessClient\release\ChessClient.exe
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: upload release ChessGame_linux_x64
+        uses: Guerra24/upload-to-release@v1
+        with:
+          name: ChessGame_linux_x64-${{ github.ref_name }}.exe
+          path: bin/ChessGame_linux_amd64
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: upload release ChessGate_linux_x64
+        uses: Guerra24/upload-to-release@v1
+        with:
+          name: ChessGate_linux_amd64-${{ github.ref_name }}.exe
+          path: bin/ChessGate_linux_amd64
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+  build-upload_windows-x64:
+    runs-on: windows-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: install qt static
+        uses: orestonce/install-qt@main
+        with:
+          version: Qt5.15.7-Windows-x86_64-MinGW8.1.0-staticFull-20221104
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.2.1
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.18 # optional
+      - name: build
+        run: |
+          go mod tidy
+          go run ChessServer/ProtocolGen/main.go
+          cd ChessClient && qmake && mingw32-make release && cd ..
+          dir ChessClient\release\ChessClient.exe
+          
+      - name: upload release ChessClient_windows_x64_qt
+        uses: Guerra24/upload-to-release@v1
+        with:
+          name: ChessClient_windows_x64_qt-${{ github.ref_name }}.exe
+          path: ChessClient\release\ChessClient.exe
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+  
