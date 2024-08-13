@@ -178,6 +178,6 @@ QString GamePoint::GetImageString()
     {
         qstrImagePath = "b";
     }
-    qstrImagePath.push_back(tolower(this->Data));
+    qstrImagePath.push_back(QChar(this->Data).toLower());
     return  ":/images/" + qstrImagePath + ".png";
 }
