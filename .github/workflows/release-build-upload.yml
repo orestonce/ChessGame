@@ -39,8 +39,7 @@ jobs:
           $env:GOOS='linux'
           $env:GOARCH='amd64'
           go mod tidy
-          go build -o bin/ChessGame_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_linux_amd64 github.com/orestonce/ChessGame/ChessServer
 
       - name: upload release ChessClient_windows_x86_qt
         uses: Guerra24/upload-to-release@v1
@@ -48,17 +47,12 @@ jobs:
           name: ChessClient_windows_x86_qt-${{ github.ref_name }}.exe
           path: ChessClient\release\ChessClient.exe
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload release ChessGame_linux_x64
+      
+      - name: upload release ChessServer_linux_x64
         uses: Guerra24/upload-to-release@v1
         with:
-          name: ChessGame_linux_x64-${{ github.ref_name }}
-          path: bin/ChessGame_linux_amd64
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload release ChessGate_linux_x64
-        uses: Guerra24/upload-to-release@v1
-        with:
-          name: ChessGate_linux_x64-${{ github.ref_name }}
-          path: bin/ChessGate_linux_amd64
+          name: ChessServer_linux_x64-${{ github.ref_name }}
+          path: bin/ChessServer_linux_amd64
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           
   build-upload_windows-x64:

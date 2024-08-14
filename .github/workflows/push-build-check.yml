@@ -37,44 +37,37 @@ jobs:
           $env:GOOS=‘windows’
           $env:GOARCH='386'
           go mod tidy
-          go build -o bin/ChessGame_windows_386 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_windows_386 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_windows_386 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS=‘windows’
           $env:GOARCH='amd64'
           go mod tidy
-          go build -o bin/ChessGame_windows_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_windows_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_windows_amd64 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS='linux'
           $env:GOARCH='386'
           go mod tidy
-          go build -o bin/ChessGame_linux_386 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_linux_386 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_linux_386 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS='linux'
           $env:GOARCH='amd64'
           go mod tidy
-          go build -o bin/ChessGame_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_linux_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_linux_amd64 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS='linux'
           $env:GOARCH='arm64'
           go mod tidy
-          go build -o bin/ChessGame_linux_arm64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_linux_arm64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_linux_arm64 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS='darwin'
           $env:GOARCH='amd64'
           go mod tidy
-          go build -o bin/ChessGame_darwin_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_darwin_amd64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_darwin_amd64 github.com/orestonce/ChessGame/ChessServer
           
           $env:GOOS='darwin'
           $env:GOARCH='arm64'
           go mod tidy
-          go build -o bin/ChessGame_darwin_arm64 github.com/orestonce/ChessGame/ChessServer/ChessGame
-          go build -o bin/ChessGate_darwin_arm64 github.com/orestonce/ChessGame/ChessServer/ChessGate
+          go build -o bin/ChessServer_darwin_arm64 github.com/orestonce/ChessGame/ChessServer
           
   build-windows-x64:
     runs-on: windows-latest
